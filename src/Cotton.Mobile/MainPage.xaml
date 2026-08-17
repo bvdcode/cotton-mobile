@@ -47,29 +47,27 @@
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
 
-                <Border IsVisible="{Binding Display.IsSignInVisible}"
-                        Style="{StaticResource AppCard}">
-                    <VerticalStackLayout Spacing="16">
-                        <material:TextField Title="{Binding Display.InstanceUrlPlaceholder}"
-                                            Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
-                                            Keyboard="Url"
-                                            ReturnType="Go"
-                                            ReturnCommand="{Binding ConnectCommand}"
-                                            AllowClear="True"
-                                            IsEnabled="{Binding Display.IsInputEnabled}"
-                                            SemanticProperties.Hint="{x:Static localization:AppResources.CottonCloudAddressHint}"
-                                            Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Cloud}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
+                <VerticalStackLayout IsVisible="{Binding Display.IsSignInVisible}"
+                                     Spacing="16">
+                    <material:TextField Title="{Binding Display.InstanceUrlPlaceholder}"
+                                        Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
+                                        Keyboard="Url"
+                                        ReturnType="Go"
+                                        ReturnCommand="{Binding ConnectCommand}"
+                                        AllowClear="True"
+                                        IsEnabled="{Binding Display.IsInputEnabled}"
+                                        SemanticProperties.Hint="{x:Static localization:AppResources.CottonCloudAddressHint}"
+                                        Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Cloud}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
 
-                        <Label Text="{Binding Display.Status}"
-                               IsVisible="{Binding Display.IsStatusVisible}"
-                               Style="{StaticResource AppBodyText}" />
+                    <Label Text="{Binding Display.Status}"
+                           IsVisible="{Binding Display.IsStatusVisible}"
+                           Style="{StaticResource AppBodyText}" />
 
-                        <Button Text="{x:Static localization:AppResources.ConnectText}"
-                                Command="{Binding ConnectCommand}"
-                                IsEnabled="{Binding Display.IsInputEnabled}"
-                                StyleClass="FilledButton, TouchTarget" />
-                    </VerticalStackLayout>
-                </Border>
+                    <Button Text="{x:Static localization:AppResources.ConnectText}"
+                            Command="{Binding ConnectCommand}"
+                            IsEnabled="{Binding Display.IsInputEnabled}"
+                            StyleClass="FilledButton, TouchTarget" />
+                </VerticalStackLayout>
 
                 <Border IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
                         Style="{StaticResource AppStatusCard}">
@@ -96,12 +94,22 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <Button Grid.Row="1"
-                Margin="12,4"
-                Text="{x:Static localization:AppResources.PrivacyText}"
-                Command="{Binding PrivacyPolicyCommand}"
-                IsVisible="{Binding Display.IsLegalFooterVisible}"
-                StyleClass="TextButton, TouchTarget" />
+        <HorizontalStackLayout Grid.Row="1"
+                               Margin="12,4"
+                               Spacing="4"
+                               IsVisible="{Binding Display.IsLegalFooterVisible}"
+                               HorizontalOptions="Center">
+            <Button Text="{x:Static localization:AppResources.RepositoryText}"
+                    Command="{Binding OpenRepositoryCommand}"
+                    StyleClass="TextButton, TouchTarget" />
+            <BoxView WidthRequest="1"
+                     HeightRequest="20"
+                     VerticalOptions="Center"
+                     Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}" />
+            <Button Text="{x:Static localization:AppResources.PrivacyText}"
+                    Command="{Binding PrivacyPolicyCommand}"
+                    StyleClass="TextButton, TouchTarget" />
+        </HorizontalStackLayout>
 
         <Grid Grid.RowSpan="2"
               RowDefinitions="*,Auto"

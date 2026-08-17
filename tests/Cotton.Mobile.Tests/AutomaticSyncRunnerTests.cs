@@ -96,6 +96,7 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
                 await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
             Assert.Equal(CottonAutomaticSyncOutcome.Failed, statuses[failingRoot.Id].Outcome);
+            Assert.Equal(CottonAutomaticSyncFailureKind.LocalReadFailed, statuses[failingRoot.Id].FailureKind);
             Assert.Equal(CottonAutomaticSyncOutcome.Succeeded, statuses[succeedingRoot.Id].Outcome);
         }
 
@@ -120,6 +121,35 @@ namespace Cotton.Mobile.Tests
             Assert.Equal([selectedRoot.Id], coordinator.RootIds);
             Assert.Equal([selectedRoot.Id], result.SucceededRootIds);
             Assert.Empty(result.FailedRootIds);
+        }
+
+        [Fact]
+        public async Task InternalTimeoutIsRecordedWithoutCancellingOtherRoots()
+        {
+            CottonSyncRootSnapshot timedOutRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
+            CottonSyncRootSnapshot succeedingRoot = SyncTestRootFactory.CreateMediaStoreRoot();
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [timedOutRoot, succeedingRoot]);
+            RecordingDeviceToCloudSyncCoordinator coordinator = new()
+            {
+                FailingRootId = timedOutRoot.Id,
+                FailureException = new OperationCanceledException("Simulated request timeout."),
+            };
+            CottonAutomaticSyncRunner runner = new(
+                _rootStore,
+                coordinator,
+                _statusStore,
+                _timeProvider,
+                NullLogger<CottonAutomaticSyncRunner>.Instance);
+
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(
+                SyncTestRootFactory.InstanceUri,
+                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+
+            Assert.Equal([timedOutRoot.Id], result.FailedRootIds);
+            Assert.Equal([succeedingRoot.Id], result.SucceededRootIds);
+            IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
+                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
+            Assert.Equal(CottonAutomaticSyncFailureKind.TimedOut, statuses[timedOutRoot.Id].FailureKind);
         }
 
         public void Dispose()

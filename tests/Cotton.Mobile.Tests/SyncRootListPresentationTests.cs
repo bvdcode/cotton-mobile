@@ -15,7 +15,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(item.CanRunNow);
             Assert.False(item.CanReconnect);
-            Assert.Contains("Upload", item.DetailText, StringComparison.Ordinal);
+            Assert.Equal("Projects", item.DisplayPathText);
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(item.CanRunNow);
             Assert.False(item.CanReconnect);
-            Assert.Contains("Photos and videos", item.DetailText, StringComparison.Ordinal);
+            Assert.Equal("Projects", item.DisplayPathText);
         }
 
         [Fact]
@@ -70,13 +70,27 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
             DateTime completedAtUtc = new(2026, 8, 16, 12, 0, 0, DateTimeKind.Utc);
-            CottonAutomaticSyncRootStatusSnapshot status = new(
+            CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                 root.Id,
-                CottonAutomaticSyncOutcome.Succeeded,
                 completedAtUtc);
             CottonSyncRootListItem item = new(root, automaticStatus: status);
 
             Assert.Contains("Last synced", item.StatusText, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void FailedRootOffersReadableFailureDetails()
+        {
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
+            CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
+                root.Id,
+                new DateTime(2026, 8, 16, 12, 0, 0, DateTimeKind.Utc),
+                CottonAutomaticSyncFailureKind.NetworkUnavailable);
+            CottonSyncRootListItem item = new(root, automaticStatus: status);
+
+            Assert.True(item.CanShowFailureDetails);
+            Assert.True(item.IsAttentionVisible);
+            Assert.Contains("connection", item.FailureDetails, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -94,6 +108,16 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.IsProgressDeterminate);
             Assert.Equal(0.5, item.ProgressValue);
             Assert.Equal("Syncing 2 of 4 changes…", item.StatusText);
+
+            item.ApplyProgress(CottonSyncProgressSnapshot.UploadingFile(
+                root.Id,
+                completedItemCount: 0,
+                totalItemCount: 1,
+                new CottonSyncTransferSnapshot("photo.jpg", 512, 1024, 256)));
+            Assert.True(item.IsProgressDeterminate);
+            Assert.Equal(0.5, item.ProgressValue);
+            Assert.Contains("photo.jpg", item.StatusText, StringComparison.Ordinal);
+            Assert.Contains("/s", item.StatusText, StringComparison.Ordinal);
 
             item.CompleteProgress();
             Assert.False(item.IsRunning);

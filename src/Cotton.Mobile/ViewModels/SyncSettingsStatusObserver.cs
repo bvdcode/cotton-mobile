@@ -58,27 +58,18 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            HashSet<Guid> visibleRootIds = [.. state.Roots.Select(root => root.Id)];
-            CottonAutomaticSyncRootStatusSnapshot[] visibleStatuses = [.. eventArgs.Statuses.Values
-                .Where(status => visibleRootIds.Contains(status.RootId))];
-            string? aggregateStatus = CottonAutomaticSyncStatusText.Create(visibleStatuses);
-            MainThread.BeginInvokeOnMainThread(() => ApplyStatuses(
-                state,
-                eventArgs,
-                aggregateStatus));
+            MainThread.BeginInvokeOnMainThread(() => ApplyStatuses(state, eventArgs));
         }
 
         private static void ApplyStatuses(
             ISyncSettingsViewState state,
-            CottonAutomaticSyncStatusesChangedEventArgs eventArgs,
-            string? aggregateStatus)
+            CottonAutomaticSyncStatusesChangedEventArgs eventArgs)
         {
             if (!Uri.Equals(state.InstanceUri, eventArgs.InstanceUri))
             {
                 return;
             }
 
-            state.AutomaticStatus = aggregateStatus;
             foreach (CottonSyncRootListItem item in state.Roots)
             {
                 eventArgs.Statuses.TryGetValue(

@@ -6,7 +6,6 @@
     <Thickness x:Key="AppPagePadding">20,12,20,24</Thickness>
     <Thickness x:Key="AppCardPadding">16</Thickness>
     <Thickness x:Key="AppTopBarPadding">12,8</Thickness>
-    <Thickness x:Key="AppCardActionPadding">12,14</Thickness>
     <x:Double x:Key="AppContentMaximumWidth">720</x:Double>
     <x:Double x:Key="AppTouchTargetSize">48</x:Double>
     <x:Double x:Key="AppNavigationItemHeight">64</x:Double>
@@ -25,10 +24,6 @@
 
     <!-- FlexLayout measures children from content, so padding supplies the touch target
          while still allowing the button to grow with accessible font scaling. -->
-    <Style TargetType="Button" Class="CardAction" ApplyToDerivedTypes="True">
-        <Setter Property="Padding" Value="{StaticResource AppCardActionPadding}" />
-    </Style>
-
     <Style TargetType="Button" Class="DisabledOpacity" ApplyToDerivedTypes="True">
         <Style.Triggers>
             <Trigger TargetType="Button"

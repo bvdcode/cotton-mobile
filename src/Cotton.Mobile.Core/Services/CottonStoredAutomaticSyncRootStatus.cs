@@ -9,6 +9,8 @@ namespace Cotton.Mobile.Services
 
         public CottonAutomaticSyncOutcome Outcome { get; set; }
 
+        public CottonAutomaticSyncFailureKind FailureKind { get; set; }
+
         public DateTime CompletedAtUtc { get; set; }
     }
 }

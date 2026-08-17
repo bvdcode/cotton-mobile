@@ -52,30 +52,6 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("OutlineVariant", value, StringComparison.Ordinal);
         }
 
-        [Fact]
-        public void CardActionsCanGrowWithAccessibleFontScaling()
-        {
-            XDocument document = XDocument.Parse(RepositoryPath.ReadText(AppStylesPath));
-            XElement cardActionStyle = document
-                .Descendants()
-                .Single(element =>
-                    element.Name.LocalName == "Style"
-                    && string.Equals(
-                        (string?)element.Attribute("Class"),
-                        "CardAction",
-                        StringComparison.Ordinal));
-            IReadOnlySet<string> properties = cardActionStyle
-                .Elements()
-                .Where(element => element.Name.LocalName == "Setter")
-                .Select(element => (string?)element.Attribute("Property"))
-                .Where(property => property is not null)
-                .Select(property => property!)
-                .ToHashSet(StringComparer.Ordinal);
-
-            Assert.DoesNotContain("HeightRequest", properties);
-            Assert.Contains("Padding", properties);
-        }
-
         private static List<string> FindUntintedFontImageSources()
         {
             List<string> offenders = [];

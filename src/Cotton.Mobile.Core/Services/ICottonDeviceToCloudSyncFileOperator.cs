@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
             CottonFolderHandle parentFolder,
+            IProgress<long>? progress,
             CancellationToken cancellationToken = default);
 
         Task<CottonFileBrowserEntry> CreateFolderAsync(

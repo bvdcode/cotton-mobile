@@ -7,30 +7,21 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonAutomaticSyncStatusText
     {
-        public static string? Create(
-            IReadOnlyCollection<CottonAutomaticSyncRootStatusSnapshot> statuses)
+        public static string Create(CottonAutomaticSyncRootStatusSnapshot status)
         {
-            ArgumentNullException.ThrowIfNull(statuses);
-            CottonAutomaticSyncRootStatusSnapshot[] failedStatuses = [.. statuses
-                .Where(status => status.Outcome == CottonAutomaticSyncOutcome.Failed)];
-            if (failedStatuses.Length > 0)
+            ArgumentNullException.ThrowIfNull(status);
+            DateTime completedAt = status.CompletedAtUtc.ToLocalTime();
+            return status.Outcome switch
             {
-                DateTime latestFailure = failedStatuses.Max(status => status.CompletedAtUtc).ToLocalTime();
-                return failedStatuses.Length == 1
-                    ? CoreResources.Format(CoreResources.LastSyncFailedFormat, latestFailure)
-                    : CoreResources.Format(
-                        CoreResources.SyncFailuresFormat,
-                        failedStatuses.Length,
-                        latestFailure);
-            }
-
-            if (statuses.Count == 0)
-            {
-                return null;
-            }
-
-            DateTime latestSuccess = statuses.Max(status => status.CompletedAtUtc).ToLocalTime();
-            return CoreResources.Format(CoreResources.LastSyncSucceededFormat, latestSuccess);
+                CottonAutomaticSyncOutcome.Succeeded =>
+                    CoreResources.Format(CoreResources.LastSyncSucceededFormat, completedAt),
+                CottonAutomaticSyncOutcome.Failed =>
+                    CoreResources.Format(CoreResources.LastSyncFailedFormat, completedAt),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(status),
+                    status.Outcome,
+                    "Automatic sync outcome is not supported."),
+            };
         }
     }
 }

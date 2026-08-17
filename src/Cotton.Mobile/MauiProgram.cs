@@ -81,6 +81,7 @@ namespace Cotton.Mobile
             services.AddSingleton(
                 new CottonMobileOptions(
                     AppResources.AppTitle,
+                    new Uri("https://github.com/bvdcode/cotton-mobile"),
                     new Uri("https://cottoncloud.dev/privacy-policy"),
                     "cotton-play-market-support@belov.us"));
             services.AddSingleton<IApplicationForegroundService, ApplicationForegroundService>();

@@ -205,10 +205,20 @@ namespace Cotton.Mobile.Services
                 return null;
             }
 
-            return new CottonAutomaticSyncRootStatusSnapshot(
-                item.RootId,
-                item.Outcome,
-                item.CompletedAtUtc);
+            return item.Outcome switch
+            {
+                CottonAutomaticSyncOutcome.Succeeded => CottonAutomaticSyncRootStatusSnapshot.Succeeded(
+                    item.RootId,
+                    item.CompletedAtUtc),
+                CottonAutomaticSyncOutcome.Failed => CottonAutomaticSyncRootStatusSnapshot.Failed(
+                    item.RootId,
+                    item.CompletedAtUtc,
+                    ResolveFailureKind(item.FailureKind)),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(item),
+                    item.Outcome,
+                    "Stored automatic sync outcome is not supported."),
+            };
         }
 
         private static CottonStoredAutomaticSyncRootStatus CreateStoredStatus(
@@ -218,8 +228,20 @@ namespace Cotton.Mobile.Services
             {
                 RootId = status.RootId,
                 Outcome = status.Outcome,
+                FailureKind = status.FailureKind,
                 CompletedAtUtc = status.CompletedAtUtc,
             };
+        }
+
+        private static CottonAutomaticSyncFailureKind ResolveFailureKind(
+            CottonAutomaticSyncFailureKind failureKind)
+        {
+            if (failureKind == CottonAutomaticSyncFailureKind.None || !Enum.IsDefined(failureKind))
+            {
+                return CottonAutomaticSyncFailureKind.Unexpected;
+            }
+
+            return failureKind;
         }
 
         private static ReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> AsReadOnly(

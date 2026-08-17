@@ -22,6 +22,7 @@ namespace Cotton.Mobile.Platforms.Android
             CottonContentRevisionIndexSnapshot? previousIndex,
             List<CottonContentRevisionSnapshot>? revisions,
             AndroidMediaStoreScanStatistics statistics,
+            CottonSyncScanProgressReporter progress,
             DateTime scanStartedAtUtc,
             CancellationToken cancellationToken)
         {
@@ -97,6 +98,8 @@ namespace Cotton.Mobile.Platforms.Android
                     throw new IOException(
                         $"Android media collection contains a duplicate path: {file.RelativePath}.");
                 }
+
+                progress.RecordScannedItem();
             }
         }
 

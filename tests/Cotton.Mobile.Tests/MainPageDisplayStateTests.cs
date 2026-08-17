@@ -69,6 +69,20 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void ServerCheckKeepsTheSignInFormMounted()
+        {
+            MainPageDisplayState display = new();
+            display.ShowSignIn(status: null);
+
+            display.ShowSignInProgress("Checking server…");
+
+            Assert.True(display.IsSignInVisible);
+            Assert.False(display.IsLoadingVisible);
+            Assert.False(display.IsInputEnabled);
+            Assert.Equal("Checking server…", display.Status);
+        }
+
+        [Fact]
         public void AuthorizationStateCanBeCancelledOnce()
         {
             MainPageDisplayState display = new();

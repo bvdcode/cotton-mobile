@@ -53,11 +53,33 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task OpenPrivacyPolicyAsync()
         {
+            await OpenExternalUriAsync(
+                _options.PrivacyPolicyUri,
+                "Failed to open the Cotton Cloud privacy policy.",
+                AppResources.PrivacyPolicyTitle,
+                AppResources.PrivacyPolicyOpenFailed);
+        }
+
+        public async Task OpenRepositoryAsync()
+        {
+            await OpenExternalUriAsync(
+                _options.RepositoryUri,
+                "Failed to open the Cotton Cloud source repository.",
+                AppResources.RepositoryTitle,
+                AppResources.RepositoryOpenFailed);
+        }
+
+        private async Task OpenExternalUriAsync(
+            Uri uri,
+            string logMessage,
+            string failureTitle,
+            string failureMessage)
+        {
             try
             {
                 bool opened = await MainThread.InvokeOnMainThreadAsync(
                     () => _browser.OpenAsync(
-                        _options.PrivacyPolicyUri,
+                        uri,
                         CottonBrowserLaunchOptions.SystemPreferred()));
                 if (opened)
                 {
@@ -66,12 +88,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                CottonLog.Warning(_logger, "Failed to open the Cotton Cloud privacy policy.", exception);
+                CottonLog.Warning(_logger, logMessage, exception);
             }
 
             await _dialogService.ShowAlertAsync(
-                AppResources.PrivacyPolicyTitle,
-                AppResources.PrivacyPolicyOpenFailed,
+                failureTitle,
+                failureMessage,
                 AppResources.OkText);
         }
     }

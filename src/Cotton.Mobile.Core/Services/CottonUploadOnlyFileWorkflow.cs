@@ -19,6 +19,7 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
             CottonDeviceToCloudRemoteFolderIndex folderIndex,
+            IProgress<long>? progress,
             CancellationToken cancellationToken)
         {
             Guid operationId = item.UploadOperationId ?? Guid.NewGuid();
@@ -44,7 +45,13 @@ namespace Cotton.Mobile.Services
 
             CottonFolderHandle parentFolder = folderIndex.ResolveParent(uploadItem);
             CottonFileBrowserEntry uploadedFile = await _fileOperator
-                .UploadNewFileAsync(instanceUri, root, uploadItem, parentFolder, cancellationToken)
+                .UploadNewFileAsync(
+                    instanceUri,
+                    root,
+                    uploadItem,
+                    parentFolder,
+                    progress,
+                    cancellationToken)
                 .ConfigureAwait(false);
             CottonUploadReceiptSnapshot uploadedReceipt = pendingReceipt.MarkUploaded(
                 uploadedFile,

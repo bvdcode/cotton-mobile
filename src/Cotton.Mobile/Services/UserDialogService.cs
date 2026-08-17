@@ -67,5 +67,40 @@ namespace Cotton.Mobile.Services
                 return false;
             }
         }
+
+        public async Task<string?> ShowActionSheetAsync(
+            string title,
+            string cancel,
+            string? destruction,
+            IReadOnlyList<string> actions)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(title);
+            ArgumentException.ThrowIfNullOrWhiteSpace(cancel);
+            ArgumentNullException.ThrowIfNull(actions);
+            if (actions.Any(string.IsNullOrWhiteSpace))
+            {
+                throw new ArgumentException("Action labels cannot be empty.", nameof(actions));
+            }
+
+            try
+            {
+                string? selected = await MainThread.InvokeOnMainThreadAsync(() =>
+                    ActiveApplicationPage.GetRequired().DisplayActionSheetAsync(
+                        title,
+                        cancel,
+                        destruction,
+                        [.. actions]));
+                return string.Equals(selected, cancel, StringComparison.Ordinal) ? null : selected;
+            }
+            catch (Exception exception)
+            {
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to show a Cotton mobile action sheet.",
+                    title,
+                    exception);
+                return null;
+            }
+        }
     }
 }

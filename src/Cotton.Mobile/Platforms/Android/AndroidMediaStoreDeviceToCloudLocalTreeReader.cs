@@ -11,7 +11,8 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public partial class AndroidMediaStoreDeviceToCloudLocalTreeReader(
         TimeProvider timeProvider,
-        ICottonContentRevisionStore revisionStore) :
+        ICottonContentRevisionStore revisionStore,
+        CottonSyncProgressHub progressHub) :
         ICottonDeviceToCloudLocalTreeReader
     {
         private const int IdColumnIndex = 0;
@@ -34,6 +35,8 @@ namespace Cotton.Mobile.Platforms.Android
             timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
         private readonly ICottonContentRevisionStore _revisionStore =
             revisionStore ?? throw new ArgumentNullException(nameof(revisionStore));
+        private readonly CottonSyncProgressHub _progressHub =
+            progressHub ?? throw new ArgumentNullException(nameof(progressHub));
 
         public async Task<CottonDeviceToCloudLocalContentSnapshot> ReadAsync(
             Uri instanceUri,
@@ -120,6 +123,7 @@ namespace Cotton.Mobile.Platforms.Android
             List<CottonDeviceToCloudLocalProblemSnapshot> problems = [];
             List<CottonContentRevisionSnapshot>? revisions = sourceVersion is null ? null : [];
             AndroidMediaStoreScanStatistics statistics = new();
+            CottonSyncScanProgressReporter progress = new(root.Id, _progressHub, _timeProvider);
             DateTime scanStartedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
 
             if (access.CanReadImages)
@@ -133,6 +137,7 @@ namespace Cotton.Mobile.Platforms.Android
                     previousIndex,
                     revisions,
                     statistics,
+                    progress,
                     scanStartedAtUtc,
                     cancellationToken);
             }
@@ -148,10 +153,12 @@ namespace Cotton.Mobile.Platforms.Android
                     previousIndex,
                     revisions,
                     statistics,
+                    progress,
                     scanStartedAtUtc,
                     cancellationToken);
             }
 
+            progress.Complete();
             CottonDeviceToCloudLocalContentSnapshot content = new(
                 root.LocalRoot.DisplayName,
                 [.. items.Values],

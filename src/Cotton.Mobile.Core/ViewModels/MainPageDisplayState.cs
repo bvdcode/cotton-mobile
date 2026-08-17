@@ -181,6 +181,19 @@ namespace Cotton.Mobile.ViewModels
             SetState(MainPageViewState.SignIn);
         }
 
+        public void ShowSignInProgress(string message)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(message);
+
+            LoadingMessage = string.Empty;
+            Status = message;
+            IsInputEnabled = false;
+            IsCancelAuthorizationEnabled = false;
+            IsLogoutEnabled = false;
+            SetLoadingIndicatorVisibility(isVisible: false);
+            SetState(MainPageViewState.SignIn);
+        }
+
         public void ShowAuthorizationProgress()
         {
             LoadingMessage = string.Empty;

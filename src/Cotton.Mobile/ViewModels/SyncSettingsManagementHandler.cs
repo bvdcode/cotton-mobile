@@ -91,6 +91,33 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        public async Task<CottonSyncRootAction?> ChooseRootActionAsync(
+            CottonSyncRootListItem item)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+
+            string? selected = await _dialogService.ShowActionSheetAsync(
+                item.Title,
+                CottonSyncRootManagementText.CancelAction,
+                CottonSyncRootActionMenu.CreateDestructionAction(item),
+                CottonSyncRootActionMenu.CreateActions(item));
+            return CottonSyncRootActionMenu.Resolve(item, selected);
+        }
+
+        public Task ShowFailureDetailsAsync(CottonSyncRootListItem item)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+            if (!item.CanShowFailureDetails)
+            {
+                throw new ArgumentException("Sync root does not have failure details.", nameof(item));
+            }
+
+            return _dialogService.ShowAlertAsync(
+                CottonSyncRootManagementText.CreateFailureDetailsTitle(item.Title),
+                item.FailureDetails,
+                CottonSyncRootManagementText.CloseAction);
+        }
+
         public async Task SetRootPausedAsync(
             ISyncSettingsViewState state,
             CottonSyncRootListItem item,

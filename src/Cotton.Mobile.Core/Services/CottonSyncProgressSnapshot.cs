@@ -9,7 +9,8 @@ namespace Cotton.Mobile.Services
             Guid rootId,
             CottonSyncProgressStage stage,
             int completedItemCount,
-            int? totalItemCount)
+            int? totalItemCount,
+            CottonSyncTransferSnapshot? transfer)
         {
             if (rootId == Guid.Empty)
             {
@@ -35,21 +36,34 @@ namespace Cotton.Mobile.Services
                     "Total sync item count cannot be less than the completed count.");
             }
 
-            if (stage == CottonSyncProgressStage.ApplyingChanges && !totalItemCount.HasValue)
+            if (stage is CottonSyncProgressStage.ApplyingChanges or CottonSyncProgressStage.UploadingFile
+                && !totalItemCount.HasValue)
             {
-                throw new ArgumentException("Applying sync changes requires a total item count.", nameof(totalItemCount));
+                throw new ArgumentException("Sync change progress requires a total item count.", nameof(totalItemCount));
             }
 
-            if (stage != CottonSyncProgressStage.ApplyingChanges
+            if (stage == CottonSyncProgressStage.CheckingCloud
                 && (completedItemCount != 0 || totalItemCount.HasValue))
             {
-                throw new ArgumentException("Indeterminate sync stages cannot contain item counts.");
+                throw new ArgumentException("Cloud checking progress cannot contain item counts.");
+            }
+
+            if (stage == CottonSyncProgressStage.ScanningDevice && totalItemCount.HasValue)
+            {
+                throw new ArgumentException("Device scanning does not have a known total item count.");
+            }
+
+            bool requiresTransfer = stage == CottonSyncProgressStage.UploadingFile;
+            if (requiresTransfer != (transfer is not null))
+            {
+                throw new ArgumentException("Only file upload progress can contain transfer details.", nameof(transfer));
             }
 
             RootId = rootId;
             Stage = stage;
             CompletedItemCount = completedItemCount;
             TotalItemCount = totalItemCount;
+            Transfer = transfer;
         }
 
         public Guid RootId { get; }
@@ -60,13 +74,28 @@ namespace Cotton.Mobile.Services
 
         public int? TotalItemCount { get; }
 
+        public CottonSyncTransferSnapshot? Transfer { get; }
+
         public static CottonSyncProgressSnapshot ScanningDevice(Guid rootId)
         {
             return new CottonSyncProgressSnapshot(
                 rootId,
                 CottonSyncProgressStage.ScanningDevice,
                 completedItemCount: 0,
-                totalItemCount: null);
+                totalItemCount: null,
+                transfer: null);
+        }
+
+        public static CottonSyncProgressSnapshot ScanningDevice(
+            Guid rootId,
+            int scannedItemCount)
+        {
+            return new CottonSyncProgressSnapshot(
+                rootId,
+                CottonSyncProgressStage.ScanningDevice,
+                scannedItemCount,
+                totalItemCount: null,
+                transfer: null);
         }
 
         public static CottonSyncProgressSnapshot CheckingCloud(Guid rootId)
@@ -75,7 +104,8 @@ namespace Cotton.Mobile.Services
                 rootId,
                 CottonSyncProgressStage.CheckingCloud,
                 completedItemCount: 0,
-                totalItemCount: null);
+                totalItemCount: null,
+                transfer: null);
         }
 
         public static CottonSyncProgressSnapshot ApplyingChanges(
@@ -87,7 +117,23 @@ namespace Cotton.Mobile.Services
                 rootId,
                 CottonSyncProgressStage.ApplyingChanges,
                 completedItemCount,
-                totalItemCount);
+                totalItemCount,
+                transfer: null);
+        }
+
+        public static CottonSyncProgressSnapshot UploadingFile(
+            Guid rootId,
+            int completedItemCount,
+            int totalItemCount,
+            CottonSyncTransferSnapshot transfer)
+        {
+            ArgumentNullException.ThrowIfNull(transfer);
+            return new CottonSyncProgressSnapshot(
+                rootId,
+                CottonSyncProgressStage.UploadingFile,
+                completedItemCount,
+                totalItemCount,
+                transfer);
         }
     }
 }

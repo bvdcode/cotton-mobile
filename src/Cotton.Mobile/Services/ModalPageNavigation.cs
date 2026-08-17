@@ -41,14 +41,7 @@ namespace Cotton.Mobile.Services
 
         private static INavigation GetNavigation()
         {
-            Application? application = Application.Current;
-            if (application is null || application.Windows.Count == 0)
-            {
-                throw new InvalidOperationException("Modal navigation needs an active application page.");
-            }
-
-            return application.Windows[0].Page?.Navigation
-                ?? throw new InvalidOperationException("Modal navigation needs an active application page.");
+            return ActiveApplicationPage.GetRequired().Navigation;
         }
     }
 }

@@ -94,9 +94,9 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
                         <Grid RowDefinitions="Auto,Auto">
-                            <VerticalStackLayout Padding="4,12"
-                                                 Spacing="10">
-                                <Grid ColumnDefinitions="Auto,*"
+                            <VerticalStackLayout Padding="4,10"
+                                                 Spacing="8">
+                                <Grid ColumnDefinitions="Auto,*,Auto"
                                       ColumnSpacing="12">
                                     <Border Style="{StaticResource AppIconFrame}">
                                         <Image Style="{StaticResource AppIcon}">
@@ -119,14 +119,15 @@
                                     <VerticalStackLayout Grid.Column="1"
                                                          Spacing="3"
                                                          VerticalOptions="Center">
-                                        <Label Text="{Binding Title}"
-                                               FontAttributes="Bold" />
-                                        <Label Text="{Binding PathText}"
+                                        <Label Text="{Binding DisplayPathText}"
+                                               FontAttributes="Bold"
                                                Style="{StaticResource AppBodyText}"
                                                LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding DetailText}"
-                                               Style="{StaticResource AppCaptionText}" />
                                         <HorizontalStackLayout Spacing="6">
+                                            <HorizontalStackLayout.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding BindingContext.RootActionsCommand, Source={x:Reference SyncViewRoot}}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </HorizontalStackLayout.GestureRecognizers>
                                             <ActivityIndicator IsRunning="{Binding IsRunning}"
                                                                IsVisible="{Binding IsRunning}"
                                                                WidthRequest="18"
@@ -134,45 +135,36 @@
                                                                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                                             <Label Text="{Binding StatusText}"
                                                    Style="{StaticResource AppCaptionText}"
-                                                   VerticalOptions="Center" />
+                                                   VerticalOptions="Center">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                                 Binding="{Binding CanShowFailureDetails}"
+                                                                 Value="True">
+                                                        <Setter Property="TextDecorations"
+                                                                Value="Underline" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
+
+                                    <Button Grid.Column="2"
+                                            Command="{Binding BindingContext.RootActionsCommand, Source={x:Reference SyncViewRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            SemanticProperties.Description="{x:Static localization:AppResources.MoreSyncActionsDescription}"
+                                            StyleClass="TextButton, TouchTarget">
+                                        <Button.ImageSource>
+                                            <FontImageSource FontFamily="MaterialOutlined"
+                                                             Glyph="{x:Static symbols:MaterialOutlined.More_vert}"
+                                                             Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                        </Button.ImageSource>
+                                    </Button>
                                 </Grid>
 
                                 <ProgressBar Progress="{Binding ProgressValue}"
                                              IsVisible="{Binding IsProgressDeterminate}"
                                              ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
 
-                                <FlexLayout Direction="Row"
-                                            Wrap="Wrap"
-                                            JustifyContent="End"
-                                            AlignItems="Center">
-                                    <Button Text="{Binding PrimaryActionText}"
-                                            Command="{Binding BindingContext.RootPrimaryActionCommand, Source={x:Reference SyncViewRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            IsEnabled="{Binding CanUsePrimaryAction}"
-                                            IsVisible="{Binding CanUsePrimaryAction}"
-                                            StyleClass="TextButton, TouchTarget, CardAction" />
-                                    <Button Text="{Binding PauseSyncActionText}"
-                                            Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            IsEnabled="{Binding CanPauseSync}"
-                                            IsVisible="{Binding CanPauseSync}"
-                                            StyleClass="TextButton, TouchTarget, CardAction" />
-                                    <Button Text="{Binding ResumeSyncActionText}"
-                                            Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncViewRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            IsEnabled="{Binding CanResumeSync}"
-                                            IsVisible="{Binding CanResumeSync}"
-                                            StyleClass="TextButton, TouchTarget, CardAction" />
-                                    <Button Text="{Binding StopSyncActionText}"
-                                            Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncViewRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            IsEnabled="{Binding CanStopSync}"
-                                            IsVisible="{Binding CanStopSync}"
-                                            TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                                            StyleClass="TextButton, TouchTarget, CardAction" />
-                                </FlexLayout>
                             </VerticalStackLayout>
                             <BoxView Grid.Row="1"
                                      HeightRequest="1"

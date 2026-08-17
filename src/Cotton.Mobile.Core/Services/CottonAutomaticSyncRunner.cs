@@ -78,13 +78,22 @@ namespace Cotton.Mobile.Services
                 {
                     await _coordinator.RunRootAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
                     succeededRootIds.Add(root.Id);
-                    updatedStatuses.Add(CreateStatus(root.Id, CottonAutomaticSyncOutcome.Succeeded));
+                    updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Succeeded(
+                        root.Id,
+                        _timeProvider.GetUtcNow().UtcDateTime));
                 }
-                catch (Exception exception) when (exception is not OperationCanceledException)
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception exception)
                 {
                     CottonAutomaticSyncLog.RootFailed(_logger, root.Id, exception);
                     failedRootIds.Add(root.Id);
-                    updatedStatuses.Add(CreateStatus(root.Id, CottonAutomaticSyncOutcome.Failed));
+                    updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Failed(
+                        root.Id,
+                        _timeProvider.GetUtcNow().UtcDateTime,
+                        CottonAutomaticSyncFailureClassifier.Classify(exception)));
                 }
             }
 
@@ -92,16 +101,6 @@ namespace Cotton.Mobile.Services
                 .UpdateAsync(instanceUri, activeRootIds, updatedStatuses, cancellationToken)
                 .ConfigureAwait(false);
             return new CottonAutomaticSyncRunResult(succeededRootIds, failedRootIds);
-        }
-
-        private CottonAutomaticSyncRootStatusSnapshot CreateStatus(
-            Guid rootId,
-            CottonAutomaticSyncOutcome outcome)
-        {
-            return new CottonAutomaticSyncRootStatusSnapshot(
-                rootId,
-                outcome,
-                _timeProvider.GetUtcNow().UtcDateTime);
         }
 
         private static bool ShouldRun(

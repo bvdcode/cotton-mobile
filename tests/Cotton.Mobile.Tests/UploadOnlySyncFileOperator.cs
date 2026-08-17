@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
             CottonFolderHandle parentFolder,
+            IProgress<long>? progress,
             CancellationToken cancellationToken = default)
         {
             UploadCalls.Add(item);
@@ -22,6 +23,8 @@ namespace Cotton.Mobile.Tests
             {
                 return Task.FromException<CottonFileBrowserEntry>(UploadException);
             }
+
+            progress?.Report(item.SizeBytes ?? 0);
 
             Guid operationId = item.UploadOperationId
                 ?? throw new InvalidOperationException("Upload call requires an operation id.");

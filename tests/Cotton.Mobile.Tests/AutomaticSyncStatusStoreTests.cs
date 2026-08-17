@@ -35,23 +35,22 @@ namespace Cotton.Mobile.Tests
                 SyncTestRootFactory.InstanceUri,
                 activeRootIds,
                 [
-                    new CottonAutomaticSyncRootStatusSnapshot(
+                    CottonAutomaticSyncRootStatusSnapshot.Failed(
                         FirstRootId,
-                        CottonAutomaticSyncOutcome.Failed,
-                        firstAttempt),
-                    new CottonAutomaticSyncRootStatusSnapshot(
+                        firstAttempt,
+                        CottonAutomaticSyncFailureKind.NetworkUnavailable),
+                    CottonAutomaticSyncRootStatusSnapshot.Failed(
                         SecondRootId,
-                        CottonAutomaticSyncOutcome.Succeeded,
-                        firstAttempt),
+                        firstAttempt,
+                        CottonAutomaticSyncFailureKind.NetworkUnavailable),
                 ]);
 
             await _store.UpdateAsync(
                 SyncTestRootFactory.InstanceUri,
                 activeRootIds,
                 [
-                    new CottonAutomaticSyncRootStatusSnapshot(
+                    CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         FirstRootId,
-                        CottonAutomaticSyncOutcome.Succeeded,
                         retryAttempt),
                 ]);
 
@@ -61,6 +60,12 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonAutomaticSyncOutcome.Succeeded, statuses[FirstRootId].Outcome);
             Assert.Equal(retryAttempt, statuses[FirstRootId].CompletedAtUtc);
             Assert.Equal(firstAttempt, statuses[SecondRootId].CompletedAtUtc);
+            Assert.Equal(
+                CottonAutomaticSyncFailureKind.None,
+                statuses[FirstRootId].FailureKind);
+            Assert.Equal(
+                CottonAutomaticSyncFailureKind.NetworkUnavailable,
+                statuses[SecondRootId].FailureKind);
         }
 
         [Fact]
@@ -71,14 +76,13 @@ namespace Cotton.Mobile.Tests
                 SyncTestRootFactory.InstanceUri,
                 new HashSet<Guid> { FirstRootId, SecondRootId },
                 [
-                    new CottonAutomaticSyncRootStatusSnapshot(
+                    CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         FirstRootId,
-                        CottonAutomaticSyncOutcome.Succeeded,
                         attempt),
-                    new CottonAutomaticSyncRootStatusSnapshot(
+                    CottonAutomaticSyncRootStatusSnapshot.Failed(
                         SecondRootId,
-                        CottonAutomaticSyncOutcome.Failed,
-                        attempt),
+                        attempt,
+                        CottonAutomaticSyncFailureKind.LocalReadFailed),
                 ]);
 
             await _store.UpdateAsync(
@@ -102,9 +106,8 @@ namespace Cotton.Mobile.Tests
                 SyncTestRootFactory.InstanceUri,
                 new HashSet<Guid> { FirstRootId },
                 [
-                    new CottonAutomaticSyncRootStatusSnapshot(
+                    CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         FirstRootId,
-                        CottonAutomaticSyncOutcome.Succeeded,
                         attempt),
                 ]);
 

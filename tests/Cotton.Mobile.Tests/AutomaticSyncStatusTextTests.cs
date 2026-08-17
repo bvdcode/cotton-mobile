@@ -9,48 +9,29 @@ namespace Cotton.Mobile.Tests
             new(2026, 8, 14, 18, 0, 0, DateTimeKind.Utc);
 
         [Fact]
-        public void EmptyHistoryHasNoStatusText()
+        public void FailureStatusContainsAttemptTime()
         {
-            Assert.Null(CottonAutomaticSyncStatusText.Create([]));
-        }
+            CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
+                Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                AttemptTime,
+                CottonAutomaticSyncFailureKind.NetworkUnavailable);
 
-        [Fact]
-        public void FailureRemainsVisibleWhenAnotherRootSucceeded()
-        {
-            string? text = CottonAutomaticSyncStatusText.Create(
-                [
-                    CreateStatus(
-                        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                        CottonAutomaticSyncOutcome.Failed),
-                    CreateStatus(
-                        Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                        CottonAutomaticSyncOutcome.Succeeded),
-                ]);
+            string text = CottonAutomaticSyncStatusText.Create(status);
 
-            Assert.NotNull(text);
             Assert.Contains("failed", text, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]
-        public void SuccessfulRetryClearsFailureText()
+        public void SuccessfulStatusDoesNotContainFailure()
         {
-            string? text = CottonAutomaticSyncStatusText.Create(
-                [
-                    CreateStatus(
-                        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                        CottonAutomaticSyncOutcome.Succeeded),
-                ]);
+            CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Succeeded(
+                Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                AttemptTime);
 
-            Assert.NotNull(text);
+            string text = CottonAutomaticSyncStatusText.Create(status);
+
             Assert.Contains("Last synced", text, StringComparison.Ordinal);
             Assert.DoesNotContain("failed", text, StringComparison.OrdinalIgnoreCase);
-        }
-
-        private static CottonAutomaticSyncRootStatusSnapshot CreateStatus(
-            Guid rootId,
-            CottonAutomaticSyncOutcome outcome)
-        {
-            return new CottonAutomaticSyncRootStatusSnapshot(rootId, outcome, AttemptTime);
         }
     }
 }

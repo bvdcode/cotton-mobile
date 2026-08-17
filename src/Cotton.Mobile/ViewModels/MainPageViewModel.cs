@@ -68,6 +68,10 @@ namespace Cotton.Mobile.ViewModels
                 () => AsyncCommandExecution.RunAsync(
                     _userInteractionService.OpenPrivacyPolicyAsync,
                     LogUnhandledCommandException));
+            OpenRepositoryCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(
+                    _userInteractionService.OpenRepositoryAsync,
+                    LogUnhandledCommandException));
             ShowSyncCommand = new AsyncRelayCommand(
                 () => AsyncCommandExecution.RunAsync(ShowSyncAsync, LogUnhandledCommandException));
             ShowProfileCommand = new AsyncRelayCommand(
@@ -89,6 +93,8 @@ namespace Cotton.Mobile.ViewModels
         public IAsyncRelayCommand LogoutCommand { get; }
 
         public IAsyncRelayCommand PrivacyPolicyCommand { get; }
+
+        public IAsyncRelayCommand OpenRepositoryCommand { get; }
 
         public IAsyncRelayCommand ShowSyncCommand { get; }
 
@@ -118,7 +124,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            Display.ShowLoading(AppResources.CheckingServer);
+            Display.ShowSignInProgress(AppResources.CheckingServer);
             RefreshCommands();
             Uri? instanceUri = await _instanceResolver.ResolveAsync(instanceUrlInput);
             if (instanceUri is null)

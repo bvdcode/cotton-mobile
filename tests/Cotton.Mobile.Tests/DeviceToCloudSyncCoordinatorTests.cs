@@ -173,6 +173,8 @@ namespace Cotton.Mobile.Tests
                 item => Assert.Equal(CottonSyncProgressStage.ScanningDevice, item?.Stage),
                 item => Assert.Equal(CottonSyncProgressStage.CheckingCloud, item?.Stage),
                 item => AssertProgress(item, completedItemCount: 0, totalItemCount: 1),
+                item => AssertUploadProgress(item, transferredBytes: 0),
+                item => AssertUploadProgress(item, transferredBytes: 42),
                 item => AssertProgress(item, completedItemCount: 1, totalItemCount: 1),
                 Assert.Null);
         }
@@ -296,6 +298,17 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonSyncProgressStage.ApplyingChanges, progress.Stage);
             Assert.Equal(completedItemCount, progress.CompletedItemCount);
             Assert.Equal(totalItemCount, progress.TotalItemCount);
+        }
+
+        private static void AssertUploadProgress(
+            CottonSyncProgressSnapshot? progress,
+            long transferredBytes)
+        {
+            Assert.NotNull(progress);
+            Assert.Equal(CottonSyncProgressStage.UploadingFile, progress.Stage);
+            Assert.Equal("alpha.txt", progress.Transfer?.ItemName);
+            Assert.Equal(transferredBytes, progress.Transfer?.TransferredBytes);
+            Assert.Equal(42, progress.Transfer?.TotalBytes);
         }
     }
 }

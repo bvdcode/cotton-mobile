@@ -109,14 +109,13 @@ namespace Cotton.Mobile.Tests
                 InstanceUri,
                 new HashSet<Guid> { currentRoot.Id, otherRoot.Id },
                 [
-                    new CottonAutomaticSyncRootStatusSnapshot(
+                    CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         currentRoot.Id,
-                        CottonAutomaticSyncOutcome.Succeeded,
                         completedAt),
-                    new CottonAutomaticSyncRootStatusSnapshot(
+                    CottonAutomaticSyncRootStatusSnapshot.Failed(
                         otherRoot.Id,
-                        CottonAutomaticSyncOutcome.Failed,
-                        completedAt),
+                        completedAt,
+                        CottonAutomaticSyncFailureKind.Unexpected),
                 ]);
 
             SyncRootCollectionSnapshot collection = await _manager.LoadAsync(InstanceUri, "account-1");

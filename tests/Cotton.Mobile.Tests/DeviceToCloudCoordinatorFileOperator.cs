@@ -20,6 +20,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
             CottonFolderHandle parentFolder,
+            IProgress<long>? progress,
             CancellationToken cancellationToken = default)
         {
             Guid operationId = item.UploadOperationId
@@ -30,6 +31,7 @@ namespace Cotton.Mobile.Tests
                 [CottonFileUploadMetadataKeys.UploadOperationId] = operationId.ToString("N"),
             };
             UploadedItems.Add(item);
+            progress?.Report(item.SizeBytes ?? 0);
             return Task.FromResult(CreateFile(fileId, item.DisplayName, eTag, metadata));
         }
 

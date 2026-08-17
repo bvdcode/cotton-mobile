@@ -13,6 +13,8 @@ namespace Cotton.Mobile.Tests
 
         public Guid? FailingRootId { get; set; }
 
+        public Exception FailureException { get; set; } = new IOException("Simulated sync root failure.");
+
         public Task<CottonDeviceToCloudSyncRunSummary> RunAsync(
             Uri instanceUri,
             CancellationToken cancellationToken = default)
@@ -34,7 +36,7 @@ namespace Cotton.Mobile.Tests
             RootIds.Add(root.Id);
             if (root.Id == FailingRootId)
             {
-                throw new IOException("Simulated sync root failure.");
+                throw FailureException;
             }
 
             return Task.FromResult(new CottonDeviceToCloudSyncRunSummary([]));

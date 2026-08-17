@@ -25,6 +25,7 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
             CottonFolderHandle parentFolder,
+            IProgress<long>? progress,
             CancellationToken cancellationToken = default)
         {
             EnsureUploadItem(instanceUri, root, item);
@@ -34,7 +35,7 @@ namespace Cotton.Mobile.Services
                 instanceUri,
                 parentFolder,
                 CreateUploadSource(instanceUri, root, item),
-                progress: null,
+                progress,
                 cancellationToken);
         }
 

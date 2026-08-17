@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonDeviceToCloudSyncFileOperator _fileOperator;
         private readonly CottonUploadOnlyFileWorkflow _fileWorkflow;
         private readonly CottonSyncProgressHub _progressHub;
+        private readonly TimeProvider _timeProvider;
 
         public CottonUploadOnlySyncPlanExecutor(
             ICottonDeviceToCloudSyncFileOperator fileOperator,
@@ -23,11 +24,12 @@ namespace Cotton.Mobile.Services
 
             _fileOperator = fileOperator;
             _progressHub = progressHub;
+            _timeProvider = timeProvider ?? TimeProvider.System;
             _fileWorkflow = new CottonUploadOnlyFileWorkflow(
                 fileOperator,
                 localFileOperator,
                 uploadReceiptStore,
-                timeProvider ?? TimeProvider.System);
+                _timeProvider);
         }
 
         public async Task<CottonDeviceToCloudSyncExecutionResult> ExecuteAsync(
@@ -55,12 +57,22 @@ namespace Cotton.Mobile.Services
                 switch (item.Action)
                 {
                     case CottonDeviceToCloudSyncActionKind.UploadNewFile:
+                        CottonSyncUploadProgressReporter uploadProgress = new(
+                            root.Id,
+                            item.DisplayName,
+                            completedChangeCount,
+                            totalChangeCount,
+                            item.SizeBytes,
+                            _progressHub,
+                            _timeProvider);
+                        uploadProgress.Report(0);
                         CottonDeviceToCloudLocalFileDeleteStatus? uploadedDeleteStatus =
                             await _fileWorkflow.UploadFileAsync(
                                 instanceUri,
                                 root,
                                 item,
                                 folderIndex,
+                                uploadProgress,
                                 cancellationToken).ConfigureAwait(false);
                         uploadedCount++;
                         CountDeleteStatus(

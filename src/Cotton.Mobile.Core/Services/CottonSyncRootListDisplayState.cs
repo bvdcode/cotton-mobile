@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using Cotton.Mobile.Resources.Localization;
-
 namespace Cotton.Mobile.Services
 {
     public class CottonSyncRootListDisplayState
@@ -12,12 +10,9 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(items);
 
             Items = items;
-            SummaryText = CreateSummaryText(items.Count);
         }
 
         public IReadOnlyList<CottonSyncRootListItem> Items { get; }
-
-        public string SummaryText { get; }
 
         public bool HasItems => Items.Count > 0;
 
@@ -62,17 +57,6 @@ namespace Cotton.Mobile.Services
                     automaticStatuses.GetValueOrDefault(root.Id),
                     isDividerVisible: index < orderedRoots.Length - 1))];
             return new CottonSyncRootListDisplayState(items);
-        }
-
-        private static string CreateSummaryText(int count)
-        {
-            return count switch
-            {
-                0 => CoreResources.NoFoldersSyncing,
-                1 => CoreResources.OneFolderSyncing,
-                _ when count > 1 => CoreResources.Format(CoreResources.FoldersSyncingFormat, count),
-                _ => throw new ArgumentOutOfRangeException(nameof(count), count, "Sync root count cannot be negative."),
-            };
         }
     }
 }

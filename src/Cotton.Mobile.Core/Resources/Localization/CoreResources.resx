@@ -25,6 +25,9 @@
   <data name="PauseAction" xml:space="preserve"><value>Pause</value></data>
   <data name="ResumeAction" xml:space="preserve"><value>Resume</value></data>
   <data name="CancelAction" xml:space="preserve"><value>Cancel</value></data>
+  <data name="FailureDetailsAction" xml:space="preserve"><value>Failure details</value></data>
+  <data name="FailureDetailsTitleFormat" xml:space="preserve"><value>Why {0} failed</value></data>
+  <data name="CloseAction" xml:space="preserve"><value>Close</value></data>
   <data name="StopSyncingMessage" xml:space="preserve"><value>This stops future sync for this folder. Files already on this device are not deleted.</value></data>
   <data name="PausedStatus" xml:space="preserve"><value>Paused</value></data>
   <data name="RootPausedStatus" xml:space="preserve"><value>Sync paused. Resume this folder first.</value></data>
@@ -36,9 +39,6 @@
   <data name="StoppedSyncingFormat" xml:space="preserve"><value>Stopped syncing {0}.</value></data>
   <data name="PausedSyncingFormat" xml:space="preserve"><value>Paused syncing {0}.</value></data>
   <data name="ResumedSyncingFormat" xml:space="preserve"><value>Resumed syncing {0}.</value></data>
-  <data name="NoFoldersSyncing" xml:space="preserve"><value>No folders syncing</value></data>
-  <data name="OneFolderSyncing" xml:space="preserve"><value>1 folder set to sync</value></data>
-  <data name="FoldersSyncingFormat" xml:space="preserve"><value>{0} folders set to sync</value></data>
   <data name="RunNowAction" xml:space="preserve"><value>Run now</value></data>
   <data name="UnsupportedStatus" xml:space="preserve"><value>Unsupported</value></data>
   <data name="UnavailableStatus" xml:space="preserve"><value>Unavailable</value></data>
@@ -50,12 +50,29 @@
   <data name="SyncingStatus" xml:space="preserve"><value>Syncing</value></data>
   <data name="UploadingStatus" xml:space="preserve"><value>Uploading</value></data>
   <data name="ScanningDeviceStatus" xml:space="preserve"><value>Scanning device…</value></data>
+  <data name="ScanningOneFileStatus" xml:space="preserve"><value>Scanning device · 1 file</value></data>
+  <data name="ScanningFilesFormat" xml:space="preserve"><value>Scanning device · {0} files</value></data>
   <data name="CheckingCloudStatus" xml:space="preserve"><value>Checking cloud…</value></data>
   <data name="ApplyingChangesFormat" xml:space="preserve"><value>Syncing {0} of {1} changes…</value></data>
   <data name="FinishingSyncStatus" xml:space="preserve"><value>Finishing sync…</value></data>
+  <data name="UploadingFileFormat" xml:space="preserve"><value>Uploading {0} · {1}</value></data>
+  <data name="UploadingFileWithTotalFormat" xml:space="preserve"><value>Uploading {0} · {1} of {2}</value></data>
+  <data name="UploadingFileWithSpeedFormat" xml:space="preserve"><value>Uploading {0} · {1} · {2}/s</value></data>
+  <data name="UploadingFileWithTotalAndSpeedFormat" xml:space="preserve"><value>Uploading {0} · {1} of {2} · {3}/s</value></data>
+  <data name="BytesFormat" xml:space="preserve"><value>{0:0} B</value></data>
+  <data name="KilobytesFormat" xml:space="preserve"><value>{0:0.0} KB</value></data>
+  <data name="MegabytesFormat" xml:space="preserve"><value>{0:0.0} MB</value></data>
+  <data name="GigabytesFormat" xml:space="preserve"><value>{0:0.0} GB</value></data>
   <data name="LastSyncSucceededFormat" xml:space="preserve"><value>Last synced {0:g}.</value></data>
   <data name="LastSyncFailedFormat" xml:space="preserve"><value>Last sync failed {0:g}. Retry is automatic.</value></data>
-  <data name="SyncFailuresFormat" xml:space="preserve"><value>{0} folders could not sync. Last attempt {1:g}; retry is automatic.</value></data>
+  <data name="SyncFailureAuthenticationRequired" xml:space="preserve"><value>Your account session expired. Sign in again, then retry.</value></data>
+  <data name="SyncFailureNetworkUnavailable" xml:space="preserve"><value>Cotton Cloud could not be reached. Check the connection and retry.</value></data>
+  <data name="SyncFailureLocalAccessUnavailable" xml:space="preserve"><value>Android no longer allows access to this source. Reconnect it, then retry.</value></data>
+  <data name="SyncFailureSourceChanged" xml:space="preserve"><value>A file changed while Cotton was reading or uploading it. The next run will retry its current version.</value></data>
+  <data name="SyncFailureTimedOut" xml:space="preserve"><value>The server did not respond in time. The next run will retry.</value></data>
+  <data name="SyncFailureServerRejectedRequest" xml:space="preserve"><value>Cotton Cloud could not complete the request. Retry, then contact support if it repeats.</value></data>
+  <data name="SyncFailureLocalReadFailed" xml:space="preserve"><value>A local file could not be read. Check that it still exists and Android can access it.</value></data>
+  <data name="SyncFailureUnexpected" xml:space="preserve"><value>An unexpected sync error occurred. Retry, then contact support if it repeats.</value></data>
   <data name="SyncRootReady" xml:space="preserve"><value>Sync root ready</value></data>
   <data name="ChooseLocalFolder" xml:space="preserve"><value>Choose local folder</value></data>
   <data name="ChooseMediaFolders" xml:space="preserve"><value>Choose media folders</value></data>

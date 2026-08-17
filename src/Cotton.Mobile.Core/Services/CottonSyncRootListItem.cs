@@ -10,8 +10,10 @@ namespace Cotton.Mobile.Services
     public class CottonSyncRootListItem : ObservableObject
     {
         private readonly string _idleStatusText;
+        private readonly bool _requiresAttention;
         private CottonSyncProgressSnapshot? _progress;
         private string? _lastSyncStatusText;
+        private string? _failureDetails;
 
         public CottonSyncRootListItem(
             CottonSyncRootSnapshot root,
@@ -28,8 +30,9 @@ namespace Cotton.Mobile.Services
             Id = root.Id;
             Direction = root.Direction;
             Title = root.CloudFolder.FolderName;
-            PathText = root.CloudFolder.Path;
-            DetailText = $"{CreateDirectionText(root.Direction)} · {root.LocalRoot.DisplayName}";
+            DisplayPathText = CottonSyncRootPathText.Create(
+                root.CloudFolder.FolderName,
+                root.CloudFolder.Path);
             IsPaused = isPaused;
             IsUnsupportedLocalRoot = !isPaused && CottonSyncRootRunCapability.HasUnsupportedLocalRoot(root);
             CanRunNow = !isPaused && CottonSyncRootRunCapability.CanRun(root);
@@ -38,7 +41,7 @@ namespace Cotton.Mobile.Services
             PrimaryActionText = CreatePrimaryActionText(root, CanReconnect, CanRunNow);
             _idleStatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot);
             IsReady = !isPaused && !IsUnsupportedLocalRoot && CanRunNow;
-            IsAttentionVisible = !isPaused
+            _requiresAttention = !isPaused
                 && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync || !CanRunNow);
             CanPauseSync = !isPaused;
             CanResumeSync = isPaused;
@@ -53,9 +56,7 @@ namespace Cotton.Mobile.Services
 
         public string Title { get; }
 
-        public string PathText { get; }
-
-        public string DetailText { get; }
+        public string DisplayPathText { get; }
 
         public string StatusText => _progress is null
             ? _lastSyncStatusText ?? _idleStatusText
@@ -63,15 +64,32 @@ namespace Cotton.Mobile.Services
 
         public bool IsRunning => _progress is not null;
 
+        public bool CanShowFailureDetails => !string.IsNullOrWhiteSpace(_failureDetails);
+
+        public string FailureDetails => _failureDetails ?? string.Empty;
+
         public bool IsProgressDeterminate =>
-            _progress?.Stage == CottonSyncProgressStage.ApplyingChanges
-            && _progress.TotalItemCount > 0;
+            (_progress?.Stage == CottonSyncProgressStage.ApplyingChanges
+                && _progress.TotalItemCount > 0)
+            || (_progress?.Stage == CottonSyncProgressStage.UploadingFile
+                && _progress.Transfer?.TotalBytes.HasValue == true);
 
         public double ProgressValue
         {
             get
             {
                 CottonSyncProgressSnapshot? progress = _progress;
+                if (progress?.Stage == CottonSyncProgressStage.UploadingFile
+                    && progress.Transfer?.TotalBytes is long totalBytes)
+                {
+                    if (totalBytes == 0)
+                    {
+                        return 1;
+                    }
+
+                    return Math.Min(1, (double)progress.Transfer.TransferredBytes / totalBytes);
+                }
+
                 if (progress?.TotalItemCount is not int totalItemCount || totalItemCount <= 0)
                 {
                     return 0;
@@ -83,7 +101,7 @@ namespace Cotton.Mobile.Services
 
         public bool IsReady { get; }
 
-        public bool IsAttentionVisible { get; }
+        public bool IsAttentionVisible => _requiresAttention || (CanShowFailureDetails && !IsRunning);
 
         public bool CanRunNow { get; }
 
@@ -147,17 +165,31 @@ namespace Cotton.Mobile.Services
             }
 
             string? statusText = IsReady && status is not null
-                ? CottonAutomaticSyncStatusText.Create([status])
+                ? CottonAutomaticSyncStatusText.Create(status)
                 : null;
-            if (string.Equals(_lastSyncStatusText, statusText, StringComparison.Ordinal))
+            string? failureDetails = IsReady
+                && status?.Outcome == CottonAutomaticSyncOutcome.Failed
+                ? CottonAutomaticSyncFailureText.Create(status.FailureKind)
+                : null;
+            bool statusChanged = !string.Equals(_lastSyncStatusText, statusText, StringComparison.Ordinal);
+            bool failureChanged = !string.Equals(_failureDetails, failureDetails, StringComparison.Ordinal);
+            if (!statusChanged && !failureChanged)
             {
                 return;
             }
 
             _lastSyncStatusText = statusText;
-            if (!IsRunning)
+            _failureDetails = failureDetails;
+            if (statusChanged && !IsRunning)
             {
                 OnPropertyChanged(nameof(StatusText));
+            }
+
+            if (failureChanged)
+            {
+                OnPropertyChanged(nameof(CanShowFailureDetails));
+                OnPropertyChanged(nameof(FailureDetails));
+                OnPropertyChanged(nameof(IsAttentionVisible));
             }
         }
 
@@ -214,34 +246,7 @@ namespace Cotton.Mobile.Services
 
         private static string CreateProgressStatusText(CottonSyncProgressSnapshot progress)
         {
-            return progress.Stage switch
-            {
-                CottonSyncProgressStage.ScanningDevice => CoreResources.ScanningDeviceStatus,
-                CottonSyncProgressStage.CheckingCloud => CoreResources.CheckingCloudStatus,
-                CottonSyncProgressStage.ApplyingChanges when progress.TotalItemCount > 0 => CoreResources.Format(
-                    CoreResources.ApplyingChangesFormat,
-                    progress.CompletedItemCount,
-                    progress.TotalItemCount.Value),
-                CottonSyncProgressStage.ApplyingChanges => CoreResources.FinishingSyncStatus,
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(progress),
-                    progress.Stage,
-                    "Sync progress stage is not supported."),
-            };
-        }
-
-        private static string CreateDirectionText(CottonSyncDirection direction)
-        {
-            EnsureSupportedDirection(direction);
-            return CoreResources.UploadNewFilesAction;
-        }
-
-        private static void EnsureSupportedDirection(CottonSyncDirection direction)
-        {
-            if (direction != CottonSyncDirection.DeviceToCloud)
-            {
-                throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported.");
-            }
+            return CottonSyncProgressText.Create(progress);
         }
 
         private void NotifyProgressChanged()
@@ -250,6 +255,7 @@ namespace Cotton.Mobile.Services
             OnPropertyChanged(nameof(IsRunning));
             OnPropertyChanged(nameof(IsProgressDeterminate));
             OnPropertyChanged(nameof(ProgressValue));
+            OnPropertyChanged(nameof(IsAttentionVisible));
         }
     }
 }

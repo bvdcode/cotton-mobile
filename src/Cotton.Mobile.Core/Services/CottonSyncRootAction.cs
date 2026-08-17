@@ -3,11 +3,12 @@
 
 namespace Cotton.Mobile.Services
 {
-    public enum CottonSyncProgressStage
+    public enum CottonSyncRootAction
     {
-        ScanningDevice,
-        CheckingCloud,
-        ApplyingChanges,
-        UploadingFile,
+        ShowFailureDetails,
+        UsePrimaryAction,
+        Pause,
+        Resume,
+        Stop,
     }
 }

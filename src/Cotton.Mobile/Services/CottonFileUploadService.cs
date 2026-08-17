@@ -148,7 +148,7 @@ namespace Cotton.Mobile.Services
         {
             List<string> chunkHashes = [];
             byte[] buffer = new byte[settings.MaxChunkSizeBytes];
-            long uploadedBytes = 0;
+            long processedBytes = 0;
 
             using SHA256 contentHash = SHA256.Create();
             while (true)
@@ -166,16 +166,23 @@ namespace Cotton.Mobile.Services
                 if (!await client.Chunks.ExistsAsync(chunkHash, cancellationToken).ConfigureAwait(false))
                 {
                     using MemoryStream chunkStream = new(buffer, 0, bytesRead, writable: false);
+                    using CottonProgressReadStream? progressStream = progress is null
+                        ? null
+                        : new CottonProgressReadStream(
+                            chunkStream,
+                            new CottonChunkUploadProgress(progress, processedBytes),
+                            leaveOpen: true);
+                    Stream uploadStream = progressStream is not null ? progressStream : chunkStream;
                     await client.Chunks.UploadRawAsync(
                             chunkHash,
-                            chunkStream,
+                            uploadStream,
                             CottonFileUploadSourceSnapshot.DefaultContentType,
                             cancellationToken)
                         .ConfigureAwait(false);
                 }
 
-                uploadedBytes += bytesRead;
-                progress?.Report(uploadedBytes);
+                processedBytes += bytesRead;
+                progress?.Report(processedBytes);
             }
 
             contentHash.TransformFinalBlock([], 0, 0);
@@ -184,7 +191,7 @@ namespace Cotton.Mobile.Services
             return new CottonFileUploadResult(
                 chunkHashes,
                 CottonContentHash.FormatSha256(fileHash),
-                uploadedBytes);
+                processedBytes);
         }
 
         private static async Task<int> ReadChunkAsync(

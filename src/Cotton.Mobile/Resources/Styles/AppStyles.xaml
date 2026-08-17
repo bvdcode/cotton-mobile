@@ -74,6 +74,13 @@
         <Setter Property="StrokeThickness" Value="0" />
     </Style>
 
+    <Style x:Key="AppDivider" TargetType="BoxView">
+        <Setter Property="HeightRequest" Value="1" />
+        <Setter Property="Margin" Value="4,0" />
+        <Setter Property="Color"
+                Value="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}" />
+    </Style>
+
     <Style x:Key="AppTopBarTitle" TargetType="Label">
         <Setter Property="FontSize" Value="22" />
         <Setter Property="FontAttributes" Value="Bold" />

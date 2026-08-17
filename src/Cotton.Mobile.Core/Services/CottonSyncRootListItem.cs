@@ -47,6 +47,15 @@ namespace Cotton.Mobile.Services
             CanResumeSync = isPaused;
             CanStopSync = true;
             IsDividerVisible = isDividerVisible;
+            FailureDetailsAction = new CottonSyncRootActionRequest(
+                this,
+                CottonSyncRootAction.ShowFailureDetails);
+            PrimaryAction = new CottonSyncRootActionRequest(
+                this,
+                CottonSyncRootAction.UsePrimaryAction);
+            PauseAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Pause);
+            ResumeAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Resume);
+            StopAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Stop);
             SetAutomaticStatus(automaticStatus);
         }
 
@@ -67,6 +76,8 @@ namespace Cotton.Mobile.Services
         public bool CanShowFailureDetails => !string.IsNullOrWhiteSpace(_failureDetails);
 
         public string FailureDetails => _failureDetails ?? string.Empty;
+
+        public CottonSyncRootActionRequest FailureDetailsAction { get; }
 
         public bool IsProgressDeterminate =>
             (_progress?.Stage == CottonSyncProgressStage.ApplyingChanges
@@ -111,6 +122,8 @@ namespace Cotton.Mobile.Services
 
         public string PrimaryActionText { get; }
 
+        public CottonSyncRootActionRequest PrimaryAction { get; }
+
         public bool IsPaused { get; }
 
         public bool IsUnsupportedLocalRoot { get; }
@@ -119,13 +132,19 @@ namespace Cotton.Mobile.Services
 
         public string PauseSyncActionText { get; } = CottonSyncRootManagementText.PauseAction;
 
+        public CottonSyncRootActionRequest PauseAction { get; }
+
         public bool CanResumeSync { get; }
 
         public string ResumeSyncActionText { get; } = CottonSyncRootManagementText.ResumeAction;
 
+        public CottonSyncRootActionRequest ResumeAction { get; }
+
         public bool CanStopSync { get; }
 
         public string StopSyncActionText { get; } = CottonSyncRootManagementText.StopAction;
+
+        public CottonSyncRootActionRequest StopAction { get; }
 
         public bool IsDividerVisible { get; }
 

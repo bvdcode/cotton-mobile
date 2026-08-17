@@ -13,6 +13,7 @@ namespace Cotton.Mobile.Tests
     {
         private const string ViewDirectory = "src/Cotton.Mobile";
         private const string AppStylesPath = "src/Cotton.Mobile/Resources/Styles/AppStyles.xaml";
+        private const string ProfileViewPath = "src/Cotton.Mobile/ProfileView.xaml";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -50,6 +51,27 @@ namespace Cotton.Mobile.Tests
 
             Assert.Contains("StaticResource Outline", value, StringComparison.Ordinal);
             Assert.DoesNotContain("OutlineVariant", value, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void ProfileUsesDividersInsteadOfOutlinedCards()
+        {
+            XDocument document = XDocument.Parse(RepositoryPath.ReadText(ProfileViewPath));
+            IReadOnlyList<XAttribute> appCardReferences = [.. document
+                .Descendants()
+                .Attributes("Style")
+                .Where(attribute => attribute.Value.Contains("StaticResource AppCard", StringComparison.Ordinal))];
+            int dividerCount = document
+                .Descendants()
+                .Count(element =>
+                    element.Name.LocalName == "BoxView"
+                    && string.Equals(
+                        (string?)element.Attribute("Style"),
+                        "{StaticResource AppDivider}",
+                        StringComparison.Ordinal));
+
+            Assert.Empty(appCardReferences);
+            Assert.Equal(3, dividerCount);
         }
 
         private static List<string> FindUntintedFontImageSources()

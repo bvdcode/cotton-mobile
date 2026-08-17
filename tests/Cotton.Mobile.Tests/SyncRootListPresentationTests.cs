@@ -16,6 +16,8 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.CanRunNow);
             Assert.False(item.CanReconnect);
             Assert.Equal("Projects", item.DisplayPathText);
+            Assert.Same(item, item.PrimaryAction.Item);
+            Assert.Equal(CottonSyncRootAction.UsePrimaryAction, item.PrimaryAction.Action);
         }
 
         [Fact]

@@ -11,7 +11,6 @@ namespace Cotton.Mobile.Services
         public static string PauseAction => CoreResources.PauseAction;
         public static string ResumeAction => CoreResources.ResumeAction;
         public static string CancelAction => CoreResources.CancelAction;
-        public static string FailureDetailsAction => CoreResources.FailureDetailsAction;
         public static string CloseAction => CoreResources.CloseAction;
         public static string StopMessage => CoreResources.StopSyncingMessage;
         public static string PausedStatusText => CoreResources.PausedStatus;

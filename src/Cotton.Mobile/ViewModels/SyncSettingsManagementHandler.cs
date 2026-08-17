@@ -91,19 +91,6 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        public async Task<CottonSyncRootAction?> ChooseRootActionAsync(
-            CottonSyncRootListItem item)
-        {
-            ArgumentNullException.ThrowIfNull(item);
-
-            string? selected = await _dialogService.ShowActionSheetAsync(
-                item.Title,
-                CottonSyncRootManagementText.CancelAction,
-                CottonSyncRootActionMenu.CreateDestructionAction(item),
-                CottonSyncRootActionMenu.CreateActions(item));
-            return CottonSyncRootActionMenu.Resolve(item, selected);
-        }
-
         public Task ShowFailureDetailsAsync(CottonSyncRootListItem item)
         {
             ArgumentNullException.ThrowIfNull(item);

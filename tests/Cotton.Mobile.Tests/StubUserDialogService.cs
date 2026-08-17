@@ -16,14 +16,5 @@ namespace Cotton.Mobile.Tests
         {
             return Task.FromResult(false);
         }
-
-        public Task<string?> ShowActionSheetAsync(
-            string title,
-            string cancel,
-            string? destruction,
-            IReadOnlyList<string> actions)
-        {
-            return Task.FromResult<string?>(null);
-        }
     }
 }

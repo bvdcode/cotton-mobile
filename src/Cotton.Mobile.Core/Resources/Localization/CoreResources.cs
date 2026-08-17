@@ -31,7 +31,6 @@ namespace Cotton.Mobile.Resources.Localization
         public static string PauseAction => GetString(nameof(PauseAction));
         public static string ResumeAction => GetString(nameof(ResumeAction));
         public static string CancelAction => GetString(nameof(CancelAction));
-        public static string FailureDetailsAction => GetString(nameof(FailureDetailsAction));
         public static string FailureDetailsTitleFormat => GetString(nameof(FailureDetailsTitleFormat));
         public static string CloseAction => GetString(nameof(CloseAction));
         public static string StopSyncingMessage => GetString(nameof(StopSyncingMessage));

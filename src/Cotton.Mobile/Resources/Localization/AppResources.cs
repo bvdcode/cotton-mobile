@@ -50,7 +50,6 @@ namespace Cotton.Mobile.Resources.Localization
         public static string RepositoryOpenFailed => GetString(nameof(RepositoryOpenFailed));
         public static string CloudFoldersLoadFailed => GetString(nameof(CloudFoldersLoadFailed));
         public static string CloudFolderOpenFailed => GetString(nameof(CloudFolderOpenFailed));
-        public static string MoreSyncActionsDescription => GetString(nameof(MoreSyncActionsDescription));
         public static string SyncSettingsUpdateFailed => GetString(nameof(SyncSettingsUpdateFailed));
         public static string SyncFoldersInspectFailed => GetString(nameof(SyncFoldersInspectFailed));
         public static string SyncFolderAccountUnavailable => GetString(nameof(SyncFolderAccountUnavailable));

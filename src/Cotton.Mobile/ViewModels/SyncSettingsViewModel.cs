@@ -46,7 +46,7 @@ namespace Cotton.Mobile.ViewModels
             LoadCommand = CreateLoadCommand();
             AddRootCommand = CreateAddRootCommand();
             RunAllCommand = CreateRunAllCommand();
-            RootActionsCommand = CreateRootActionsCommand();
+            RootActionCommand = CreateRootActionCommand();
         }
 
         private AsyncRelayCommand CreateLoadCommand()
@@ -79,15 +79,15 @@ namespace Cotton.Mobile.ViewModels
                 CanRunAll);
         }
 
-        private AsyncRelayCommand<CottonSyncRootListItem> CreateRootActionsCommand()
+        private AsyncRelayCommand<CottonSyncRootActionRequest> CreateRootActionCommand()
         {
-            return new AsyncRelayCommand<CottonSyncRootListItem>(
-                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
-                    item,
+            return new AsyncRelayCommand<CottonSyncRootActionRequest>(
+                (request, cancellationToken) => AsyncCommandExecution.RunAsync(
+                    request,
                     ExecuteRootActionAsync,
                     LogUnhandledCommandException,
                     cancellationToken),
-                item => !IsBusy && item is not null);
+                request => !IsBusy && request is not null && CanExecuteRootAction(request));
         }
 
         public IAsyncRelayCommand LoadCommand { get; }
@@ -96,7 +96,7 @@ namespace Cotton.Mobile.ViewModels
 
         public IAsyncRelayCommand RunAllCommand { get; }
 
-        public IAsyncRelayCommand<CottonSyncRootListItem> RootActionsCommand { get; }
+        public IAsyncRelayCommand<CottonSyncRootActionRequest> RootActionCommand { get; }
 
         public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = [];
 
@@ -110,7 +110,7 @@ namespace Cotton.Mobile.ViewModels
                     LoadCommand.NotifyCanExecuteChanged();
                     AddRootCommand.NotifyCanExecuteChanged();
                     RunAllCommand.NotifyCanExecuteChanged();
-                    RootActionsCommand.NotifyCanExecuteChanged();
+                    RootActionCommand.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -211,13 +211,29 @@ namespace Cotton.Mobile.ViewModels
             return !IsBusy && _instanceUri is not null && !string.IsNullOrWhiteSpace(_accountScopeKey);
         }
 
+        private static bool CanExecuteRootAction(CottonSyncRootActionRequest request)
+        {
+            return request.Action switch
+            {
+                CottonSyncRootAction.ShowFailureDetails => request.Item.CanShowFailureDetails,
+                CottonSyncRootAction.UsePrimaryAction => request.Item.CanUsePrimaryAction,
+                CottonSyncRootAction.Pause => request.Item.CanPauseSync,
+                CottonSyncRootAction.Resume => request.Item.CanResumeSync,
+                CottonSyncRootAction.Stop => request.Item.CanStopSync,
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(request),
+                    request.Action,
+                    "Sync-root action is not supported."),
+            };
+        }
+
         private async Task ExecuteRootActionAsync(
-            CottonSyncRootListItem item,
+            CottonSyncRootActionRequest request,
             CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(item);
-            CottonSyncRootAction? action = await _managementHandler.ChooseRootActionAsync(item);
-            switch (action)
+            ArgumentNullException.ThrowIfNull(request);
+            CottonSyncRootListItem item = request.Item;
+            switch (request.Action)
             {
                 case CottonSyncRootAction.ShowFailureDetails:
                     await _managementHandler.ShowFailureDetailsAsync(item);
@@ -241,9 +257,6 @@ namespace Cotton.Mobile.ViewModels
 
                 case CottonSyncRootAction.Stop:
                     await _managementHandler.StopRootAsync(this, item, cancellationToken);
-                    break;
-
-                case null:
                     break;
 
                 default:

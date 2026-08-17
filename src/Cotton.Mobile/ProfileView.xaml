@@ -30,9 +30,10 @@
                        IsVisible="{Binding Display.IsProfileStatusVisible}"
                        Style="{StaticResource AppBodyText}" />
 
-                <Border Style="{StaticResource AppCard}">
+                <VerticalStackLayout Spacing="0">
                     <Grid ColumnDefinitions="Auto,*"
-                          ColumnSpacing="12">
+                          ColumnSpacing="12"
+                          Padding="4,12">
                         <Grid>
                             <Border Style="{StaticResource AppIconFrame}">
                                 <Image Style="{StaticResource AppIcon}"
@@ -62,65 +63,65 @@
                                    Style="{StaticResource AppCaptionText}" />
                         </VerticalStackLayout>
                     </Grid>
-                </Border>
 
-                <material:ButtonView TappedCommand="{Binding PrivacyPolicyCommand}"
-                                     Padding="16"
-                                     Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
-                                     StrokeThickness="1"
-                                     BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                                     StrokeShape="RoundRectangle 20"
-                                     SemanticProperties.Description="{x:Static localization:AppResources.OpenPrivacyPolicyDescription}">
-                    <Grid ColumnDefinitions="Auto,*,Auto"
-                          ColumnSpacing="12">
-                        <Image Style="{StaticResource AppIcon}"
-                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Open_in_new}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
-                        <VerticalStackLayout Grid.Column="1"
-                                             Spacing="3"
-                                             VerticalOptions="Center">
-                            <Label Text="{x:Static localization:AppResources.PrivacyPolicyText}"
-                                   FontAttributes="Bold" />
-                            <Label Text="{x:Static localization:AppResources.PrivacyPolicySupportingText}"
-                                   Style="{StaticResource AppBodyText}" />
-                        </VerticalStackLayout>
-                        <Image Grid.Column="2"
-                               Style="{StaticResource AppIcon}"
-                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Chevron_right}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
-                    </Grid>
-                </material:ButtonView>
+                    <BoxView Style="{StaticResource AppDivider}" />
 
-                <material:ButtonView TappedCommand="{Binding LogoutCommand}"
-                                     IsEnabled="{Binding IsLogoutEnabled}"
-                                     Padding="16"
-                                     Stroke="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                                     StrokeThickness="1"
-                                     BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                                     StrokeShape="RoundRectangle 20"
-                                     SemanticProperties.Description="{x:Static localization:AppResources.SignOutText}">
+                    <material:ButtonView TappedCommand="{Binding PrivacyPolicyCommand}"
+                                         Padding="4,12"
+                                         StrokeThickness="0"
+                                         BackgroundColor="Transparent"
+                                         SemanticProperties.Description="{x:Static localization:AppResources.OpenPrivacyPolicyDescription}">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="12">
+                            <Border Style="{StaticResource AppIconFrame}">
+                                <Image Style="{StaticResource AppIcon}"
+                                       Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Open_in_new}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="3"
+                                                 VerticalOptions="Center">
+                                <Label Text="{x:Static localization:AppResources.PrivacyPolicyText}"
+                                       FontAttributes="Bold" />
+                                <Label Text="{x:Static localization:AppResources.PrivacyPolicySupportingText}"
+                                       Style="{StaticResource AppBodyText}" />
+                            </VerticalStackLayout>
+                            <Image Grid.Column="2"
+                                   Style="{StaticResource AppIcon}"
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Chevron_right}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
+                        </Grid>
+                    </material:ButtonView>
+
+                    <BoxView Style="{StaticResource AppDivider}" />
+
+                    <material:ButtonView TappedCommand="{Binding LogoutCommand}"
+                                         IsEnabled="{Binding IsLogoutEnabled}"
+                                         Padding="4,12"
+                                         StrokeThickness="0"
+                                         BackgroundColor="Transparent"
+                                         SemanticProperties.Description="{x:Static localization:AppResources.SignOutText}">
+                        <Grid ColumnDefinitions="Auto,*"
+                              ColumnSpacing="12">
+                            <Border Style="{StaticResource AppIconFrame}">
+                                <Image Style="{StaticResource AppIcon}"
+                                       Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Close}, Color={AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}}" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="3"
+                                                 VerticalOptions="Center">
+                                <Label Text="{x:Static localization:AppResources.SignOutText}"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                                <Label Text="{x:Static localization:AppResources.SignOutSupportingText}"
+                                       Style="{StaticResource AppBodyText}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </material:ButtonView>
+
+                    <BoxView Style="{StaticResource AppDivider}" />
+
                     <Grid ColumnDefinitions="Auto,*"
-                          ColumnSpacing="12">
-                        <Image Style="{StaticResource AppIcon}">
-                            <Image.Source>
-                                <FontImageSource FontFamily="MaterialOutlined"
-                                                 Glyph="{x:Static symbols:MaterialOutlined.Close}"
-                                                 Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
-                            </Image.Source>
-                        </Image>
-                        <VerticalStackLayout Grid.Column="1"
-                                             Spacing="3"
-                                             VerticalOptions="Center">
-                            <Label Text="{x:Static localization:AppResources.SignOutText}"
-                                   FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
-                            <Label Text="{x:Static localization:AppResources.SignOutSupportingText}"
-                                   Style="{StaticResource AppBodyText}" />
-                        </VerticalStackLayout>
-                    </Grid>
-                </material:ButtonView>
-
-                <Border Style="{StaticResource AppCard}">
-                    <Grid ColumnDefinitions="Auto,*"
-                          ColumnSpacing="12">
+                          ColumnSpacing="12"
+                          Padding="4,12">
                         <Border Style="{StaticResource AppIconFrame}">
                             <Image Style="{StaticResource AppIcon}"
                                    Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Info}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
@@ -134,7 +135,7 @@
                                    Style="{StaticResource AppBodyText}" />
                         </VerticalStackLayout>
                     </Grid>
-                </Border>
+                </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

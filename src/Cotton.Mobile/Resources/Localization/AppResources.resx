@@ -43,7 +43,6 @@
   <data name="RepositoryOpenFailed" xml:space="preserve"><value>Could not open the Cotton Cloud repository.</value></data>
   <data name="CloudFoldersLoadFailed" xml:space="preserve"><value>Could not load cloud folders.</value></data>
   <data name="CloudFolderOpenFailed" xml:space="preserve"><value>Could not open this folder.</value></data>
-  <data name="MoreSyncActionsDescription" xml:space="preserve"><value>More sync actions</value></data>
   <data name="SyncSettingsUpdateFailed" xml:space="preserve"><value>Could not update sync settings.</value></data>
   <data name="SyncFoldersInspectFailed" xml:space="preserve"><value>Could not inspect sync folders.</value></data>
   <data name="SyncFolderAccountUnavailable" xml:space="preserve"><value>Could not add a sync folder for this account.</value></data>

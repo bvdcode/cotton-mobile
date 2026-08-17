@@ -125,8 +125,8 @@
                                                LineBreakMode="TailTruncation" />
                                         <HorizontalStackLayout Spacing="6">
                                             <HorizontalStackLayout.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding BindingContext.RootActionsCommand, Source={x:Reference SyncViewRoot}}"
-                                                                      CommandParameter="{Binding .}" />
+                                                <TapGestureRecognizer Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                                      CommandParameter="{Binding FailureDetailsAction}" />
                                             </HorizontalStackLayout.GestureRecognizers>
                                             <ActivityIndicator IsRunning="{Binding IsRunning}"
                                                                IsVisible="{Binding IsRunning}"
@@ -148,17 +148,65 @@
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
 
-                                    <Button Grid.Column="2"
-                                            Command="{Binding BindingContext.RootActionsCommand, Source={x:Reference SyncViewRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            SemanticProperties.Description="{x:Static localization:AppResources.MoreSyncActionsDescription}"
-                                            StyleClass="TextButton, TouchTarget">
-                                        <Button.ImageSource>
-                                            <FontImageSource FontFamily="MaterialOutlined"
-                                                             Glyph="{x:Static symbols:MaterialOutlined.More_vert}"
-                                                             Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                                        </Button.ImageSource>
-                                    </Button>
+                                    <VerticalStackLayout Grid.Column="2"
+                                                         Spacing="0"
+                                                         VerticalOptions="Center">
+                                        <Button Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                CommandParameter="{Binding PrimaryAction}"
+                                                IsVisible="{Binding CanUsePrimaryAction}"
+                                                SemanticProperties.Description="{Binding PrimaryActionText}"
+                                                StyleClass="TextButton, TouchTarget">
+                                            <Button.ImageSource>
+                                                <FontImageSource FontFamily="MaterialOutlined"
+                                                                 Glyph="{x:Static symbols:MaterialOutlined.Play_arrow}"
+                                                                 Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                            </Button.ImageSource>
+                                            <Button.Triggers>
+                                                <DataTrigger TargetType="Button"
+                                                             Binding="{Binding CanReconnect}"
+                                                             Value="True">
+                                                    <Setter Property="ImageSource"
+                                                            Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Folder_open}, Color={AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}}" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+                                        </Button>
+
+                                        <Button Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                CommandParameter="{Binding PauseAction}"
+                                                IsVisible="{Binding CanPauseSync}"
+                                                SemanticProperties.Description="{Binding PauseSyncActionText}"
+                                                StyleClass="TextButton, TouchTarget">
+                                            <Button.ImageSource>
+                                                <FontImageSource FontFamily="MaterialOutlined"
+                                                                 Glyph="{x:Static symbols:MaterialOutlined.Pause}"
+                                                                 Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                            </Button.ImageSource>
+                                        </Button>
+
+                                        <Button Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                CommandParameter="{Binding ResumeAction}"
+                                                IsVisible="{Binding CanResumeSync}"
+                                                SemanticProperties.Description="{Binding ResumeSyncActionText}"
+                                                StyleClass="TextButton, TouchTarget">
+                                            <Button.ImageSource>
+                                                <FontImageSource FontFamily="MaterialOutlined"
+                                                                 Glyph="{x:Static symbols:MaterialOutlined.Resume}"
+                                                                 Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                            </Button.ImageSource>
+                                        </Button>
+
+                                        <Button Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                CommandParameter="{Binding StopAction}"
+                                                IsVisible="{Binding CanStopSync}"
+                                                SemanticProperties.Description="{Binding StopSyncActionText}"
+                                                StyleClass="TextButton, TouchTarget">
+                                            <Button.ImageSource>
+                                                <FontImageSource FontFamily="MaterialOutlined"
+                                                                 Glyph="{x:Static symbols:MaterialOutlined.Stop_circle}"
+                                                                 Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                                            </Button.ImageSource>
+                                        </Button>
+                                    </VerticalStackLayout>
                                 </Grid>
 
                                 <ProgressBar Progress="{Binding ProgressValue}"
@@ -167,10 +215,9 @@
 
                             </VerticalStackLayout>
                             <BoxView Grid.Row="1"
-                                     HeightRequest="1"
-                                     Margin="4,0"
+                                     Style="{StaticResource AppDivider}"
                                      IsVisible="{Binding IsDividerVisible}"
-                                     Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}" />
+                                     />
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

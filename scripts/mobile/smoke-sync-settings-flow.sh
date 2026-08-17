@@ -46,10 +46,12 @@ verify_sync_dashboard() {
     "Seeded sync-root path is not compact."
   cotton_require_xml_text "$sync_dashboard_xml" "Reconnect" \
     "Seeded root does not expose its local-access status."
-  cotton_require_xml_text "$sync_dashboard_xml" "More sync actions" \
-    "Seeded root does not expose its action menu."
-
-  verify_root_actions
+  cotton_require_xml_text "$sync_dashboard_xml" "Reconnect local folder" \
+    "Seeded root does not expose reconnect."
+  cotton_require_xml_text "$sync_dashboard_xml" "Pause" \
+    "Seeded root does not expose pause."
+  cotton_require_xml_text "$sync_dashboard_xml" "Stop syncing" \
+    "Seeded root does not expose stop."
 
   if ! cotton_xml_has_text "$sync_dashboard_xml" "Archive → Pictures / Archive"; then
     capture_scrolled_sync_dashboard "$scrolled_prefix"
@@ -61,23 +63,8 @@ verify_sync_dashboard() {
     "Paused seeded sync root is not visible."
   cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Paused" \
     "Paused seeded sync-root status is not visible."
-}
-
-verify_root_actions() {
-  local actions_xml
-
-  cotton_tap_clickable_from_xml "$sync_dashboard_xml" "More sync actions"
-  sleep 1
-  cotton_capture_screen "50-sync-root-actions"
-  actions_xml="$evidence_dir/50-sync-root-actions.xml"
-  cotton_require_xml_text "$actions_xml" "Reconnect local folder" \
-    "Root action menu does not expose reconnect."
-  cotton_require_xml_text "$actions_xml" "Pause" \
-    "Root action menu does not expose pause."
-  cotton_require_xml_text "$actions_xml" "Stop syncing" \
-    "Root action menu does not expose stop."
-  cotton_adb shell input keyevent 4 >/dev/null
-  sleep 1
+  cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Resume" \
+    "Paused root does not expose resume."
 }
 
 verify_refresh_action() {

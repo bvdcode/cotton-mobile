@@ -90,6 +90,21 @@ read_metric() {
   printf '%s\n' "$value"
 }
 
+schedule_background_work() {
+  local request_id="$1"
+  local phase="$2"
+  local output
+
+  output="$(run_diagnostic schedule-work "$request_id")"
+  if [[ "$output" == *":failed:"* ]]; then
+    printf 'Background work scheduling failed: %s\n' "$output" >&2
+    exit 1
+  fi
+
+  wait_for_jobs "$phase"
+  wait_for_media_sync_job "$phase"
+}
+
 timeout 300 "$sdkmanager_bin" --install emulator platform-tools "$system_image" >/dev/null
 mkdir -p "$ANDROID_AVD_HOME"
 printf 'no\n' | "$avdmanager_bin" create avd \
@@ -120,7 +135,14 @@ wait_for_boot
 "$adb_bin" install -r "$apk_path" >/dev/null
 "$adb_bin" shell pm clear "$package_name" >/dev/null
 launch_application
+schedule_background_work schedule "after scheduling"
+wait_for_enabled_component "$workmanager_reschedule_receiver"
+"$adb_bin" logcat -c
+"$adb_bin" shell am kill "$package_name"
+wait_for_jobs "after process death"
+wait_for_media_sync_job "after process death"
 create_media_fixture
+wait_for_media_sync_start
 
 denied_output="$(run_diagnostic scan-media denied)"
 denied_access="$(read_metric "$denied_output" access)"
@@ -223,21 +245,7 @@ if [[ "$revoked_output" == *":failed:"* \
   exit 1
 fi
 
-schedule_output="$(run_diagnostic schedule-work schedule)"
-if [[ "$schedule_output" == *":failed:"* ]]; then
-  printf 'WorkManager scheduling failed: %s\n' "$schedule_output" >&2
-  exit 1
-fi
-
-wait_for_jobs "after scheduling"
-wait_for_media_sync_job "after scheduling"
-wait_for_enabled_component "$workmanager_reschedule_receiver"
-"$adb_bin" logcat -c
-"$adb_bin" shell am kill "$package_name"
-wait_for_jobs "after process death"
-wait_for_media_sync_job "after process death"
-update_media_fixture
-wait_for_media_sync_start
+schedule_background_work reboot-schedule "before reboot"
 sleep "$package_state_persistence_delay_seconds"
 "$adb_bin" reboot
 wait_for_disconnect

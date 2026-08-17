@@ -113,12 +113,15 @@ wait_for_enabled_component() {
 }
 
 has_scheduled_job() {
+  local jobs
   local line
+  jobs="$("$adb_bin" shell dumpsys jobscheduler | tr -d '\r')"
+
   while IFS= read -r line; do
     if [[ "$line" == *"JOB "* && "$line" == *"$package_name/"* ]]; then
       return 0
     fi
-  done < <("$adb_bin" shell dumpsys jobscheduler | tr -d '\r')
+  done <<<"$jobs"
 
   return 1
 }

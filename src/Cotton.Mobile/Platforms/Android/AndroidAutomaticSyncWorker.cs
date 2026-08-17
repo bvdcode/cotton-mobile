@@ -26,59 +26,18 @@ namespace Cotton.Mobile.Platforms.Android
                 return Retry();
             }
 
-            ICottonSessionService sessionService = services.GetRequiredService<ICottonSessionService>();
-            Uri? instanceUri = await sessionService
-                .GetRememberedSessionInstanceAsync(cancellationToken)
+            AndroidAutomaticSyncExecutor executor = services
+                .GetRequiredService<AndroidAutomaticSyncExecutor>();
+            AndroidAutomaticSyncExecutionResult result = await executor
+                .ExecuteAsync(Trigger, RetryRootId, cancellationToken)
                 .ConfigureAwait(false);
-            if (instanceUri is null)
+            return result switch
             {
-                return Success();
-            }
-
-            CottonAutomaticSyncRunResult result = await RunAsync(
-                    services,
-                    instanceUri,
-                    cancellationToken)
-                .ConfigureAwait(false);
-            ICottonAutomaticSyncBackgroundScheduler scheduler = services
-                .GetRequiredService<ICottonAutomaticSyncBackgroundScheduler>();
-            if (result.HasFailures)
-            {
-                if (RetryRootId.HasValue)
-                {
-                    return Retry();
-                }
-
-                await scheduler
-                    .ScheduleRootRetriesAsync(result.FailedRootIds, cancellationToken)
-                    .ConfigureAwait(false);
-            }
-
-            if (Trigger == CottonAutomaticSyncTrigger.MediaStoreChanged)
-            {
-                await scheduler
-                    .RescheduleMediaStoreTriggerAsync(cancellationToken)
-                    .ConfigureAwait(false);
-            }
-
-            return Success();
-        }
-
-        private Task<CottonAutomaticSyncRunResult> RunAsync(
-            IServiceProvider services,
-            Uri instanceUri,
-            CancellationToken cancellationToken)
-        {
-            if (RetryRootId.HasValue)
-            {
-                CottonAutomaticSyncDispatcher retryDispatcher = services
-                    .GetRequiredService<CottonAutomaticSyncDispatcher>();
-                return retryDispatcher.RunRootsAsync(instanceUri, [RetryRootId.Value], cancellationToken);
-            }
-
-            CottonAutomaticSyncDispatcher dispatcher = services
-                .GetRequiredService<CottonAutomaticSyncDispatcher>();
-            return dispatcher.RunAsync(instanceUri, Trigger, cancellationToken);
+                AndroidAutomaticSyncExecutionResult.Completed => Success(),
+                AndroidAutomaticSyncExecutionResult.NoSession => Success(),
+                AndroidAutomaticSyncExecutionResult.RetryRequired => Retry(),
+                _ => throw new InvalidOperationException("Sync execution result is not supported."),
+            };
         }
     }
 }

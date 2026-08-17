@@ -24,16 +24,20 @@ namespace Cotton.Mobile.Platforms.Android
 
         private readonly IAndroidDocumentTreeActivityResultBridge _activityResultBridge;
         private readonly ICottonMediaAlbumPickerService _mediaAlbumPicker;
+        private readonly IUserDialogService _dialogService;
 
         public AndroidSyncLocalRootPickerService(
             IAndroidDocumentTreeActivityResultBridge activityResultBridge,
-            ICottonMediaAlbumPickerService mediaAlbumPicker)
+            ICottonMediaAlbumPickerService mediaAlbumPicker,
+            IUserDialogService dialogService)
         {
             ArgumentNullException.ThrowIfNull(activityResultBridge);
             ArgumentNullException.ThrowIfNull(mediaAlbumPicker);
+            ArgumentNullException.ThrowIfNull(dialogService);
 
             _activityResultBridge = activityResultBridge;
             _mediaAlbumPicker = mediaAlbumPicker;
+            _dialogService = dialogService;
         }
 
         public bool IsAvailable => true;
@@ -99,6 +103,12 @@ namespace Cotton.Mobile.Platforms.Android
             AndroidMediaReadAccessSnapshot access = AndroidMediaReadAccessResolver.Resolve();
             if (!access.HasAccess)
             {
+                await _dialogService
+                    .ShowAlertAsync(
+                        SyncRootSetupResources.MediaAccessRequiredTitle,
+                        SyncRootSetupResources.MediaAccessRequiredMessage,
+                        AppResources.OkText)
+                    .ConfigureAwait(false);
                 return null;
             }
 

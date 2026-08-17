@@ -69,9 +69,11 @@ namespace Cotton.Mobile.Platforms.Android
         private static async Task<string> ScanMediaAsync(IServiceProvider services)
         {
             AndroidMediaReadAccessSnapshot access = AndroidMediaReadAccessResolver.Resolve();
+            string accessMetrics =
+                $"access={Convert.ToInt32(access.HasAccess)},limited={Convert.ToInt32(access.HasLimitedAccess)}";
             if (!access.HasAccess)
             {
-                return "files=0,hashed=0,reused=0";
+                return $"{accessMetrics},files=0,hashed=0,reused=0";
             }
 
             IReadOnlyList<CottonMediaAlbumSnapshot> albums = await AndroidMediaStoreAlbumProvider
@@ -96,7 +98,7 @@ namespace Cotton.Mobile.Platforms.Android
                 .ReadWithDiagnosticsAsync(instanceUri, root)
                 .ConfigureAwait(false);
             int fileCount = scan.Content.Items.Count(item => item.ItemType == CottonFileBrowserEntryType.File);
-            return $"files={fileCount},hashed={scan.Statistics.HashedFileCount},reused={scan.Statistics.ReusedHashCount}";
+            return $"{accessMetrics},files={fileCount},hashed={scan.Statistics.HashedFileCount},reused={scan.Statistics.ReusedHashCount}";
         }
 
         private static async Task<string> ScheduleWorkAsync(IServiceProvider services)

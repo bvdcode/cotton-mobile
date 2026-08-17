@@ -13,6 +13,9 @@ readonly diagnostics_receiver="$package_name.SyncDiagnosticsReceiver"
 readonly diagnostics_action="dev.cottoncloud.app.debug.SYNC_DIAGNOSTICS"
 readonly diagnostics_tag="CottonSyncDiagnostics"
 readonly workmanager_reschedule_receiver="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+readonly media_sync_job_id="1129598209"
+readonly media_sync_job_service="dev.cottoncloud.mobile.AndroidMediaStoreSyncJobService"
+readonly media_sync_log_tag="CottonMediaSyncJob"
 readonly runtime_api="${COTTON_ANDROID_RUNTIME_API:-35}"
 readonly avd_name="cotton-runtime-$runtime_api"
 readonly system_image="system-images;android-$runtime_api;google_apis;x86_64"
@@ -41,6 +44,7 @@ excluded_media_uri=""
 export ANDROID_AVD_HOME="$avd_home"
 
 source "$(dirname "$0")/android-runtime-support.sh"
+source "$(dirname "$0")/android-runtime-job-support.sh"
 trap cleanup EXIT
 
 run_diagnostic() {
@@ -119,12 +123,15 @@ launch_application
 create_media_fixture
 
 denied_output="$(run_diagnostic scan-media denied)"
-if [[ "$denied_output" != *":failed:"* ]]; then
-  denied_files="$(read_metric "$denied_output" files)"
-  if [[ "$denied_files" -ne 0 ]]; then
-    printf 'MediaStore content was visible before permission was granted: %s\n' "$denied_output" >&2
-    exit 1
-  fi
+denied_access="$(read_metric "$denied_output" access)"
+denied_limited="$(read_metric "$denied_output" limited)"
+denied_files="$(read_metric "$denied_output" files)"
+if [[ "$denied_output" == *":failed:"* \
+  || "$denied_access" -ne 0 \
+  || "$denied_limited" -ne 0 \
+  || "$denied_files" -ne 0 ]]; then
+  printf 'MediaStore content was visible before permission was granted: %s\n' "$denied_output" >&2
+  exit 1
 fi
 
 device_api="$("$adb_bin" shell getprop ro.build.version.sdk | tr -d '\r')"
@@ -136,9 +143,13 @@ else
 fi
 
 first_output="$(run_diagnostic scan-media first)"
+first_access="$(read_metric "$first_output" access)"
 first_files="$(read_metric "$first_output" files)"
 first_hashed="$(read_metric "$first_output" hashed)"
-if [[ "$first_output" == *":failed:"* || "$first_files" -ne 1 || "$first_hashed" -ne 1 ]]; then
+if [[ "$first_output" == *":failed:"* \
+  || "$first_access" -ne 1 \
+  || "$first_files" -ne 1 \
+  || "$first_hashed" -ne 1 ]]; then
   printf 'Scoped MediaStore scan did not isolate and hash the test folder: %s\n' "$first_output" >&2
   exit 1
 fi
@@ -184,13 +195,32 @@ else
   "$adb_bin" shell pm revoke "$package_name" android.permission.READ_EXTERNAL_STORAGE
 fi
 
-revoked_output="$(run_diagnostic scan-media revoked)"
-if [[ "$revoked_output" != *":failed:"* ]]; then
-  revoked_files="$(read_metric "$revoked_output" files)"
-  if [[ "$revoked_files" -ne 0 ]]; then
-    printf 'MediaStore content remained visible after permission revocation: %s\n' "$revoked_output" >&2
+if [[ "$device_api" -ge 34 ]]; then
+  "$adb_bin" shell pm grant "$package_name" android.permission.READ_MEDIA_VISUAL_USER_SELECTED
+  limited_output="$(run_diagnostic scan-media limited)"
+  limited_access="$(read_metric "$limited_output" access)"
+  limited_selection="$(read_metric "$limited_output" limited)"
+  limited_files="$(read_metric "$limited_output" files)"
+  if [[ "$limited_output" == *":failed:"* \
+    || "$limited_access" -ne 0 \
+    || "$limited_selection" -ne 1 \
+    || "$limited_files" -ne 0 ]]; then
+    printf 'Selected-only media access was treated as full-library access: %s\n' "$limited_output" >&2
     exit 1
   fi
+  "$adb_bin" shell pm revoke "$package_name" android.permission.READ_MEDIA_VISUAL_USER_SELECTED
+fi
+
+revoked_output="$(run_diagnostic scan-media revoked)"
+revoked_access="$(read_metric "$revoked_output" access)"
+revoked_limited="$(read_metric "$revoked_output" limited)"
+revoked_files="$(read_metric "$revoked_output" files)"
+if [[ "$revoked_output" == *":failed:"* \
+  || "$revoked_access" -ne 0 \
+  || "$revoked_limited" -ne 0 \
+  || "$revoked_files" -ne 0 ]]; then
+  printf 'MediaStore content remained visible after permission revocation: %s\n' "$revoked_output" >&2
+  exit 1
 fi
 
 schedule_output="$(run_diagnostic schedule-work schedule)"
@@ -200,14 +230,20 @@ if [[ "$schedule_output" == *":failed:"* ]]; then
 fi
 
 wait_for_jobs "after scheduling"
+wait_for_media_sync_job "after scheduling"
 wait_for_enabled_component "$workmanager_reschedule_receiver"
+"$adb_bin" logcat -c
 "$adb_bin" shell am kill "$package_name"
 wait_for_jobs "after process death"
+wait_for_media_sync_job "after process death"
+update_media_fixture
+wait_for_media_sync_start
 sleep "$package_state_persistence_delay_seconds"
 "$adb_bin" reboot
 wait_for_disconnect
 wait_for_device
 wait_for_boot
 wait_for_jobs "after reboot" 120
+wait_for_media_sync_job "after reboot" 120
 
 printf 'Android runtime smoke passed.\n'

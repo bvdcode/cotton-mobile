@@ -72,6 +72,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
             services.AddSingleton<ICottonNotificationBackgroundScheduler, AndroidNotificationBackgroundScheduler>();
             services.AddSingleton<ICottonAutomaticSyncBackgroundScheduler, AndroidAutomaticSyncBackgroundScheduler>();
+            services.AddSingleton<AndroidAutomaticSyncExecutor>();
         }
 
         private static void RegisterApplicationServices(IServiceCollection services)

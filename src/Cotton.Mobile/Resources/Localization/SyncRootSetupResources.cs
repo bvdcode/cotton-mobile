@@ -48,6 +48,10 @@ namespace Cotton.Mobile.Resources.Localization
 
         public static string NoMediaAlbumsSupportingText => GetString(nameof(NoMediaAlbumsSupportingText));
 
+        public static string MediaAccessRequiredTitle => GetString(nameof(MediaAccessRequiredTitle));
+
+        public static string MediaAccessRequiredMessage => GetString(nameof(MediaAccessRequiredMessage));
+
         public static string CreateMediaAlbumItemCount(int itemCount)
         {
             if (itemCount <= 0)

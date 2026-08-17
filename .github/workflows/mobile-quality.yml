@@ -47,7 +47,11 @@ jobs:
         run: scripts/ci/test-android-play-media-permissions.sh
 
       - name: Validate Android runtime smoke script
-        run: bash -n scripts/mobile/test-android-runtime.sh scripts/mobile/android-runtime-support.sh
+        run: >-
+          bash -n
+          scripts/mobile/test-android-runtime.sh
+          scripts/mobile/android-runtime-support.sh
+          scripts/mobile/android-runtime-job-support.sh
 
       - name: Test Google Play listing screenshots
         run: scripts/ci/test-google-play-listing-screenshots.sh

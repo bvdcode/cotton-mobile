@@ -115,6 +115,12 @@
   <data name="NoMediaAlbumsSupportingText" xml:space="preserve">
     <value>Allow access to at least one photo or video, then try again.</value>
   </data>
+  <data name="MediaAccessRequiredTitle" xml:space="preserve">
+    <value>Allow all media</value>
+  </data>
+  <data name="MediaAccessRequiredMessage" xml:space="preserve">
+    <value>Automatic upload needs access to all photos or videos. Selected-only access cannot see media created later.</value>
+  </data>
   <data name="SelectedSourceDescriptionFormat" xml:space="preserve">
     <value>{0}, selected.</value>
   </data>

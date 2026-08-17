@@ -13,12 +13,10 @@ namespace Cotton.Mobile.Platforms.Android
             global::Android.Content.Context context = global::Android.App.Application.Context;
             if (OperatingSystem.IsAndroidVersionAtLeast(34))
             {
-                bool hasSelectedAccess = IsGranted(
-                    context,
-                    global::Android.Manifest.Permission.ReadMediaVisualUserSelected);
                 return new AndroidMediaReadAccessSnapshot(
-                    IsGranted(context, global::Android.Manifest.Permission.ReadMediaImages) || hasSelectedAccess,
-                    IsGranted(context, global::Android.Manifest.Permission.ReadMediaVideo) || hasSelectedAccess);
+                    IsGranted(context, global::Android.Manifest.Permission.ReadMediaImages),
+                    IsGranted(context, global::Android.Manifest.Permission.ReadMediaVideo),
+                    IsGranted(context, global::Android.Manifest.Permission.ReadMediaVisualUserSelected));
             }
 
             if (OperatingSystem.IsAndroidVersionAtLeast(33))

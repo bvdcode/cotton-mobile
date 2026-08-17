@@ -24,7 +24,7 @@ Usage: $(basename "$0") [options]
 
 Runs an Android Sync settings smoke:
   1. Backs up current app-private sync root metadata for the selected instance.
-  2. Seeds one ready cloud-to-device root and one paused bidirectional root.
+  2. Seeds one reconnect-required upload root and one paused upload root.
   3. Opens the current Sync dashboard and verifies its toolbar and root cards.
   4. Taps Refresh and verifies the seeded roots reload from app-private metadata.
   5. Restores the previous sync root metadata unless --leave-seed is used.
@@ -99,10 +99,13 @@ load_sync_seed "$seed_dir/seed-data.json"
 sync_metadata_directory="files/CottonSyncRoots/$instance_key"
 sync_roots_path="$sync_metadata_directory/sync-roots.json"
 paused_roots_path="$sync_metadata_directory/paused-sync-roots.json"
+automatic_status_path="$sync_metadata_directory/automatic-sync-status.json"
 sync_roots_backup_path="$evidence_dir/09-existing-sync-roots.json"
 paused_roots_backup_path="$evidence_dir/09-existing-paused-sync-roots.json"
+automatic_status_backup_path="$evidence_dir/09-existing-automatic-sync-status.json"
 sync_roots_backup_exists=0
 paused_roots_backup_exists=0
+automatic_status_backup_exists=0
 seeded_sync_data=0
 
 trap restore_sync_data EXIT

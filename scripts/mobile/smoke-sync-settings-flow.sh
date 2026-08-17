@@ -11,7 +11,7 @@ wait_for_sync_dashboard() {
     xml_file="$evidence_dir/$prefix.xml"
 
     if cotton_xml_has_text "$xml_file" "Sync" \
-      && cotton_xml_has_text "$xml_file" "Smoke Downloads"; then
+      && cotton_xml_has_text "$xml_file" "2026 → Pictures / 2026"; then
       sync_dashboard_xml="$xml_file"
       return
     fi
@@ -40,43 +40,44 @@ verify_sync_dashboard() {
 
   cotton_require_xml_text "$sync_dashboard_xml" "Sync" \
     "Sync dashboard title is not visible."
-  cotton_require_xml_text "$sync_dashboard_xml" "2 folders set to sync" \
-    "Seeded sync-root summary is not visible."
-  cotton_require_xml_text "$sync_dashboard_xml" "Run all sync folders" \
-    "Run-all action is not exposed."
   cotton_require_xml_text "$sync_dashboard_xml" "Refresh sync folders" \
     "Refresh action is not exposed."
-  cotton_require_xml_text "$sync_dashboard_xml" "Smoke Downloads" \
-    "Ready seeded sync root is not visible."
-  cotton_require_xml_text "$sync_dashboard_xml" "Files / Smoke Downloads" \
-    "Ready seeded sync-root path is not visible."
-  cotton_require_xml_text "$sync_dashboard_xml" "Cloud to device · On-device smoke root" \
-    "Ready seeded sync-root direction is not visible."
-  cotton_require_xml_text "$sync_dashboard_xml" "Ready" \
-    "Ready seeded sync-root status is not visible."
-  cotton_require_xml_text "$sync_dashboard_xml" "Run now" \
-    "Ready root does not expose Run now."
-  cotton_require_xml_text "$sync_dashboard_xml" "Pause" \
-    "Ready root does not expose Pause."
-  cotton_require_xml_text "$sync_dashboard_xml" "Stop syncing" \
-    "Ready root does not expose Stop syncing."
+  cotton_require_xml_text "$sync_dashboard_xml" "2026 → Pictures / 2026" \
+    "Seeded sync-root path is not compact."
+  cotton_require_xml_text "$sync_dashboard_xml" "Reconnect" \
+    "Seeded root does not expose its local-access status."
+  cotton_require_xml_text "$sync_dashboard_xml" "More sync actions" \
+    "Seeded root does not expose its action menu."
 
-  if ! cotton_xml_has_text "$sync_dashboard_xml" "Smoke Paused"; then
+  verify_root_actions
+
+  if ! cotton_xml_has_text "$sync_dashboard_xml" "Archive → Pictures / Archive"; then
     capture_scrolled_sync_dashboard "$scrolled_prefix"
   else
     sync_dashboard_scrolled_xml="$sync_dashboard_xml"
   fi
 
-  cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Smoke Paused" \
+  cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Archive → Pictures / Archive" \
     "Paused seeded sync root is not visible."
-  cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Files / Smoke Paused" \
-    "Paused seeded sync-root path is not visible."
-  cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Bidirectional · Selected smoke folder" \
-    "Paused seeded sync-root direction is not visible."
   cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Paused" \
     "Paused seeded sync-root status is not visible."
-  cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Resume" \
-    "Paused root does not expose Resume."
+}
+
+verify_root_actions() {
+  local actions_xml
+
+  cotton_tap_clickable_from_xml "$sync_dashboard_xml" "More sync actions"
+  sleep 1
+  cotton_capture_screen "50-sync-root-actions"
+  actions_xml="$evidence_dir/50-sync-root-actions.xml"
+  cotton_require_xml_text "$actions_xml" "Reconnect local folder" \
+    "Root action menu does not expose reconnect."
+  cotton_require_xml_text "$actions_xml" "Pause" \
+    "Root action menu does not expose pause."
+  cotton_require_xml_text "$actions_xml" "Stop syncing" \
+    "Root action menu does not expose stop."
+  cotton_adb shell input keyevent 4 >/dev/null
+  sleep 1
 }
 
 verify_refresh_action() {

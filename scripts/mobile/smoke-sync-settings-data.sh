@@ -66,7 +66,7 @@ active_local_key = f"sync-dashboard-smoke-downloads-{run_id}"
 active_stable_key = create_stable_key(
     normalized,
     active_folder_id,
-    "AppPrivateDirectory",
+    "UserSelectedDocumentTree",
     active_local_key,
 )
 paused_root_id = create_id("paused-root")
@@ -91,13 +91,13 @@ roots = {
             "instanceUri": normalized,
             "accountScopeKey": account_scope.strip(),
             "cloudFolderId": str(active_folder_id),
-            "cloudFolderName": "Smoke Downloads",
-            "cloudFolderPath": "Files / Smoke Downloads",
-            "localStorageKind": 0,
+            "cloudFolderName": "2026",
+            "cloudFolderPath": "Default / Pictures / 2026",
+            "localStorageKind": 1,
             "localRootKey": active_local_key,
-            "localRootDisplayName": "On-device smoke root",
-            "localPermissionStatus": 0,
-            "direction": 0,
+            "localRootDisplayName": "Selected smoke folder",
+            "localPermissionStatus": 1,
+            "direction": 1,
             "uploadOriginalRetention": 0,
             "stableKey": active_stable_key,
         },
@@ -106,13 +106,13 @@ roots = {
             "instanceUri": normalized,
             "accountScopeKey": account_scope.strip(),
             "cloudFolderId": str(paused_folder_id),
-            "cloudFolderName": "Smoke Paused",
-            "cloudFolderPath": "Files / Smoke Paused",
+            "cloudFolderName": "Archive",
+            "cloudFolderPath": "Default / Pictures / Archive",
             "localStorageKind": 1,
             "localRootKey": paused_local_key,
             "localRootDisplayName": "Selected smoke folder",
             "localPermissionStatus": 0,
-            "direction": 2,
+            "direction": 1,
             "uploadOriginalRetention": 0,
             "stableKey": paused_stable_key,
         },
@@ -193,6 +193,10 @@ backup_sync_data() {
     > "$paused_roots_backup_path" 2> "$seed_dir/existing-paused-sync-roots.err"; then
     paused_roots_backup_exists=1
   fi
+  if cotton_adb shell run-as "$package_id" cat "$automatic_status_path" \
+    > "$automatic_status_backup_path" 2> "$seed_dir/existing-automatic-sync-status.err"; then
+    automatic_status_backup_exists=1
+  fi
 }
 
 seed_sync_data() {
@@ -243,5 +247,8 @@ restore_sync_data() {
   restore_one_metadata_file \
     "$paused_roots_backup_exists" "$paused_roots_backup_path" "$paused_roots_path" \
     "paused-sync-roots.json" "$remote_restore_dir"
+  restore_one_metadata_file \
+    "$automatic_status_backup_exists" "$automatic_status_backup_path" "$automatic_status_path" \
+    "automatic-sync-status.json" "$remote_restore_dir"
   cotton_adb shell rm -rf "$remote_restore_dir" >/dev/null 2>&1 || true
 }

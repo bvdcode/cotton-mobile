@@ -15,7 +15,7 @@ UI_XML = """<?xml version="1.0" encoding="UTF-8"?>
         enabled="true" clickable="false" bounds="[10,20][210,80]" />
   <node text="" content-desc="Refresh sync folders" hint="" class="android.widget.Button"
         enabled="true" clickable="true" bounds="[220,20][320,80]" />
-  <node text="2 folders set to sync" content-desc="" hint="" class="android.widget.TextView"
+  <node text="2026 → Pictures / 2026" content-desc="" hint="" class="android.widget.TextView"
         enabled="true" clickable="false" bounds="[10,100][320,160]" />
 </hierarchy>
 """
@@ -44,8 +44,8 @@ def main() -> int:
         if center.stdout.strip() != "270 50":
             raise AssertionError(f"Unexpected center: {center.stdout!r}")
 
-        run_support("has-node", str(xml_path), "2 folders set to sync")
-        partial = run_support("has-node", str(xml_path), "2 folder", check=False)
+        run_support("has-node", str(xml_path), "2026 → Pictures / 2026")
+        partial = run_support("has-node", str(xml_path), "Pictures / 2026", check=False)
         if partial.returncode == 0:
             raise AssertionError("Exact node matching accepted a partial plural string.")
 

@@ -2,10 +2,17 @@
   <PropertyGroup>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
-		<CottonSdkVersion>0.5.4</CottonSdkVersion>
-    <EasyExtensionsMediatorVersion>3.0.71</EasyExtensionsMediatorVersion>
+    <CottonSdkVersion>0.5.4</CottonSdkVersion>
+    <EasyExtensionsAnalyzersVersion>3.0.74</EasyExtensionsAnalyzersVersion>
+    <EasyExtensionsMediatorVersion>3.0.74</EasyExtensionsMediatorVersion>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EasyExtensions.Analyzers"
+                      Version="$(EasyExtensionsAnalyzersVersion)"
+                      PrivateAssets="all" />
+  </ItemGroup>
 </Project>

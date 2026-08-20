@@ -92,9 +92,15 @@ core_head="$(commit_all "core")"
 output="$("$detect_script" "$nested_app_head" "$core_head")"
 assert_contains "$output" "Android release required: true"
 
+printf '<Project><PropertyGroup><DependencyVersion>2.0.0</DependencyVersion></PropertyGroup></Project>\n' \
+  > Directory.Build.props
+shared_props_head="$(commit_all "shared build props")"
+output="$("$detect_script" "$core_head" "$shared_props_head")"
+assert_contains "$output" "Android release required: true"
+
 printf 'next-version: 1.0.1\n' > GitVersion.yml
 version_head="$(commit_all "version")"
-output="$("$detect_script" "$core_head" "$version_head")"
+output="$("$detect_script" "$shared_props_head" "$version_head")"
 assert_contains "$output" "Android release required: true"
 
 git tag v1.0.0 "$version_head"

@@ -14,7 +14,7 @@ release_required="false"
 
 requires_android_release() {
   case "$1" in
-    .github/workflows/mobile-android.yml|GitVersion.yml|src/Cotton.Mobile/*|src/Cotton.Mobile.Core/*)
+    .github/workflows/mobile-android.yml|Directory.Build.props|GitVersion.yml|src/Cotton.Mobile/*|src/Cotton.Mobile.Core/*)
       return 0
       ;;
     scripts/mobile/compute-android-release-version.sh|scripts/mobile/create-android-release-notes.sh)

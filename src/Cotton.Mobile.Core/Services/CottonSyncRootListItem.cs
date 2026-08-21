@@ -14,7 +14,6 @@ namespace Cotton.Mobile.Services
         private CottonSyncProgressSnapshot? _progress;
         private string? _lastSyncStatusText;
         private string? _failureDetails;
-        private bool _isDeleteMode;
 
         public CottonSyncRootListItem(
             CottonSyncRootSnapshot root,
@@ -152,37 +151,15 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncRootActionRequest DeleteAction { get; }
 
-        public bool IsDeleteMode
-        {
-            get => _isDeleteMode;
-            private set
-            {
-                if (SetProperty(ref _isDeleteMode, value))
-                {
-                    OnPropertyChanged(nameof(ContextAction));
-                    OnPropertyChanged(nameof(ContextActionText));
-                }
-            }
-        }
+        public CottonSyncRootActionRequest PauseResumeAction => IsPaused
+            ? ResumeAction
+            : PauseAction;
 
-        public CottonSyncRootActionRequest ContextAction => IsDeleteMode
-            ? DeleteAction
-            : IsPaused
-                ? ResumeAction
-                : PauseAction;
-
-        public string ContextActionText => IsDeleteMode
-            ? DeleteSyncActionText
-            : IsPaused
-                ? ResumeSyncActionText
-                : PauseSyncActionText;
+        public string PauseResumeActionText => IsPaused
+            ? ResumeSyncActionText
+            : PauseSyncActionText;
 
         public bool IsDividerVisible { get; }
-
-        public void SetDeleteMode(bool isDeleteMode)
-        {
-            IsDeleteMode = isDeleteMode;
-        }
 
         public void ApplyProgress(CottonSyncProgressSnapshot progress)
         {

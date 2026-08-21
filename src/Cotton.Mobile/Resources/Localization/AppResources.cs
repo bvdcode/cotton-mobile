@@ -33,14 +33,12 @@ namespace Cotton.Mobile.Resources.Localization
         public static string AddSyncFolderDescription => GetString(nameof(AddSyncFolderDescription));
         public static string RunAllSyncFoldersDescription => GetString(nameof(RunAllSyncFoldersDescription));
         public static string RefreshSyncFoldersDescription => GetString(nameof(RefreshSyncFoldersDescription));
-        public static string DeleteSyncHint => GetString(nameof(DeleteSyncHint));
         public static string SyncTitle => GetString(nameof(SyncTitle));
         public static string NoSyncFoldersTitle => GetString(nameof(NoSyncFoldersTitle));
         public static string NoSyncFoldersBody => GetString(nameof(NoSyncFoldersBody));
         public static string ConnectText => GetString(nameof(ConnectText));
         public static string ChangeServerText => GetString(nameof(ChangeServerText));
         public static string CottonCloudAddressHint => GetString(nameof(CottonCloudAddressHint));
-        public static string OpenSyncDescription => GetString(nameof(OpenSyncDescription));
         public static string OpenProfileDescription => GetString(nameof(OpenProfileDescription));
         public static string PrimaryActionDescription => GetString(nameof(PrimaryActionDescription));
         public static string SecondaryActionDescription => GetString(nameof(SecondaryActionDescription));

@@ -48,6 +48,8 @@ verify_sync_dashboard() {
     "Seeded root does not expose its local-access status."
   cotton_require_xml_text "$sync_dashboard_xml" "Pause" \
     "Seeded root does not expose pause."
+  cotton_require_xml_text "$sync_dashboard_xml" "Delete sync" \
+    "Seeded root does not expose delete."
 
   if ! cotton_xml_has_text "$sync_dashboard_xml" "Archive → Pictures / Archive"; then
     capture_scrolled_sync_dashboard "$scrolled_prefix"
@@ -80,18 +82,11 @@ verify_pause_resume_actions() {
 }
 
 verify_delete_action() {
-  local delete_mode_xml="$evidence_dir/50-sync-dashboard-delete-mode.xml"
-  local confirmation_xml="$evidence_dir/51-sync-dashboard-delete-confirmation.xml"
+  local confirmation_xml="$evidence_dir/50-sync-dashboard-delete-confirmation.xml"
 
-  cotton_long_press_from_xml "$sync_dashboard_xml" "2026 → Pictures / 2026"
+  cotton_tap_clickable_from_xml "$sync_dashboard_xml" "Delete sync"
   sleep 1
-  cotton_capture_screen "50-sync-dashboard-delete-mode"
-  cotton_require_xml_text "$delete_mode_xml" "Delete sync" \
-    "Long press did not expose the delete action."
-
-  cotton_tap_clickable_from_xml "$delete_mode_xml" "Delete sync"
-  sleep 1
-  cotton_capture_screen "51-sync-dashboard-delete-confirmation"
+  cotton_capture_screen "50-sync-dashboard-delete-confirmation"
   cotton_require_xml_text "$confirmation_xml" "Delete sync for 2026?" \
     "Delete action did not ask for confirmation."
   cotton_require_xml_text "$confirmation_xml" \

@@ -26,7 +26,7 @@ Runs an Android Sync settings smoke:
   1. Backs up current app-private sync root metadata for the selected instance.
   2. Seeds one reconnect-required upload root and one paused upload root.
   3. Opens the current Sync dashboard and verifies its toolbar and root cards.
-  4. Verifies pause, resume, long-press delete, and delete confirmation.
+  4. Verifies pause, resume, delete, and delete confirmation.
   5. Taps Refresh and verifies the seeded roots reload from app-private metadata.
   6. Restores the previous sync root metadata unless --leave-seed is used.
 

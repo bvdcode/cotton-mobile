@@ -4,7 +4,6 @@
              xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.SyncDashboardView"
              x:Name="SyncViewRoot"
@@ -94,20 +93,16 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
-                        <Grid x:Name="SyncRootRow"
-                              RowDefinitions="Auto,Auto"
-                              SemanticProperties.Hint="{x:Static localization:AppResources.DeleteSyncHint}">
-                            <Grid.Behaviors>
-                                <toolkit:TouchBehavior
-                                    BindingContext="{Binding Source={x:Reference SyncViewRoot}, Path=BindingContext, x:DataType=ContentView}"
-                                    LongPressCommand="{Binding ToggleRootDeleteModeCommand, x:DataType=viewModels:SyncSettingsViewModel}"
-                                    LongPressCommandParameter="{Binding Source={x:Reference SyncRootRow}, Path=BindingContext, x:DataType=Grid}"
-                                    ShouldMakeChildrenInputTransparent="False" />
-                            </Grid.Behaviors>
+                        <Grid RowDefinitions="Auto,Auto">
                             <VerticalStackLayout Padding="4,10"
                                                  Spacing="8">
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      ColumnSpacing="12">
+                                <Grid ColumnSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="{StaticResource AppTouchTargetSize}" />
+                                        <ColumnDefinition Width="{StaticResource AppTouchTargetSize}" />
+                                    </Grid.ColumnDefinitions>
                                     <Border Style="{StaticResource AppIconFrame}">
                                         <Image Style="{StaticResource AppIcon}">
                                             <Image.Source>
@@ -160,8 +155,10 @@
 
                                     <Button Grid.Column="2"
                                             Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
-                                            CommandParameter="{Binding ContextAction}"
-                                            SemanticProperties.Description="{Binding ContextActionText}"
+                                            CommandParameter="{Binding PauseResumeAction}"
+                                            SemanticProperties.Description="{Binding PauseResumeActionText}"
+                                            WidthRequest="{StaticResource AppTouchTargetSize}"
+                                            Padding="0"
                                             StyleClass="TextButton, TouchTarget">
                                         <Button.ImageSource>
                                             <FontImageSource FontFamily="MaterialOutlined"
@@ -170,18 +167,26 @@
                                         </Button.ImageSource>
                                         <Button.Triggers>
                                             <DataTrigger TargetType="Button"
-                                                         Binding="{Binding ContextAction.Action}"
+                                                         Binding="{Binding PauseResumeAction.Action}"
                                                          Value="{x:Static services:CottonSyncRootAction.Resume}">
                                                 <Setter Property="ImageSource"
                                                         Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Play_arrow}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
                                             </DataTrigger>
-                                            <DataTrigger TargetType="Button"
-                                                         Binding="{Binding ContextAction.Action}"
-                                                         Value="{x:Static services:CottonSyncRootAction.Delete}">
-                                                <Setter Property="ImageSource"
-                                                        Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Delete}, Color={AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}}" />
-                                            </DataTrigger>
                                         </Button.Triggers>
+                                    </Button>
+
+                                    <Button Grid.Column="3"
+                                            Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                            CommandParameter="{Binding DeleteAction}"
+                                            SemanticProperties.Description="{Binding DeleteSyncActionText}"
+                                            WidthRequest="{StaticResource AppTouchTargetSize}"
+                                            Padding="0"
+                                            StyleClass="TextButton, TouchTarget">
+                                        <Button.ImageSource>
+                                            <FontImageSource FontFamily="MaterialOutlined"
+                                                             Glyph="{x:Static symbols:MaterialOutlined.Delete}"
+                                                             Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                                        </Button.ImageSource>
                                     </Button>
                                 </Grid>
 

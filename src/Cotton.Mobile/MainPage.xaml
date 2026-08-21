@@ -127,7 +127,7 @@
                 <Button Text="{x:Static localization:AppResources.SyncTitle}"
                         Command="{Binding ShowSyncCommand}"
                         ContentLayout="Top,4"
-                        SemanticProperties.Description="{x:Static localization:AppResources.OpenSyncDescription}"
+                        SemanticProperties.Description="{x:Static localization:AppResources.RunAllSyncFoldersDescription}"
                         StyleClass="TextButton, NavigationBarItem">
                     <Button.ImageSource>
                         <FontImageSource FontFamily="MaterialOutlined"

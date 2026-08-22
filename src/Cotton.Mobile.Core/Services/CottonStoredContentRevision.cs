@@ -10,5 +10,7 @@ namespace Cotton.Mobile.Services
         public long Generation { get; set; }
 
         public string? ContentHash { get; set; }
+
+        public long? SizeBytes { get; set; }
     }
 }

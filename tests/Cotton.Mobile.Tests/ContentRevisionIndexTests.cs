@@ -28,6 +28,63 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void MatchingGenerationAndSizeReturnsCachedHash()
+        {
+            CottonContentRevisionIndexSnapshot index = new(
+                "version-1",
+                [new CottonContentRevisionSnapshot(
+                    "document-1",
+                    generation: 12,
+                    TestContentHashes.First,
+                    sizeBytes: 42)]);
+
+            bool found = index.TryGetContentHash(
+                "document-1",
+                generation: 12,
+                sizeBytes: 42,
+                out string? contentHash);
+
+            Assert.True(found);
+            Assert.Equal(TestContentHashes.First, contentHash);
+        }
+
+        [Fact]
+        public void ChangedSizeDoesNotReturnCachedHash()
+        {
+            CottonContentRevisionIndexSnapshot index = new(
+                "version-1",
+                [new CottonContentRevisionSnapshot(
+                    "document-1",
+                    generation: 12,
+                    TestContentHashes.First,
+                    sizeBytes: 42)]);
+
+            bool found = index.TryGetContentHash(
+                "document-1",
+                generation: 12,
+                sizeBytes: 43,
+                out string? contentHash);
+
+            Assert.False(found);
+            Assert.Null(contentHash);
+        }
+
+        [Fact]
+        public void EntryWithoutSizeDoesNotSatisfySizeBoundLookup()
+        {
+            CottonContentRevisionIndexSnapshot index = CreateIndex(generation: 12);
+
+            bool found = index.TryGetContentHash(
+                "content://media/1",
+                generation: 12,
+                sizeBytes: 42,
+                out string? contentHash);
+
+            Assert.False(found);
+            Assert.Null(contentHash);
+        }
+
+        [Fact]
         public void EquivalentIndexesIgnoreInputOrder()
         {
             CottonContentRevisionSnapshot first = new("content://media/1", 12, TestContentHashes.First);

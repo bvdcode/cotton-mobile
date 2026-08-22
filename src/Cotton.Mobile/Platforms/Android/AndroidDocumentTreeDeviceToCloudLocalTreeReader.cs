@@ -11,7 +11,9 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Platforms.Android
 {
-    public class AndroidDocumentTreeDeviceToCloudLocalTreeReader(TimeProvider timeProvider) :
+    public partial class AndroidDocumentTreeDeviceToCloudLocalTreeReader(
+        TimeProvider timeProvider,
+        ICottonContentRevisionStore revisionStore) :
         ICottonDeviceToCloudLocalTreeReader
     {
         private const int DocumentIdColumnIndex = 0;
@@ -22,6 +24,8 @@ namespace Cotton.Mobile.Platforms.Android
 
         private readonly TimeProvider _timeProvider =
             timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+        private readonly ICottonContentRevisionStore _revisionStore =
+            revisionStore ?? throw new ArgumentNullException(nameof(revisionStore));
 
         private static readonly string[] ChildProjection =
         [
@@ -39,14 +43,34 @@ namespace Cotton.Mobile.Platforms.Android
         {
             EnsureSupportedRoot(instanceUri, root);
 
-            return await Task.Run(
-                    () => ReadTree(root, cancellationToken),
+            CottonContentRevisionIndexSnapshot? storedIndex = await _revisionStore
+                .LoadAsync(instanceUri, root, cancellationToken)
+                .ConfigureAwait(false);
+            CottonContentRevisionIndexSnapshot? previousIndex = string.Equals(
+                storedIndex?.SourceVersion,
+                RevisionSourceVersion,
+                StringComparison.Ordinal)
+                    ? storedIndex
+                    : null;
+            (CottonDeviceToCloudLocalContentSnapshot content, CottonContentRevisionIndexSnapshot revisionIndex) =
+                await Task.Run(
+                    () => ReadTree(root, previousIndex, cancellationToken),
                     cancellationToken)
                 .ConfigureAwait(false);
+            if (!revisionIndex.HasSameContentAs(storedIndex))
+            {
+                await _revisionStore
+                    .SaveAsync(instanceUri, root, revisionIndex, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            return content;
         }
 
-        private CottonDeviceToCloudLocalContentSnapshot ReadTree(
+        private (CottonDeviceToCloudLocalContentSnapshot Content, CottonContentRevisionIndexSnapshot RevisionIndex)
+            ReadTree(
             CottonSyncRootSnapshot root,
+            CottonContentRevisionIndexSnapshot? previousIndex,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -55,6 +79,7 @@ namespace Cotton.Mobile.Platforms.Android
             AndroidUri rootUri = GetRootDocumentUri(treeUri);
             List<CottonDeviceToCloudLocalItemSnapshot> items = [];
             List<CottonDeviceToCloudLocalProblemSnapshot> problems = [];
+            List<CottonContentRevisionSnapshot> revisions = [];
             CottonSyncTraversalGuard<string> traversalGuard = new();
             DateTime scanStartedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
             string rootDocumentId = DocumentsContract.GetDocumentId(rootUri)
@@ -68,12 +93,21 @@ namespace Cotton.Mobile.Platforms.Android
                 parentPath: string.Empty,
                 items,
                 problems,
+                previousIndex,
+                revisions,
                 scanStartedAtUtc,
                 traversalGuard,
                 depth: 0,
                 cancellationToken: cancellationToken);
 
-            return new CottonDeviceToCloudLocalContentSnapshot(root.LocalRoot.DisplayName, items, problems);
+            CottonDeviceToCloudLocalContentSnapshot content = new(
+                root.LocalRoot.DisplayName,
+                items,
+                problems);
+            CottonContentRevisionIndexSnapshot revisionIndex = new(
+                RevisionSourceVersion,
+                revisions);
+            return (content, revisionIndex);
         }
 
         private static void ReadChildren(
@@ -83,6 +117,8 @@ namespace Cotton.Mobile.Platforms.Android
             string parentPath,
             List<CottonDeviceToCloudLocalItemSnapshot> items,
             List<CottonDeviceToCloudLocalProblemSnapshot> problems,
+            CottonContentRevisionIndexSnapshot? previousIndex,
+            List<CottonContentRevisionSnapshot> revisions,
             DateTime scanStartedAtUtc,
             CottonSyncTraversalGuard<string> traversalGuard,
             int depth,
@@ -103,7 +139,10 @@ namespace Cotton.Mobile.Platforms.Android
                 }
 
                 traversalGuard.RecordItem();
-                DateTime updatedAtUtc = ReadLastModifiedUtc(cursor, scanStartedAtUtc);
+                long? lastModifiedMilliseconds = ReadLastModifiedMilliseconds(cursor);
+                DateTime updatedAtUtc = lastModifiedMilliseconds.HasValue
+                    ? DateTimeOffset.FromUnixTimeMilliseconds(lastModifiedMilliseconds.Value).UtcDateTime
+                    : scanStartedAtUtc;
                 string rawRelativePath = CreateRawRelativePath(parentPath, child.DisplayName);
                 if (!TryCreateRelativePath(parentPath, child.DisplayName, out string? relativePath))
                 {
@@ -130,6 +169,8 @@ namespace Cotton.Mobile.Platforms.Android
                         relativePath!,
                         items,
                         problems,
+                        previousIndex,
+                        revisions,
                         scanStartedAtUtc,
                         traversalGuard,
                         depth + 1,
@@ -137,12 +178,20 @@ namespace Cotton.Mobile.Platforms.Android
                     continue;
                 }
 
-                string contentHash = ComputeContentHash(resolver, child.Uri, cancellationToken);
+                long? sizeBytes = ReadSizeBytes(cursor);
+                string contentHash = ResolveContentHash(
+                    resolver,
+                    child,
+                    lastModifiedMilliseconds,
+                    sizeBytes,
+                    previousIndex,
+                    revisions,
+                    cancellationToken);
                 items.Add(CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                     child.DisplayName,
                     relativePath!,
                     updatedAtUtc,
-                    ReadSizeBytes(cursor),
+                    sizeBytes,
                     child.MimeType,
                     child.DocumentId,
                     contentHash));
@@ -198,89 +247,6 @@ namespace Cotton.Mobile.Platforms.Android
             AndroidUri childUri = DocumentsContract.BuildDocumentUriUsingTree(treeUri, documentId)
                 ?? throw new IOException("Could not build document-tree child URI.");
             return new AndroidDocumentTreeChild(childUri, documentId, displayName, mimeType);
-        }
-
-        private static DateTime ReadLastModifiedUtc(ICursor cursor, DateTime scanStartedAtUtc)
-        {
-            if (cursor.IsNull(LastModifiedColumnIndex))
-            {
-                return scanStartedAtUtc;
-            }
-
-            long milliseconds = cursor.GetLong(LastModifiedColumnIndex);
-            return milliseconds <= 0
-                ? scanStartedAtUtc
-                : DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).UtcDateTime;
-        }
-
-        private static long? ReadSizeBytes(ICursor cursor)
-        {
-            if (cursor.IsNull(SizeColumnIndex))
-            {
-                return null;
-            }
-
-            long sizeBytes = cursor.GetLong(SizeColumnIndex);
-            return sizeBytes < 0 ? null : sizeBytes;
-        }
-
-        private static string ComputeContentHash(
-            ContentResolver resolver,
-            AndroidUri documentUri,
-            CancellationToken cancellationToken)
-        {
-            using Stream content = resolver.OpenInputStream(documentUri)
-                ?? throw new IOException("Could not open document-tree file content.");
-            return CottonContentHash.ComputeSha256(content, cancellationToken);
-        }
-
-        private static AndroidUri ParseTreeUri(CottonSyncRootSnapshot root)
-        {
-            AndroidUri? uri = AndroidUri.Parse(root.LocalRoot.RootKey);
-            return uri ?? throw new InvalidOperationException("Document-tree sync root URI is invalid.");
-        }
-
-        private static AndroidUri GetRootDocumentUri(AndroidUri treeUri)
-        {
-            string rootDocumentId = DocumentsContract.GetTreeDocumentId(treeUri)
-                ?? throw new InvalidOperationException("Document-tree root id is unavailable.");
-            return DocumentsContract.BuildDocumentUriUsingTree(treeUri, rootDocumentId)
-                ?? throw new InvalidOperationException("Could not build document-tree root URI.");
-        }
-
-        private static ContentResolver GetContentResolver()
-        {
-            return global::Android.App.Application.Context.ContentResolver
-                ?? throw new InvalidOperationException("Android content resolver is unavailable.");
-        }
-
-        private static void EnsureSupportedRoot(Uri instanceUri, CottonSyncRootSnapshot root)
-        {
-            CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
-            ArgumentNullException.ThrowIfNull(root);
-
-            if (!string.Equals(
-                CottonMobileStoragePaths.CreateInstanceStorageKey(instanceUri),
-                CottonMobileStoragePaths.CreateInstanceStorageKey(root.InstanceUri),
-                StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException("Device-to-cloud sync instance does not match the sync root.");
-            }
-
-            if (!root.CanRunSync)
-            {
-                throw new InvalidOperationException("Device-to-cloud sync root is not ready.");
-            }
-
-            if (!root.LocalRoot.RequiresPersistedUserGrant)
-            {
-                throw new InvalidOperationException("Device-to-cloud local tree reading only supports user-selected folders.");
-            }
-
-            if (root.Direction != CottonSyncDirection.DeviceToCloud)
-            {
-                throw new InvalidOperationException("Device-to-cloud local tree reading requires device-to-cloud sync direction.");
-            }
         }
     }
 }

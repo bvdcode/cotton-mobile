@@ -52,7 +52,8 @@ namespace Cotton.Mobile.Services
                 CottonContentRevisionSnapshot otherRevision = other.Revisions[index];
                 if (!string.Equals(revision.LocalSourceId, otherRevision.LocalSourceId, StringComparison.Ordinal)
                     || revision.Generation != otherRevision.Generation
-                    || !string.Equals(revision.ContentHash, otherRevision.ContentHash, StringComparison.Ordinal))
+                    || !string.Equals(revision.ContentHash, otherRevision.ContentHash, StringComparison.Ordinal)
+                    || revision.SizeBytes != otherRevision.SizeBytes)
                 {
                     return false;
                 }
@@ -74,6 +75,25 @@ namespace Cotton.Mobile.Services
 
             if (_revisionsBySourceId.TryGetValue(localSourceId, out CottonContentRevisionSnapshot? revision)
                 && revision.Generation == generation)
+            {
+                contentHash = revision.ContentHash;
+                return true;
+            }
+
+            contentHash = null;
+            return false;
+        }
+
+        public bool TryGetContentHash(
+            string localSourceId,
+            long generation,
+            long sizeBytes,
+            [NotNullWhen(true)] out string? contentHash)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(sizeBytes);
+            if (_revisionsBySourceId.TryGetValue(localSourceId, out CottonContentRevisionSnapshot? revision)
+                && revision.Generation == generation
+                && revision.SizeBytes == sizeBytes)
             {
                 contentHash = revision.ContentHash;
                 return true;

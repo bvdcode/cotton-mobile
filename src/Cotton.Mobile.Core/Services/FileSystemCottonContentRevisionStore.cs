@@ -115,7 +115,8 @@ namespace Cotton.Mobile.Services
             return new CottonContentRevisionSnapshot(
                 stored.LocalSourceId ?? string.Empty,
                 stored.Generation,
-                stored.ContentHash ?? string.Empty);
+                stored.ContentHash ?? string.Empty,
+                stored.SizeBytes);
         }
 
         private static CottonStoredContentRevision CreateStoredRevision(CottonContentRevisionSnapshot revision)
@@ -125,6 +126,7 @@ namespace Cotton.Mobile.Services
                 LocalSourceId = revision.LocalSourceId,
                 Generation = revision.Generation,
                 ContentHash = revision.ContentHash,
+                SizeBytes = revision.SizeBytes,
             };
         }
 

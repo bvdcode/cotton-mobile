@@ -69,7 +69,11 @@ namespace Cotton.Mobile.Tests
         {
             return new CottonContentRevisionIndexSnapshot(
                 "version-1",
-                [new CottonContentRevisionSnapshot("content://media/1", 12, TestContentHashes.First)]);
+                [new CottonContentRevisionSnapshot(
+                    "content://media/1",
+                    12,
+                    TestContentHashes.First,
+                    sizeBytes: 42)]);
         }
     }
 }

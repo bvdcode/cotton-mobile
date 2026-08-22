@@ -40,7 +40,7 @@ namespace Cotton.Mobile.Services
                     logLevel,
                     category,
                     eventId,
-                    formatter(state, exception),
+                    CreateDiagnosticMessage(formatter(state, exception), exception),
                     exception?.GetType());
             }
             catch (Exception writeException) when (writeException is IOException
@@ -51,6 +51,13 @@ namespace Cotton.Mobile.Services
                     "Cotton diagnostic journal write failed with {0}.",
                     writeException.GetType().FullName);
             }
+        }
+
+        private static string CreateDiagnosticMessage(string message, Exception? exception)
+        {
+            return exception is null
+                ? message
+                : $"{message}{Environment.NewLine}{exception}";
         }
     }
 }

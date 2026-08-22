@@ -21,11 +21,13 @@ namespace Cotton.Mobile.Tests
             ILogger allowed = provider.CreateLogger("Cotton.Mobile.Services.CottonSessionService");
             ILogger excluded = provider.CreateLogger("Cotton.Mobile.Services.UnrelatedService");
 
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                ThrowDiagnosticException);
             allowed.Log(
                 LogLevel.Warning,
                 new EventId(1),
                 "Safe diagnostic message 404.",
-                new InvalidOperationException("private exception detail"),
+                exception,
                 static (message, _) => message);
             excluded.Log(
                 LogLevel.Error,
@@ -37,7 +39,8 @@ namespace Cotton.Mobile.Tests
             string record = Assert.Single(journal.ReadAll());
             Assert.Contains("Safe diagnostic message 404.", record, StringComparison.Ordinal);
             Assert.Contains("System.InvalidOperationException", record, StringComparison.Ordinal);
-            Assert.DoesNotContain("private exception detail", record, StringComparison.Ordinal);
+            Assert.Contains("private exception detail", record, StringComparison.Ordinal);
+            Assert.Contains(nameof(ThrowDiagnosticException), record, StringComparison.Ordinal);
             Assert.DoesNotContain("Excluded message", record, StringComparison.Ordinal);
         }
 
@@ -49,6 +52,11 @@ namespace Cotton.Mobile.Tests
             }
 
             GC.SuppressFinalize(this);
+        }
+
+        private static void ThrowDiagnosticException()
+        {
+            throw new InvalidOperationException("private exception detail");
         }
     }
 }

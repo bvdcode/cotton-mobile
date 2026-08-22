@@ -8,7 +8,7 @@ namespace Cotton.Mobile.Services
 {
     internal static class CottonDiagnosticRecordFormatter
     {
-        private const int MaximumMessageLength = 2048;
+        private const int MaximumMessageLength = 32 * 1024;
 
         public static string Format(
             DateTimeOffset timestamp,

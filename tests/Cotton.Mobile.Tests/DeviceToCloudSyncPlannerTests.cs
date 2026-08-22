@@ -266,7 +266,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void PlannerKeepsUntrackedLocalFileWhenRemoteContentMatches()
+        public void PlannerKeepsUntrackedLocalFileWhenRemoteFileExists()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
@@ -289,7 +289,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void PlannerBlocksUntrackedLocalFileWhenRemoteContentDiffers()
+        public void PlannerKeepsUntrackedLocalFileWhenRemoteContentDiffers()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
@@ -308,8 +308,33 @@ namespace Cotton.Mobile.Tests
                 []);
 
             CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemotePathConflict, item.Action);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.KeepExistingFile, item.Action);
             Assert.Equal(FirstFileId, item.CloudItemId);
+            Assert.True(item.IsNoOp);
+            Assert.False(item.RequiresUpload);
+            Assert.False(plan.HasBlockingItems);
+        }
+
+        [Fact]
+        public void PlannerBlocksUntrackedLocalFileWhenRemotePathIsFolder()
+        {
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+            CottonFileBrowserEntry remoteFolder = CottonFileBrowserEntryFactory.CreateFolder(
+                FirstFileId,
+                "alpha.txt",
+                SyncedAt);
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                new CottonDeviceToCloudRemoteItemSnapshot(remoteFolder, "alpha.txt"));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                local,
+                remote,
+                []);
+
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemotePathConflict, item.Action);
             Assert.True(item.IsBlocked);
             Assert.False(item.RequiresUpload);
         }

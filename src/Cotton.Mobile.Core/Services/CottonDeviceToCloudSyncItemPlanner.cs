@@ -82,23 +82,13 @@ namespace Cotton.Mobile.Services
                     localFile);
             }
 
-            return MatchesLocalContent(localFile, remoteItem.Entry)
+            return remoteItem.Entry.Type == CottonFileBrowserEntryType.File
                 ? CottonDeviceToCloudSyncPlanItemFactory.CreateLocal(
                     CottonDeviceToCloudSyncActionKind.KeepExistingFile,
                     localFile,
                     remoteItem.Entry.Id,
                     remoteItem.Entry.ETag)
                 : CottonDeviceToCloudSyncPlanItemFactory.CreateRemoteConflict(localFile, remoteItem);
-        }
-
-        private static bool MatchesLocalContent(
-            CottonDeviceToCloudLocalItemSnapshot localFile,
-            CottonFileBrowserEntry remoteFile)
-        {
-            return remoteFile.Type == CottonFileBrowserEntryType.File
-                && (!localFile.SizeBytes.HasValue || remoteFile.SizeBytes == localFile.SizeBytes)
-                && localFile.ContentHash is not null
-                && string.Equals(localFile.ContentHash, remoteFile.ContentHash, StringComparison.Ordinal);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreatePendingConfirmationItem(

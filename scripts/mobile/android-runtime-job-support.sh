@@ -22,7 +22,19 @@ wait_for_media_sync_job() {
 run_media_sync_job() {
   local output
 
-  output="$("$adb_bin" shell cmd jobscheduler run -f "$package_name" "$media_sync_job_id")"
+  if ! has_media_sync_job; then
+    return
+  fi
+
+  if ! output="$("$adb_bin" shell cmd jobscheduler run -f "$package_name" "$media_sync_job_id" 2>&1)"; then
+    if [[ "$output" == *"Could not find job"* ]]; then
+      return
+    fi
+
+    printf 'MediaStore sync job could not be started: %s\n' "$output" >&2
+    exit 1
+  fi
+
   if [[ "$output" != *"Running job"* ]]; then
     printf 'MediaStore sync job could not be started: %s\n' "$output" >&2
     exit 1

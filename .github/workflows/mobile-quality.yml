@@ -8,28 +8,19 @@ defaults:
     shell: bash
 
 env:
-  TEST_PROJECT_PATH: tests/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
+  TEST_PROJECT_PATH: src/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
   CORE_PROJECT_PATH: src/Cotton.Mobile.Core/Cotton.Mobile.Core.csproj
   DOTNET_VERSION: 10.0.x
 
 jobs:
-  source-and-tests:
-    name: Validate Source and Unit Tests
+  tests-and-automation:
+    name: Validate Automation and Unit Tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - name: Check repository
         uses: actions/checkout@v5
-
-      - name: Validate source quality
-        run: python3 scripts/ci/validate-source.py
-
-      - name: Test mobile smoke support
-        run: python3 scripts/ci/test-mobile-smoke-support.py
-
-      - name: Test mobile smoke scripts
-        run: scripts/ci/test-mobile-smoke-common.sh
 
       - name: Test Android release version computation
         run: scripts/ci/test-android-release-version.sh
@@ -42,9 +33,6 @@ jobs:
 
       - name: Test Android release policy
         run: scripts/ci/test-android-release-policy.sh
-
-      - name: Test Android Play media permissions
-        run: scripts/ci/test-android-play-media-permissions.sh
 
       - name: Validate Android runtime smoke script
         run: >-

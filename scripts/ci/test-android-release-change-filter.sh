@@ -104,15 +104,15 @@ output="$("$detect_script" "$shared_props_head" "$version_head")"
 assert_contains "$output" "Android release required: true"
 
 git tag v1.0.0 "$version_head"
-mkdir -p tests/Cotton.Mobile.Tests
-printf 'test only\n' > tests/Cotton.Mobile.Tests/Marker.txt
+mkdir -p src/Cotton.Mobile.Tests
+printf 'test only\n' > src/Cotton.Mobile.Tests/Marker.txt
 test_only_head="$(commit_all "test only")"
 output="$("$detect_script" "$version_head" "$test_only_head")"
 assert_contains "$output" "Android release required: false"
 
 printf '<Project><UnreleasedChange /></Project>\n' > src/Cotton.Mobile/Cotton.Mobile.csproj
 unreleased_app_head="$(commit_all "unreleased app")"
-printf 'test follow-up\n' > tests/Cotton.Mobile.Tests/Marker.txt
+printf 'test follow-up\n' > src/Cotton.Mobile.Tests/Marker.txt
 test_follow_up_head="$(commit_all "test follow-up")"
 output="$("$detect_script" "$unreleased_app_head" "$test_follow_up_head" v1.0.0)"
 assert_contains "$output" "Android release required: true"

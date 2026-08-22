@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/Cotton.Mobile/Cotton.Mobile.csproj" />
+  <Project Path="src/Cotton.Mobile.Core/Cotton.Mobile.Core.csproj" />
+  <Project Path="src/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj" />
+</Solution>

@@ -18,7 +18,7 @@ csharp_style_var_for_built_in_types = false:warning
 csharp_style_var_when_type_is_apparent = false:warning
 
 # EasyExtensions analyzers
-dotnet_code_quality.EEX0001.max_lines = 400
+dotnet_code_quality.EEX0001.max_lines = 300
 dotnet_diagnostic.EEX0001.severity = error
 dotnet_diagnostic.EEX0002.severity = error
 dotnet_diagnostic.EEX0003.severity = error

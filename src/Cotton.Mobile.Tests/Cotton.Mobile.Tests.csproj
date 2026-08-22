@@ -18,7 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Cotton.Mobile.Core\Cotton.Mobile.Core.csproj" />
+		<ProjectReference Include="..\Cotton.Mobile.Core\Cotton.Mobile.Core.csproj" />
 	</ItemGroup>
 
 </Project>

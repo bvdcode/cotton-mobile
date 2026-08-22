@@ -17,3 +17,20 @@ Cotton Mobile connects Android devices to a Cotton Cloud instance for file brows
 
 - Package ID: `dev.cottoncloud.app`
 - Target framework: `.NET MAUI / net10.0-android`
+
+## Repository Structure
+
+- `src/Cotton.Mobile` — Android application.
+- `src/Cotton.Mobile.Core` — platform-independent application logic.
+- `src/Cotton.Mobile.Tests` — unit and contract tests.
+- `scripts/ci` — tests for release automation.
+- `scripts/mobile` — Android build, runtime verification, and release commands.
+- `store/google-play` — Google Play listing metadata and graphics.
+
+## Development
+
+```shell
+dotnet restore Cotton.Mobile.slnx
+dotnet test src/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
+dotnet build src/Cotton.Mobile/Cotton.Mobile.csproj -f net10.0-android -c Debug
+```

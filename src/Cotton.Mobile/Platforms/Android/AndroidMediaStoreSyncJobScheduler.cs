@@ -5,6 +5,7 @@
 using Android.App.Job;
 using Android.Content;
 using Android.Provider;
+using System.Runtime.Versioning;
 using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Platforms.Android
@@ -28,6 +29,10 @@ namespace Cotton.Mobile.Platforms.Android
                 AndroidMediaStoreSyncJobConstants.TriggerMaximumDelayMilliseconds);
             AddTrigger(builder, GetImagesUri());
             AddTrigger(builder, GetVideosUri());
+            if (OperatingSystem.IsAndroidVersionAtLeast(29))
+            {
+                AddPrimaryVolumeTriggers(builder);
+            }
 
             using JobInfo job = builder.Build()
                 ?? throw new InvalidOperationException("Android MediaStore sync job is unavailable.");
@@ -50,6 +55,17 @@ namespace Cotton.Mobile.Platforms.Android
                 uri,
                 TriggerContentUriFlags.NotifyForDescendants);
             _ = builder.AddTriggerContentUri(trigger);
+        }
+
+        [SupportedOSPlatform("android29.0")]
+        private static void AddPrimaryVolumeTriggers(JobInfo.Builder builder)
+        {
+            AndroidUri imagesUri = MediaStore.Images.Media.GetContentUri(MediaStore.VolumeExternalPrimary)
+                ?? throw new InvalidOperationException("Android primary images URI is unavailable.");
+            AndroidUri videosUri = MediaStore.Video.Media.GetContentUri(MediaStore.VolumeExternalPrimary)
+                ?? throw new InvalidOperationException("Android primary videos URI is unavailable.");
+            AddTrigger(builder, imagesUri);
+            AddTrigger(builder, videosUri);
         }
 
         private static JobScheduler GetScheduler(Context context)

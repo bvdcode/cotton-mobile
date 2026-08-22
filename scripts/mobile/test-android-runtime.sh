@@ -140,6 +140,7 @@ wait_for_enabled_component "$workmanager_reschedule_receiver"
 "$adb_bin" shell am kill "$package_name"
 wait_for_jobs "after process death"
 wait_for_media_sync_job "after process death"
+wait_for_media_sync_connectivity
 create_media_fixture
 wait_for_media_sync_start
 

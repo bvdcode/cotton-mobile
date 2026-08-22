@@ -266,7 +266,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void PlannerKeepsUntrackedLocalFileWhenRemoteFileExists()
+        public void PlannerKeepsUntrackedLocalFileWhenRemoteContentMatches()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
@@ -289,7 +289,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void PlannerKeepsUntrackedLocalFileWhenRemoteContentDiffers()
+        public void PlannerBlocksUntrackedLocalFileWhenRemoteContentDiffers()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
@@ -308,11 +308,11 @@ namespace Cotton.Mobile.Tests
                 []);
 
             CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.KeepExistingFile, item.Action);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemotePathConflict, item.Action);
             Assert.Equal(FirstFileId, item.CloudItemId);
-            Assert.True(item.IsNoOp);
+            Assert.True(item.IsBlocked);
             Assert.False(item.RequiresUpload);
-            Assert.False(plan.HasBlockingItems);
+            Assert.True(plan.HasBlockingItems);
         }
 
         [Fact]

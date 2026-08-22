@@ -116,6 +116,7 @@
                                     <Grid Grid.Column="1"
                                           RowDefinitions="Auto,Auto"
                                           RowSpacing="3"
+                                          Margin="4,0,0,0"
                                           IsClippedToBounds="True"
                                           VerticalOptions="Center">
                                         <Label Text="{Binding DisplayPathText}"
@@ -125,7 +126,7 @@
                                                MaxLines="1" />
                                         <Grid Grid.Row="1"
                                               ColumnDefinitions="Auto,*"
-                                              ColumnSpacing="6"
+                                              ColumnSpacing="0"
                                               IsClippedToBounds="True">
                                             <Grid.GestureRecognizers>
                                                 <TapGestureRecognizer Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
@@ -143,6 +144,12 @@
                                                    MaxLines="1"
                                                    VerticalOptions="Center">
                                                 <Label.Triggers>
+                                                    <DataTrigger TargetType="Label"
+                                                                 Binding="{Binding IsRunning}"
+                                                                 Value="True">
+                                                        <Setter Property="Margin"
+                                                                Value="6,0,0,0" />
+                                                    </DataTrigger>
                                                     <DataTrigger TargetType="Label"
                                                                  Binding="{Binding CanUseStatusAction}"
                                                                  Value="True">

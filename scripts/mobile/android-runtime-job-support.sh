@@ -19,21 +19,14 @@ wait_for_media_sync_job() {
   exit 1
 }
 
-wait_for_media_sync_connectivity() {
-  local attempt
-  local job
-  for attempt in {1..120}; do
-    job="$(read_media_sync_job)"
-    if printf '%s\n' "$job" | grep -Eq 'Satisfied constraints:.*CONNECTIVITY'; then
-      return
-    fi
+run_media_sync_job() {
+  local output
 
-    sleep 1
-  done
-
-  printf 'MediaStore sync job did not receive validated network connectivity.\n' >&2
-  printf '%s\n' "$job" >&2
-  exit 1
+  output="$("$adb_bin" shell cmd jobscheduler run -f "$package_name" "$media_sync_job_id")"
+  if [[ "$output" != *"Running job"* ]]; then
+    printf 'MediaStore sync job could not be started: %s\n' "$output" >&2
+    exit 1
+  fi
 }
 
 wait_for_media_sync_start() {
@@ -48,7 +41,7 @@ wait_for_media_sync_start() {
     sleep 1
   done
 
-  printf 'MediaStore sync job did not start after media changed with the app closed.\n' >&2
+  printf 'MediaStore sync job did not start when requested.\n' >&2
   read_media_sync_job >&2
   "$adb_bin" logcat -d -s "$media_sync_log_tag:I" '*:S' >&2
   exit 1

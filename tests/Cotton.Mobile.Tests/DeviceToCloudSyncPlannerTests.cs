@@ -266,12 +266,40 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void PlannerBlocksNewLocalFileWhenRemotePathExists()
+        public void PlannerKeepsUntrackedLocalFileWhenRemoteContentMatches()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
                 CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                local,
+                remote,
+                []);
+
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.KeepExistingFile, item.Action);
+            Assert.Equal(FirstFileId, item.CloudItemId);
+            Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
+            Assert.True(item.IsNoOp);
+            Assert.False(item.RequiresUpload);
+            Assert.False(plan.HasBlockingItems);
+        }
+
+        [Fact]
+        public void PlannerBlocksUntrackedLocalFileWhenRemoteContentDiffers()
+        {
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(
+                    FirstFileId,
+                    "alpha.txt",
+                    "alpha.txt",
+                    "\"etag-1\"",
+                    contentHash: TestContentHashes.Second));
 
             CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(),

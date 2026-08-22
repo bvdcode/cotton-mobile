@@ -97,12 +97,12 @@ namespace Cotton.Mobile.Platforms.Android
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 AndroidDocumentTreeChild child = ReadChild(treeUri, cursor);
-                traversalGuard.RecordItem();
-                if (CottonSyncWorkingFileName.IsWorkingFile(child.DisplayName))
+                if (!child.IsDirectory && CottonSyncIgnoredFileName.IsIgnored(child.DisplayName))
                 {
                     continue;
                 }
 
+                traversalGuard.RecordItem();
                 DateTime updatedAtUtc = ReadLastModifiedUtc(cursor, scanStartedAtUtc);
                 string rawRelativePath = CreateRawRelativePath(parentPath, child.DisplayName);
                 if (!TryCreateRelativePath(parentPath, child.DisplayName, out string? relativePath))

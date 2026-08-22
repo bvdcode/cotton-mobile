@@ -50,6 +50,11 @@ namespace Cotton.Mobile.Platforms.Android
                 cancellationToken.ThrowIfCancellationRequested();
                 long mediaId = cursor.GetLong(IdColumnIndex);
                 string displayName = cursor.GetString(DisplayNameColumnIndex) ?? string.Empty;
+                if (CottonSyncIgnoredFileName.IsIgnored(displayName))
+                {
+                    continue;
+                }
+
                 string? scopedStorageRelativePath = OperatingSystem.IsAndroidVersionAtLeast(29)
                     ? cursor.GetString(RelativePathColumnIndex)
                     : null;

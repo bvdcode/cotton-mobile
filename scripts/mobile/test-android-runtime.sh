@@ -134,7 +134,6 @@ wait_for_device
 wait_for_boot
 "$adb_bin" install -r "$apk_path" >/dev/null
 "$adb_bin" shell pm clear "$package_name" >/dev/null
-launch_application
 schedule_background_work schedule "after scheduling"
 wait_for_enabled_component "$workmanager_reschedule_receiver"
 "$adb_bin" logcat -c

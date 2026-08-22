@@ -55,14 +55,6 @@ wait_for_disconnect() {
   exit 1
 }
 
-launch_application() {
-  "$adb_bin" shell monkey \
-    -p "$package_name" \
-    -c android.intent.category.LAUNCHER \
-    1 >/dev/null
-  "$adb_bin" shell input keyevent 3 >/dev/null
-}
-
 wait_for_jobs() {
   local phase="$1"
   local maximum_attempts="${2:-60}"

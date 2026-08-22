@@ -38,6 +38,7 @@ namespace Cotton.Mobile.Tests
                 new DeviceToCloudCoordinatorLocalFileOperator(),
                 _uploadReceiptStore,
                 _progressHub,
+                NullLogger<CottonUploadOnlySyncPlanExecutor>.Instance,
                 new FixedTimeProvider(SyncedAt));
             _coordinator = new CottonDeviceToCloudSyncCoordinator(
                 _rootStore,
@@ -47,7 +48,8 @@ namespace Cotton.Mobile.Tests
                 new CottonRecursiveRemoteContentLoader(_remoteFolderContentSource),
                 executor,
                 new CottonSyncRootExecutionLock(),
-                _progressHub);
+                _progressHub,
+                NullLogger<CottonDeviceToCloudSyncCoordinator>.Instance);
         }
 
         [Fact]

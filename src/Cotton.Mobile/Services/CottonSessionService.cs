@@ -60,9 +60,11 @@ namespace Cotton.Mobile.Services
 
         public async Task<CottonSessionResult> RestoreAsync(CancellationToken cancellationToken = default)
         {
+            CottonSessionDiagnosticLog.RestoreStarted(_logger);
             Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
             if (instanceUri is null)
             {
+                CottonSessionDiagnosticLog.SavedInstanceMissing(_logger);
                 await ClearLocalSessionAsync(cancellationToken).ConfigureAwait(false);
                 return CottonSessionResult.Unauthenticated();
             }
@@ -70,6 +72,7 @@ namespace Cotton.Mobile.Services
             TokenPairDto? tokens = await _tokenStore.GetAsync(cancellationToken).ConfigureAwait(false);
             if (tokens is null)
             {
+                CottonSessionDiagnosticLog.TokenPairMissing(_logger);
                 return await _appCodeAuthorization
                     .RestorePendingAsync(instanceUri, cancellationToken)
                     .ConfigureAwait(false);
@@ -78,11 +81,11 @@ namespace Cotton.Mobile.Services
             await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
             try
             {
-                TokenPairDto refreshedTokens = await client.Auth
-                    .RefreshAsync(tokens.RefreshToken, cancellationToken)
-                    .ConfigureAwait(false);
-                await _tokenStore.SaveAsync(refreshedTokens, cancellationToken).ConfigureAwait(false);
+                CottonSessionDiagnosticLog.RefreshStarted(_logger);
+                await client.Auth.RefreshAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                CottonSessionDiagnosticLog.RefreshCompleted(_logger);
                 UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
+                CottonSessionDiagnosticLog.ProfileValidated(_logger);
                 await _appCodeAuthorization
                     .ClearPendingBestEffortAsync("session restore")
                     .ConfigureAwait(false);
@@ -90,6 +93,7 @@ namespace Cotton.Mobile.Services
             }
             catch (CottonApiException exception) when (IsAuthorizationFailure(exception))
             {
+                CottonSessionDiagnosticLog.RestoreRejected(_logger, (int)exception.StatusCode.GetValueOrDefault());
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.SessionExpired, instanceUri);
             }
         }
@@ -189,7 +193,9 @@ namespace Cotton.Mobile.Services
 
         private static bool IsAuthorizationFailure(CottonApiException exception)
         {
-            return exception.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden;
+            return exception.StatusCode is HttpStatusCode.Unauthorized
+                or HttpStatusCode.Forbidden
+                or HttpStatusCode.NotFound;
         }
     }
 }

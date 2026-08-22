@@ -19,6 +19,7 @@ namespace Cotton.Mobile.Tests
                 LocalFileOperator,
                 ReceiptStore,
                 new CottonSyncProgressHub(),
+                NullLogger<CottonUploadOnlySyncPlanExecutor>.Instance,
                 new FixedTimeProvider(RecordedAt));
         }
 

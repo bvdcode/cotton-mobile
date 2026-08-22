@@ -3,13 +3,15 @@
 
 #if ANDROID
 using Cotton.Mobile.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidAutomaticSyncExecutor(
         ICottonSessionService sessionService,
         CottonAutomaticSyncDispatcher dispatcher,
-        ICottonAutomaticSyncBackgroundScheduler backgroundScheduler)
+        ICottonAutomaticSyncBackgroundScheduler backgroundScheduler,
+        ILogger<AndroidAutomaticSyncExecutor> logger)
     {
         private readonly ICottonSessionService _sessionService =
             sessionService ?? throw new ArgumentNullException(nameof(sessionService));
@@ -17,6 +19,8 @@ namespace Cotton.Mobile.Platforms.Android
             dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         private readonly ICottonAutomaticSyncBackgroundScheduler _backgroundScheduler =
             backgroundScheduler ?? throw new ArgumentNullException(nameof(backgroundScheduler));
+        private readonly ILogger<AndroidAutomaticSyncExecutor> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
 
         public async Task<AndroidAutomaticSyncExecutionResult> ExecuteAsync(
             CottonAutomaticSyncTrigger trigger,
@@ -33,11 +37,14 @@ namespace Cotton.Mobile.Platforms.Android
                 throw new ArgumentException("Retry sync root id cannot be empty.", nameof(retryRootId));
             }
 
+            AndroidAutomaticSyncDiagnosticLog.Started(_logger, trigger, retryRootId.HasValue);
+
             Uri? instanceUri = await _sessionService
                 .GetRememberedSessionInstanceAsync(cancellationToken)
                 .ConfigureAwait(false);
             if (instanceUri is null)
             {
+                AndroidAutomaticSyncDiagnosticLog.SessionMissing(_logger);
                 return AndroidAutomaticSyncExecutionResult.NoSession;
             }
 
@@ -48,6 +55,7 @@ namespace Cotton.Mobile.Platforms.Android
                 : await _dispatcher
                     .RunAsync(instanceUri, trigger, cancellationToken)
                     .ConfigureAwait(false);
+            AndroidAutomaticSyncDiagnosticLog.DispatchCompleted(_logger, result.FailedRootIds.Count);
             if (!result.HasFailures)
             {
                 return AndroidAutomaticSyncExecutionResult.Completed;
@@ -61,6 +69,7 @@ namespace Cotton.Mobile.Platforms.Android
             await _backgroundScheduler
                 .ScheduleRootRetriesAsync(result.FailedRootIds, cancellationToken)
                 .ConfigureAwait(false);
+            AndroidAutomaticSyncDiagnosticLog.RetriesScheduled(_logger, result.FailedRootIds.Count);
             return AndroidAutomaticSyncExecutionResult.Completed;
         }
     }

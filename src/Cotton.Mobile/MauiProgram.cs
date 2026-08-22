@@ -77,6 +77,11 @@ namespace Cotton.Mobile
 
         private static void RegisterApplicationServices(IServiceCollection services)
         {
+            services.AddSingleton<ICottonDiagnosticJournal>(serviceProvider =>
+                new FileSystemCottonDiagnosticJournal(
+                    CottonDiagnosticJournalPathProvider.CreateDirectoryPath(),
+                    serviceProvider.GetRequiredService<TimeProvider>()));
+            services.AddSingleton<ILoggerProvider, CottonDiagnosticLoggerProvider>();
             services.AddMediator(configuration =>
                 configuration.RegisterServicesFromAssemblyContaining<RunSyncRootRequest>());
             services.AddSingleton(
@@ -146,7 +151,8 @@ namespace Cotton.Mobile
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudLocalFileOperator>(),
                     serviceProvider.GetRequiredService<ICottonUploadReceiptStore>(),
-                    serviceProvider.GetRequiredService<CottonSyncProgressHub>()));
+                    serviceProvider.GetRequiredService<CottonSyncProgressHub>(),
+                    serviceProvider.GetRequiredService<ILogger<CottonUploadOnlySyncPlanExecutor>>()));
             services.AddSingleton<CottonSyncRootExecutionLock>();
             services.AddSingleton<ICottonDeviceToCloudSyncCoordinator, CottonDeviceToCloudSyncCoordinator>();
             services.AddSingleton<ICottonAutomaticSyncRunner, CottonAutomaticSyncRunner>();

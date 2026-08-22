@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Microsoft.Extensions.Logging;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonUploadOnlySyncPlanExecutor
@@ -9,22 +11,26 @@ namespace Cotton.Mobile.Services
         private readonly CottonUploadOnlyFileWorkflow _fileWorkflow;
         private readonly CottonSyncProgressHub _progressHub;
         private readonly TimeProvider _timeProvider;
+        private readonly ILogger<CottonUploadOnlySyncPlanExecutor> _logger;
 
         public CottonUploadOnlySyncPlanExecutor(
             ICottonDeviceToCloudSyncFileOperator fileOperator,
             ICottonDeviceToCloudLocalFileOperator localFileOperator,
             ICottonUploadReceiptStore uploadReceiptStore,
             CottonSyncProgressHub progressHub,
+            ILogger<CottonUploadOnlySyncPlanExecutor> logger,
             TimeProvider? timeProvider = null)
         {
             ArgumentNullException.ThrowIfNull(fileOperator);
             ArgumentNullException.ThrowIfNull(localFileOperator);
             ArgumentNullException.ThrowIfNull(uploadReceiptStore);
             ArgumentNullException.ThrowIfNull(progressHub);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _fileOperator = fileOperator;
             _progressHub = progressHub;
             _timeProvider = timeProvider ?? TimeProvider.System;
+            _logger = logger;
             _fileWorkflow = new CottonUploadOnlyFileWorkflow(
                 fileOperator,
                 localFileOperator,
@@ -49,6 +55,7 @@ namespace Cotton.Mobile.Services
             int blockedCount = 0;
             int totalChangeCount = plan.ExecutableChangeCount;
             int completedChangeCount = 0;
+            int uploadNumber = 0;
             ReportProgress(root.Id, completedChangeCount, totalChangeCount);
 
             foreach (CottonDeviceToCloudSyncPlanItem item in plan.Items)
@@ -57,12 +64,20 @@ namespace Cotton.Mobile.Services
                 switch (item.Action)
                 {
                     case CottonDeviceToCloudSyncActionKind.UploadNewFile:
+                        uploadNumber++;
+                        long uploadSizeBytes = item.SizeBytes
+                            ?? throw new InvalidDataException("Upload plan item size is required.");
+                        CottonSyncDiagnosticLog.UploadStarted(
+                            _logger,
+                            root.Id,
+                            uploadNumber,
+                            uploadSizeBytes);
                         CottonSyncUploadProgressReporter uploadProgress = new(
                             root.Id,
                             item.DisplayName,
                             completedChangeCount,
                             totalChangeCount,
-                            item.SizeBytes,
+                            uploadSizeBytes,
                             _progressHub,
                             _timeProvider);
                         uploadProgress.Report(0);
@@ -74,6 +89,7 @@ namespace Cotton.Mobile.Services
                                 folderIndex,
                                 uploadProgress,
                                 cancellationToken).ConfigureAwait(false);
+                        CottonSyncDiagnosticLog.UploadCompleted(_logger, root.Id, uploadNumber);
                         uploadedCount++;
                         CountDeleteStatus(
                             uploadedDeleteStatus,

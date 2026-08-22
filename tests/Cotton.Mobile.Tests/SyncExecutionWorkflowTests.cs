@@ -9,7 +9,9 @@ namespace Cotton.Mobile.Tests
         public async Task RunRootUsesDeviceToCloudCoordinator()
         {
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
-            SyncExecutionWorkflow workflow = new(coordinator);
+            SyncExecutionWorkflow workflow = new(
+                coordinator,
+                NullLogger<SyncExecutionWorkflow>.Instance);
 
             string status = await workflow.RunRootAsync(
                 SyncTestRootFactory.InstanceUri,
@@ -23,7 +25,9 @@ namespace Cotton.Mobile.Tests
         public async Task RunAllRunsEveryConfiguredRoot()
         {
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
-            SyncExecutionWorkflow workflow = new(coordinator);
+            SyncExecutionWorkflow workflow = new(
+                coordinator,
+                NullLogger<SyncExecutionWorkflow>.Instance);
             IReadOnlyList<CottonSyncRootSnapshot> roots =
             [
                 SyncTestRootFactory.CreateDocumentTreeRoot(),

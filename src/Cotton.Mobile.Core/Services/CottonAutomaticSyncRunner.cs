@@ -34,6 +34,8 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(trigger), "Automatic sync trigger is not supported.");
             }
 
+            CottonSyncDiagnosticLog.AutomaticRequested(_logger, trigger);
+
             return RunSelectedAsync(
                 instanceUri,
                 root => ShouldRun(root, trigger),
@@ -53,6 +55,8 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Automatic sync root ids cannot be empty.", nameof(rootIds));
             }
 
+            CottonSyncDiagnosticLog.AutomaticRootsRequested(_logger, selectedRootIds.Count);
+
             return RunSelectedAsync(
                 instanceUri,
                 root => selectedRootIds.Contains(root.Id),
@@ -68,10 +72,12 @@ namespace Cotton.Mobile.Services
                 .LoadAsync(instanceUri, cancellationToken)
                 .ConfigureAwait(false);
             IReadOnlySet<Guid> activeRootIds = roots.Select(root => root.Id).ToHashSet();
+            CottonSyncRootSnapshot[] selectedRoots = [.. roots.Where(shouldRun)];
+            CottonSyncDiagnosticLog.AutomaticRootsSelected(_logger, selectedRoots.Length, roots.Count);
             List<Guid> succeededRootIds = [];
             List<Guid> failedRootIds = [];
             List<CottonAutomaticSyncRootStatusSnapshot> updatedStatuses = [];
-            foreach (CottonSyncRootSnapshot root in roots.Where(shouldRun))
+            foreach (CottonSyncRootSnapshot root in selectedRoots)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 try
@@ -100,6 +106,10 @@ namespace Cotton.Mobile.Services
             await _statusStore
                 .UpdateAsync(instanceUri, activeRootIds, updatedStatuses, cancellationToken)
                 .ConfigureAwait(false);
+            CottonSyncDiagnosticLog.AutomaticCompleted(
+                _logger,
+                succeededRootIds.Count,
+                failedRootIds.Count);
             return new CottonAutomaticSyncRunResult(succeededRootIds, failedRootIds);
         }
 

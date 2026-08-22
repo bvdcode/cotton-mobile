@@ -40,23 +40,26 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Failed to read Cotton mobile tokens; clearing local token store.", exception);
-                ClearBestEffort("token read failure");
-                return null;
+                CottonSessionDiagnosticLog.TokenStoreReadFailed(_logger, exception);
+                throw;
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (string.IsNullOrWhiteSpace(accessToken) && string.IsNullOrWhiteSpace(refreshToken))
             {
+                CottonSessionDiagnosticLog.TokenStoreEmpty(_logger);
                 return null;
             }
 
             if (string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(refreshToken))
             {
                 ClearBestEffort("partial token pair");
+                CottonSessionDiagnosticLog.TokenStoreIncomplete(_logger);
                 return null;
             }
+
+            CottonSessionDiagnosticLog.TokenStoreLoaded(_logger);
 
             return new TokenPairDto
             {
@@ -83,6 +86,7 @@ namespace Cotton.Mobile.Services
             {
                 await _secureStorage.SetAsync(AccessTokenKey, tokens.AccessToken).ConfigureAwait(false);
                 await _secureStorage.SetAsync(RefreshTokenKey, tokens.RefreshToken).ConfigureAwait(false);
+                CottonSessionDiagnosticLog.TokenStoreSaved(_logger);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -110,6 +114,8 @@ namespace Cotton.Mobile.Services
             {
                 throw new AggregateException("Failed to clear Cotton mobile tokens.", failures);
             }
+
+            CottonSessionDiagnosticLog.TokenStoreCleared(_logger);
 
             return Task.CompletedTask;
         }

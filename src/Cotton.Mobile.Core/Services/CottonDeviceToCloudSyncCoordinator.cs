@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Microsoft.Extensions.Logging;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonDeviceToCloudSyncCoordinator : ICottonDeviceToCloudSyncCoordinator
@@ -13,6 +15,7 @@ namespace Cotton.Mobile.Services
         private readonly CottonUploadOnlySyncPlanExecutor _planExecutor;
         private readonly CottonSyncRootExecutionLock _executionLock;
         private readonly CottonSyncProgressHub _progressHub;
+        private readonly ILogger<CottonDeviceToCloudSyncCoordinator> _logger;
 
         public CottonDeviceToCloudSyncCoordinator(
             ICottonSyncRootStore rootStore,
@@ -22,7 +25,8 @@ namespace Cotton.Mobile.Services
             CottonRecursiveRemoteContentLoader remoteContentLoader,
             CottonUploadOnlySyncPlanExecutor planExecutor,
             CottonSyncRootExecutionLock executionLock,
-            CottonSyncProgressHub progressHub)
+            CottonSyncProgressHub progressHub,
+            ILogger<CottonDeviceToCloudSyncCoordinator> logger)
         {
             ArgumentNullException.ThrowIfNull(rootStore);
             ArgumentNullException.ThrowIfNull(pauseStore);
@@ -32,6 +36,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(planExecutor);
             ArgumentNullException.ThrowIfNull(executionLock);
             ArgumentNullException.ThrowIfNull(progressHub);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _rootStore = rootStore;
             _pauseStore = pauseStore;
@@ -41,6 +46,7 @@ namespace Cotton.Mobile.Services
             _planExecutor = planExecutor;
             _executionLock = executionLock;
             _progressHub = progressHub;
+            _logger = logger;
         }
 
         public async Task<CottonDeviceToCloudSyncRunSummary> RunAsync(
@@ -93,18 +99,32 @@ namespace Cotton.Mobile.Services
         {
             if (pausedRootIds.Contains(root.Id))
             {
+                CottonSyncDiagnosticLog.RootSkipped(
+                    _logger,
+                    root.Id,
+                    CottonDeviceToCloudSyncRootRunStatus.SkippedPaused);
                 return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);
             }
 
             if (CottonDeviceToCloudSyncRootCapability.HasUnsupportedLocalRoot(root))
             {
+                CottonSyncDiagnosticLog.RootSkipped(
+                    _logger,
+                    root.Id,
+                    CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedLocalRoot);
                 return CottonDeviceToCloudSyncRootRunResult.SkippedUnsupportedLocalRoot(root);
             }
 
             if (!root.CanRunSync)
             {
+                CottonSyncDiagnosticLog.RootSkipped(
+                    _logger,
+                    root.Id,
+                    CottonDeviceToCloudSyncRootRunStatus.SkippedNotReady);
                 return CottonDeviceToCloudSyncRootRunResult.SkippedNotReady(root);
             }
+
+            CottonSyncDiagnosticLog.RootStarted(_logger, root.Id, root.LocalRoot.StorageKind);
 
             return await _executionLock.ExecuteAsync(
                     root,
@@ -124,19 +144,44 @@ namespace Cotton.Mobile.Services
                 CottonDeviceToCloudLocalContentSnapshot localContent = await _localTreeReader
                     .ReadAsync(instanceUri, root, cancellationToken)
                     .ConfigureAwait(false);
+                CottonSyncDiagnosticLog.LocalScanCompleted(
+                    _logger,
+                    root.Id,
+                    localContent.Items.Count,
+                    localContent.Problems.Count);
                 _progressHub.Report(CottonSyncProgressSnapshot.CheckingCloud(root.Id));
                 CottonDeviceToCloudRemoteContentSnapshot remoteContent = await _remoteContentLoader
                     .LoadAsync(instanceUri, root, cancellationToken)
                     .ConfigureAwait(false);
+                CottonSyncDiagnosticLog.CloudScanCompleted(_logger, root.Id, remoteContent.Items.Count);
                 IReadOnlyList<CottonUploadReceiptSnapshot> uploadReceipts = await _uploadReceiptStore
                     .LoadAsync(instanceUri, root, cancellationToken)
                     .ConfigureAwait(false);
+                CottonSyncDiagnosticLog.ReceiptsLoaded(_logger, root.Id, uploadReceipts.Count);
                 CottonDeviceToCloudSyncPlanSnapshot plan =
                     CottonDeviceToCloudSyncPlanner.Create(root, localContent, remoteContent, uploadReceipts);
+                CottonSyncDiagnosticLog.PlanCreated(
+                    _logger,
+                    root.Id,
+                    plan.UploadCount,
+                    plan.RemoteFolderCreateCount,
+                    plan.ConfirmedUploadCount,
+                    plan.LocalDeleteCount,
+                    plan.BlockedCount,
+                    plan.NoOpCount);
 
                 CottonDeviceToCloudSyncExecutionResult executionResult = await _planExecutor
                     .ExecuteAsync(instanceUri, root, plan, cancellationToken)
                     .ConfigureAwait(false);
+                CottonSyncDiagnosticLog.ExecutionCompleted(
+                    _logger,
+                    root.Id,
+                    executionResult.UploadedCount,
+                    executionResult.ConfirmedUploadCount,
+                    executionResult.CreatedFolderCount,
+                    executionResult.DeletedLocalFileCount,
+                    executionResult.SkippedCount,
+                    executionResult.BlockedCount);
                 return CottonDeviceToCloudSyncRootRunResult.Completed(root, plan, executionResult);
             }
             finally

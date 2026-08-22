@@ -37,6 +37,7 @@ namespace Cotton.Mobile
                     fonts.AddMaterialSymbolsFonts();
                 });
 
+            RegisterDiagnostics(builder);
             RegisterPlatformServices(builder.Services);
             RegisterApplicationServices(builder.Services);
             RegisterSyncServices(builder.Services);
@@ -47,6 +48,16 @@ namespace Cotton.Mobile
 #endif
 
             return builder.Build();
+        }
+
+        private static void RegisterDiagnostics(MauiAppBuilder builder)
+        {
+            ICottonDiagnosticJournal journal = new FileSystemCottonDiagnosticJournal(
+                CottonDiagnosticJournalPathProvider.CreateDirectoryPath(),
+                TimeProvider.System);
+            builder.Services.AddSingleton(journal);
+            builder.Logging.SetMinimumLevel(LogLevel.Debug);
+            builder.Logging.AddProvider(new CottonDiagnosticLoggerProvider(journal));
         }
 
         private static void RegisterPlatformServices(IServiceCollection services)
@@ -77,11 +88,6 @@ namespace Cotton.Mobile
 
         private static void RegisterApplicationServices(IServiceCollection services)
         {
-            services.AddSingleton<ICottonDiagnosticJournal>(serviceProvider =>
-                new FileSystemCottonDiagnosticJournal(
-                    CottonDiagnosticJournalPathProvider.CreateDirectoryPath(),
-                    serviceProvider.GetRequiredService<TimeProvider>()));
-            services.AddSingleton<ILoggerProvider, CottonDiagnosticLoggerProvider>();
             services.AddMediator(configuration =>
                 configuration.RegisterServicesFromAssemblyContaining<RunSyncRootRequest>());
             services.AddSingleton(

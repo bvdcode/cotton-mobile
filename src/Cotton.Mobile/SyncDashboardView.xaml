@@ -52,18 +52,10 @@
         </Grid>
 
         <Grid Grid.Row="1"
-              RowDefinitions="Auto,*"
               Padding="{StaticResource AppPagePadding}"
-              RowSpacing="16"
               MaximumWidthRequest="{StaticResource AppContentMaximumWidth}"
               HorizontalOptions="Fill">
-            <Label Text="{Binding HeaderSupportingText}"
-                   IsVisible="{Binding IsHeaderSupportingTextVisible}"
-                   Style="{StaticResource AppBodyText}"
-                   VerticalOptions="Center" />
-
-            <VerticalStackLayout Grid.Row="1"
-                                 Spacing="16"
+            <VerticalStackLayout Spacing="16"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center"
                                  IsVisible="{Binding IsEmptyVisible}">
@@ -83,8 +75,7 @@
                         StyleClass="FilledButton, TouchTarget" />
             </VerticalStackLayout>
 
-            <CollectionView Grid.Row="1"
-                            IsVisible="{Binding IsListVisible}"
+            <CollectionView IsVisible="{Binding IsListVisible}"
                             ItemsSource="{Binding Roots}"
                             ItemSizingStrategy="MeasureAllItems">
                 <CollectionView.ItemsLayout>
@@ -96,7 +87,8 @@
                         <Grid RowDefinitions="Auto,Auto">
                             <VerticalStackLayout Padding="4,10"
                                                  Spacing="8">
-                                <Grid ColumnSpacing="4">
+                                <Grid ColumnSpacing="0"
+                                      IsClippedToBounds="True">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
@@ -121,25 +113,34 @@
                                         </Image>
                                     </Border>
 
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Spacing="3"
-                                                         VerticalOptions="Center">
+                                    <Grid Grid.Column="1"
+                                          RowDefinitions="Auto,Auto"
+                                          RowSpacing="3"
+                                          IsClippedToBounds="True"
+                                          VerticalOptions="Center">
                                         <Label Text="{Binding DisplayPathText}"
                                                FontAttributes="Bold"
                                                Style="{StaticResource AppBodyText}"
-                                               LineBreakMode="TailTruncation" />
-                                        <HorizontalStackLayout Spacing="6">
-                                            <HorizontalStackLayout.GestureRecognizers>
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="1" />
+                                        <Grid Grid.Row="1"
+                                              ColumnDefinitions="Auto,*"
+                                              ColumnSpacing="6"
+                                              IsClippedToBounds="True">
+                                            <Grid.GestureRecognizers>
                                                 <TapGestureRecognizer Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
                                                                       CommandParameter="{Binding StatusAction}" />
-                                            </HorizontalStackLayout.GestureRecognizers>
+                                            </Grid.GestureRecognizers>
                                             <ActivityIndicator IsRunning="{Binding IsRunning}"
                                                                IsVisible="{Binding IsRunning}"
                                                                WidthRequest="18"
                                                                HeightRequest="18"
                                                                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                            <Label Text="{Binding StatusText}"
+                                            <Label Grid.Column="1"
+                                                   Text="{Binding StatusText}"
                                                    Style="{StaticResource AppCaptionText}"
+                                                   LineBreakMode="TailTruncation"
+                                                   MaxLines="1"
                                                    VerticalOptions="Center">
                                                 <Label.Triggers>
                                                     <DataTrigger TargetType="Label"
@@ -150,8 +151,8 @@
                                                     </DataTrigger>
                                                 </Label.Triggers>
                                             </Label>
-                                        </HorizontalStackLayout>
-                                    </VerticalStackLayout>
+                                        </Grid>
+                                    </Grid>
 
                                     <Button Grid.Column="2"
                                             Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"

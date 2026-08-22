@@ -121,17 +121,9 @@ namespace Cotton.Mobile.ViewModels
             private set
             {
                 _ = Interlocked.Increment(ref _statusRevision);
-                if (SetProperty(ref _status, value))
-                {
-                    OnPropertyChanged(nameof(HeaderSupportingText));
-                    OnPropertyChanged(nameof(IsHeaderSupportingTextVisible));
-                }
+                SetProperty(ref _status, value);
             }
         }
-
-        public string HeaderSupportingText => Status ?? string.Empty;
-
-        public bool IsHeaderSupportingTextVisible => !string.IsNullOrWhiteSpace(Status);
 
         public bool IsEmptyVisible
         {

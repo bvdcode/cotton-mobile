@@ -124,7 +124,7 @@ if [[ "$deep_link_activity" == "$package_name/"* ]]; then
   exit 1
 fi
 
-"$adb_bin" -s emulator-5554 logcat -c
+"$adb_bin" -s emulator-5554 logcat -c >/dev/null 2>&1 || true
 "$adb_bin" -s emulator-5554 shell am start -W -n "$launcher_activity" >/dev/null
 wait_for_process
 sleep 3

@@ -16,6 +16,11 @@ namespace Cotton.Mobile.Services
             CottonUploadReceiptSnapshot receipt,
             CancellationToken cancellationToken = default);
 
+        Task<int> ClearPendingAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken = default);
+
         Task ClearAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,

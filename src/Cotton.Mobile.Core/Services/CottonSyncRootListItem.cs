@@ -15,6 +15,7 @@ namespace Cotton.Mobile.Services
         private CottonSyncProgressSnapshot? _progress;
         private string? _lastSyncStatusText;
         private string? _failureDetails;
+        private CottonAutomaticSyncFailureKind _failureKind;
 
         public CottonSyncRootListItem(
             CottonSyncRootSnapshot root,
@@ -53,6 +54,9 @@ namespace Cotton.Mobile.Services
             FailureDetailsAction = new CottonSyncRootActionRequest(
                 this,
                 CottonSyncRootAction.ShowFailureDetails);
+            ResolvePendingUploadAction = new CottonSyncRootActionRequest(
+                this,
+                CottonSyncRootAction.ResolvePendingUpload);
             PrimaryAction = new CottonSyncRootActionRequest(
                 this,
                 CottonSyncRootAction.UsePrimaryAction);
@@ -82,7 +86,14 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncRootActionRequest FailureDetailsAction { get; }
 
-        public CottonSyncRootActionRequest? StatusAction => CanShowFailureDetails
+        public bool CanResolvePendingUpload =>
+            _failureKind == CottonAutomaticSyncFailureKind.ActionRequired && !IsRunning;
+
+        public CottonSyncRootActionRequest ResolvePendingUploadAction { get; }
+
+        public CottonSyncRootActionRequest? StatusAction => CanResolvePendingUpload
+            ? ResolvePendingUploadAction
+            : CanShowFailureDetails
             ? FailureDetailsAction
             : CanReconnect
                 ? PrimaryAction
@@ -91,7 +102,9 @@ namespace Cotton.Mobile.Services
         public bool CanUseStatusAction => StatusAction is not null;
 
         public string StatusActionText => CanShowFailureDetails
-            ? CoreResources.ShowFailureDetails
+            ? CanResolvePendingUpload
+                ? CoreResources.ResolvePendingUpload
+                : CoreResources.ShowFailureDetails
             : CanReconnect
                 ? _reconnectActionText
                 : string.Empty;
@@ -213,21 +226,27 @@ namespace Cotton.Mobile.Services
                 && status?.Outcome == CottonAutomaticSyncOutcome.Failed
                 ? CottonAutomaticSyncFailureText.Create(status.FailureKind)
                 : null;
+            CottonAutomaticSyncFailureKind failureKind = IsReady
+                && status?.Outcome == CottonAutomaticSyncOutcome.Failed
+                ? status.FailureKind
+                : CottonAutomaticSyncFailureKind.None;
             bool statusChanged = !string.Equals(_lastSyncStatusText, statusText, StringComparison.Ordinal);
             bool failureChanged = !string.Equals(_failureDetails, failureDetails, StringComparison.Ordinal);
-            if (!statusChanged && !failureChanged)
+            bool failureKindChanged = _failureKind != failureKind;
+            if (!statusChanged && !failureChanged && !failureKindChanged)
             {
                 return;
             }
 
             _lastSyncStatusText = statusText;
             _failureDetails = failureDetails;
+            _failureKind = failureKind;
             if (statusChanged && !IsRunning)
             {
                 OnPropertyChanged(nameof(StatusText));
             }
 
-            if (failureChanged)
+            if (failureChanged || failureKindChanged)
             {
                 OnPropertyChanged(nameof(CanShowFailureDetails));
                 OnPropertyChanged(nameof(FailureDetails));
@@ -235,6 +254,7 @@ namespace Cotton.Mobile.Services
                 OnPropertyChanged(nameof(StatusAction));
                 OnPropertyChanged(nameof(CanUseStatusAction));
                 OnPropertyChanged(nameof(StatusActionText));
+                OnPropertyChanged(nameof(CanResolvePendingUpload));
             }
         }
 

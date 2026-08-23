@@ -57,5 +57,18 @@ namespace Cotton.Mobile.Tests
             _receiptsByRootId.Remove(root.Id);
             return Task.CompletedTask;
         }
+
+        public Task<int> ClearPendingAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken = default)
+        {
+            int removed = _receiptsByRootId.TryGetValue(
+                root.Id,
+                out List<CottonUploadReceiptSnapshot>? receipts)
+                ? receipts.RemoveAll(receipt => receipt.IsPending)
+                : 0;
+            return Task.FromResult(removed);
+        }
     }
 }

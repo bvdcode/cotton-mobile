@@ -6,6 +6,7 @@ namespace Cotton.Mobile.Services
     public enum CottonSyncRootAction
     {
         ShowFailureDetails,
+        ResolvePendingUpload,
         UsePrimaryAction,
         Pause,
         Resume,

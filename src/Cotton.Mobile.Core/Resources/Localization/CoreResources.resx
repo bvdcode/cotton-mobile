@@ -80,6 +80,11 @@
   <data name="ReconnectLocalFolder" xml:space="preserve"><value>Reconnect local folder</value></data>
   <data name="ReconnectMediaFolders" xml:space="preserve"><value>Reconnect media folders</value></data>
   <data name="ShowFailureDetails" xml:space="preserve"><value>Show failure details</value></data>
+  <data name="ResolvePendingUpload" xml:space="preserve"><value>Resolve pending upload</value></data>
+  <data name="ResolvePendingUploadTitleFormat" xml:space="preserve"><value>Resolve pending upload for {0}?</value></data>
+  <data name="ResolvePendingUploadMessage" xml:space="preserve"><value>Cotton will abandon incomplete upload attempts and retry the current local files. If an earlier request finishes later, Cotton will preserve the local file and report a cloud conflict.</value></data>
+  <data name="PendingUploadResolved" xml:space="preserve"><value>Incomplete upload attempts were cleared. Syncing the current files now.</value></data>
+  <data name="PendingUploadResolveFailed" xml:space="preserve"><value>Could not resolve the incomplete upload attempts.</value></data>
   <data name="LocalFolderUnavailable" xml:space="preserve"><value>Local folder unavailable</value></data>
   <data name="MediaFoldersUnavailable" xml:space="preserve"><value>Media folders unavailable</value></data>
   <data name="LocalSyncTargetUnsupported" xml:space="preserve"><value>Local sync target unsupported</value></data>

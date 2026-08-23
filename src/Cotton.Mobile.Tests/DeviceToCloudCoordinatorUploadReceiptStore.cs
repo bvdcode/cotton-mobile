@@ -53,5 +53,28 @@ namespace Cotton.Mobile.Tests
             _receiptsByRootId.Remove(root.Id);
             return Task.CompletedTask;
         }
+
+        public Task<int> ClearPendingAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken = default)
+        {
+            if (!_receiptsByRootId.TryGetValue(
+                    root.Id,
+                    out Dictionary<string, CottonUploadReceiptSnapshot>? receipts))
+            {
+                return Task.FromResult(0);
+            }
+
+            string[] pendingSourceIds = [.. receipts.Values
+                .Where(receipt => receipt.IsPending)
+                .Select(receipt => receipt.LocalSourceId)];
+            foreach (string sourceId in pendingSourceIds)
+            {
+                receipts.Remove(sourceId);
+            }
+
+            return Task.FromResult(pendingSourceIds.Length);
+        }
     }
 }

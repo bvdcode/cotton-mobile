@@ -11,22 +11,30 @@ namespace Cotton.Mobile.ViewModels
         private readonly SyncSettingsRootProvider _rootProvider;
         private readonly SyncRootManager _rootManager;
         private readonly IUserDialogService _dialogService;
+        private readonly ICottonUploadReceiptStore _uploadReceiptStore;
+        private readonly CottonSyncRootExecutionLock _executionLock;
         private readonly ILogger<SyncSettingsManagementHandler> _logger;
 
         public SyncSettingsManagementHandler(
             SyncSettingsRootProvider rootProvider,
             SyncRootManager rootManager,
             IUserDialogService dialogService,
+            ICottonUploadReceiptStore uploadReceiptStore,
+            CottonSyncRootExecutionLock executionLock,
             ILogger<SyncSettingsManagementHandler> logger)
         {
             ArgumentNullException.ThrowIfNull(rootProvider);
             ArgumentNullException.ThrowIfNull(rootManager);
             ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(uploadReceiptStore);
+            ArgumentNullException.ThrowIfNull(executionLock);
             ArgumentNullException.ThrowIfNull(logger);
 
             _rootProvider = rootProvider;
             _rootManager = rootManager;
             _dialogService = dialogService;
+            _uploadReceiptStore = uploadReceiptStore;
+            _executionLock = executionLock;
             _logger = logger;
         }
 
@@ -103,6 +111,75 @@ namespace Cotton.Mobile.ViewModels
                 CottonSyncRootManagementText.CreateFailureDetailsTitle(item.Title),
                 item.FailureDetails,
                 CottonSyncRootManagementText.CloseAction);
+        }
+
+        public async Task<bool> ResolvePendingUploadAsync(
+            ISyncSettingsViewState state,
+            CottonSyncRootListItem item,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(item);
+            Uri? instanceUri = state.InstanceUri;
+            if (instanceUri is null || !item.CanResolvePendingUpload)
+            {
+                state.Status = CottonSyncRootManagementText.PendingUploadResolveFailedStatus;
+                return false;
+            }
+
+            state.IsBusy = true;
+            try
+            {
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state, cancellationToken);
+                CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
+                if (root is null)
+                {
+                    state.ShowRoots(collection);
+                    state.Status = CottonSyncRootManagementText.RootMissingStatus;
+                    return false;
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+                bool confirmed = await _dialogService.ShowConfirmationAsync(
+                    CottonSyncRootManagementText.CreateResolvePendingUploadTitle(root.CloudFolder.FolderName),
+                    CottonSyncRootManagementText.ResolvePendingUploadMessage,
+                    CottonSyncRootManagementText.ResolvePendingUploadAction,
+                    CottonSyncRootManagementText.CancelAction);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!confirmed)
+                {
+                    state.Status = null;
+                    return false;
+                }
+
+                int clearedCount = await _executionLock.ExecuteAsync(
+                    root,
+                    token => _uploadReceiptStore.ClearPendingAsync(instanceUri, root, token),
+                    cancellationToken);
+                if (clearedCount == 0)
+                {
+                    state.Status = CottonSyncRootManagementText.PendingUploadResolveFailedStatus;
+                    return false;
+                }
+
+                state.Status = CottonSyncRootManagementText.PendingUploadResolvedStatus;
+                return true;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                state.Status = null;
+                throw;
+            }
+            catch (Exception exception)
+            {
+                CottonLog.Warning(_logger, "Failed to resolve pending Cotton mobile uploads.", exception);
+                state.Status = CottonSyncRootManagementText.PendingUploadResolveFailedStatus;
+                return false;
+            }
+            finally
+            {
+                state.IsBusy = false;
+            }
         }
 
         public async Task SetRootPausedAsync(

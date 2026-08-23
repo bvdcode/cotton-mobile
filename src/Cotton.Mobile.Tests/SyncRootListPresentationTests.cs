@@ -123,6 +123,21 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void ActionRequiredRootOffersPendingUploadRecovery()
+        {
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
+            CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
+                root.Id,
+                new DateTime(2026, 8, 16, 12, 0, 0, DateTimeKind.Utc),
+                CottonAutomaticSyncFailureKind.ActionRequired);
+            CottonSyncRootListItem item = new(root, automaticStatus: status);
+
+            Assert.True(item.CanResolvePendingUpload);
+            Assert.Equal(CottonSyncRootAction.ResolvePendingUpload, item.StatusAction?.Action);
+            Assert.Equal("Resolve pending upload", item.StatusActionText);
+        }
+
+        [Fact]
         public void RootReportsItsCurrentSyncStageAndProgress()
         {
             CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();

@@ -122,6 +122,52 @@ namespace Cotton.Mobile.Services
             }
         }
 
+        public async Task<int> ClearPendingAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(root);
+            EnsureSupportedRoot(instanceUri, root);
+            await _writeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                string directory = _pathProvider.CreateUploadReceiptDirectory(instanceUri, root);
+                if (!Directory.Exists(directory))
+                {
+                    return 0;
+                }
+
+                string[] filePaths = Directory.GetFiles(
+                    directory,
+                    $"*{ReceiptFileExtension}",
+                    SearchOption.TopDirectoryOnly);
+                int removedCount = 0;
+                foreach (string filePath in filePaths)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    CottonUploadReceiptSnapshot receipt = await LoadReceiptAsync(
+                        filePath,
+                        root,
+                        cancellationToken).ConfigureAwait(false);
+                    if (!receipt.IsPending)
+                    {
+                        continue;
+                    }
+
+                    File.Delete(filePath);
+                    removedCount++;
+                }
+
+                return removedCount;
+            }
+            finally
+            {
+                _writeLock.Release();
+            }
+        }
+
         public void Dispose()
         {
             _writeLock.Dispose();

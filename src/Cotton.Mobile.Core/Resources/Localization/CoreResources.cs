@@ -86,6 +86,11 @@ namespace Cotton.Mobile.Resources.Localization
         public static string ReconnectLocalFolder => GetString(nameof(ReconnectLocalFolder));
         public static string ReconnectMediaFolders => GetString(nameof(ReconnectMediaFolders));
         public static string ShowFailureDetails => GetString(nameof(ShowFailureDetails));
+        public static string ResolvePendingUpload => GetString(nameof(ResolvePendingUpload));
+        public static string ResolvePendingUploadTitleFormat => GetString(nameof(ResolvePendingUploadTitleFormat));
+        public static string ResolvePendingUploadMessage => GetString(nameof(ResolvePendingUploadMessage));
+        public static string PendingUploadResolved => GetString(nameof(PendingUploadResolved));
+        public static string PendingUploadResolveFailed => GetString(nameof(PendingUploadResolveFailed));
         public static string LocalFolderUnavailable => GetString(nameof(LocalFolderUnavailable));
         public static string MediaFoldersUnavailable => GetString(nameof(MediaFoldersUnavailable));
         public static string LocalSyncTargetUnsupported => GetString(nameof(LocalSyncTargetUnsupported));

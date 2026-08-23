@@ -19,6 +19,10 @@ namespace Cotton.Mobile.Services
         public static string PauseFailedStatus => CoreResources.PauseFailedStatus;
         public static string ResumeFailedStatus => CoreResources.ResumeFailedStatus;
         public static string DeleteFailedStatus => CoreResources.DeleteFailedStatus;
+        public static string ResolvePendingUploadAction => CoreResources.ResolvePendingUpload;
+        public static string ResolvePendingUploadMessage => CoreResources.ResolvePendingUploadMessage;
+        public static string PendingUploadResolvedStatus => CoreResources.PendingUploadResolved;
+        public static string PendingUploadResolveFailedStatus => CoreResources.PendingUploadResolveFailed;
 
         public static string CreateDeleteTitle(string folderName)
         {
@@ -29,6 +33,13 @@ namespace Cotton.Mobile.Services
         {
             return CoreResources.Format(
                 CoreResources.FailureDetailsTitleFormat,
+                NormalizeFolderName(folderName));
+        }
+
+        public static string CreateResolvePendingUploadTitle(string folderName)
+        {
+            return CoreResources.Format(
+                CoreResources.ResolvePendingUploadTitleFormat,
                 NormalizeFolderName(folderName));
         }
 

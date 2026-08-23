@@ -91,6 +91,43 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        public async Task ResumePendingSetupAsync(
+            ISyncSettingsViewState state,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(state);
+            Uri? instanceUri = state.InstanceUri;
+            string? accountScopeKey = state.AccountScopeKey;
+            if (instanceUri is null || string.IsNullOrWhiteSpace(accountScopeKey))
+            {
+                return;
+            }
+
+            try
+            {
+                SyncRootSetupResult? result = await _rootSetupCoordinator
+                    .ResumePendingAsync(instanceUri, accountScopeKey, cancellationToken)
+                    .ConfigureAwait(false);
+                if (result is null || result.Status == SyncRootSetupStatus.Cancelled)
+                {
+                    return;
+                }
+
+                state.ShowRoots(await _rootProvider.LoadAsync(instanceUri, accountScopeKey, cancellationToken));
+                state.Status = result.Message;
+                QueueChangedRoot(state, instanceUri, accountScopeKey, result, state.StatusRevision);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                CottonLog.Warning(_logger, "Failed to resume Cotton mobile sync-root setup.", exception);
+                state.Status = AppResources.SyncFolderAddFailed;
+            }
+        }
+
         public async Task ReconnectRootAsync(
             ISyncSettingsViewState state,
             CottonSyncRootListItem item,

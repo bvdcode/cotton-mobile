@@ -158,6 +158,7 @@ namespace Cotton.Mobile.ViewModels
         {
             Configure(instanceUri, accountScopeKey);
             await _loadingHandler.LoadAsync(this, cancellationToken);
+            await _setupHandler.ResumePendingSetupAsync(this, cancellationToken);
         }
 
         public void Clear()

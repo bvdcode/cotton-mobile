@@ -19,6 +19,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<IBrowser>(Browser.Default);
             services.AddSingleton<IConnectivity>(Connectivity.Current);
             services.AddSingleton(TimeProvider.System);
+            services.AddSingleton<AndroidDocumentTreeActivityResultStore>();
             services.AddSingleton<IAndroidDocumentTreeActivityResultBridge, AndroidDocumentTreeActivityResultBridge>();
             services.AddSingleton<ICottonSyncLocalRootPickerService, AndroidSyncLocalRootPickerService>();
             services.AddSingleton<ICottonSyncLocalRootPermissionResolver, AndroidSyncLocalRootPermissionResolver>();

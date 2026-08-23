@@ -9,6 +9,9 @@ namespace Cotton.Mobile.Services
 
         Task<CottonSyncLocalRootSnapshot?> PickAsync(
             CottonSyncRootStorageKind storageKind,
+            Guid requestId,
             CancellationToken cancellationToken = default);
+
+        void CompletePick(Guid requestId);
     }
 }

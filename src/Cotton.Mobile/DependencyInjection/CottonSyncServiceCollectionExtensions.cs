@@ -51,6 +51,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<ICloudFolderPickerService, CloudFolderPickerService>();
             services.AddSingleton<ICottonMediaAlbumPickerService, CottonMediaAlbumPickerService>();
             services.AddSingleton<ISyncRootSetupOptionsPickerService, SyncRootSetupOptionsPickerService>();
+            services.AddSingleton<ICottonSyncRootSetupDraftStore, PreferencesCottonSyncRootSetupDraftStore>();
             services.AddSingleton<SyncRootSetupCoordinator>();
             services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserRemoteFolderContentSource>();
             services.AddSingleton<CottonRecursiveRemoteContentLoader>();

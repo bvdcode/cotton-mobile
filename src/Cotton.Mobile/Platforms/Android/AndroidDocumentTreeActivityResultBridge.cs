@@ -10,28 +10,40 @@ using Microsoft.Extensions.Logging;
 namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentTreeActivityResultBridge(
+        AndroidDocumentTreeActivityResultStore resultStore,
         ILogger<AndroidDocumentTreeActivityResultBridge> logger) :
         IAndroidDocumentTreeActivityResultBridge,
         IDisposable
     {
-        private const int RequestCode = 61029;
-
         private readonly Lock _syncRoot = new();
         private readonly ILogger<AndroidDocumentTreeActivityResultBridge> _logger =
             logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly AndroidDocumentTreeActivityResultStore _resultStore =
+            resultStore ?? throw new ArgumentNullException(nameof(resultStore));
         private PendingDocumentTreePick? _pendingPick;
 
         public Task<Intent?> StartOpenDocumentTreeAsync(
             Activity activity,
             Intent intent,
+            Guid requestId,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(activity);
             ArgumentNullException.ThrowIfNull(intent);
+            if (requestId == Guid.Empty)
+            {
+                throw new ArgumentException("Document-tree request id is required.", nameof(requestId));
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
+            if (_resultStore.TryReadResult(requestId, out Intent? savedResult))
+            {
+                return Task.FromResult(savedResult);
+            }
 
             TaskCompletionSource<Intent?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
             CancellationTokenRegistration cancellationRegistration = default;
+            bool shouldLaunch;
             lock (_syncRoot)
             {
                 if (_pendingPick is not null)
@@ -40,17 +52,33 @@ namespace Cotton.Mobile.Platforms.Android
                 }
 
                 cancellationRegistration = cancellationToken.Register(() => CancelPending(completion));
-                _pendingPick = new PendingDocumentTreePick(completion, cancellationRegistration);
+                _pendingPick = new PendingDocumentTreePick(
+                    requestId,
+                    completion,
+                    cancellationRegistration);
+                shouldLaunch = !_resultStore.IsActiveInCurrentProcess(requestId);
+                if (shouldLaunch)
+                {
+                    _resultStore.Begin(requestId);
+                }
             }
 
             try
             {
-                activity.StartActivityForResult(intent, RequestCode);
+                if (!shouldLaunch)
+                {
+                    return completion.Task;
+                }
+
+                MainActivity mainActivity = activity as MainActivity
+                    ?? throw new InvalidOperationException("Document-tree picker requires the main Android activity.");
+                mainActivity.LaunchDocumentTree(intent);
             }
             catch (Exception exception)
             {
                 PendingDocumentTreePick? pendingPick = ClearPending(completion);
                 pendingPick?.Dispose();
+                _resultStore.Complete(requestId);
                 CottonLog.Error(_logger, "Failed to start the Android document-tree picker.", exception);
                 throw;
             }
@@ -58,30 +86,34 @@ namespace Cotton.Mobile.Platforms.Android
             return completion.Task;
         }
 
-        public bool TryHandleActivityResult(int requestCode, Result resultCode, Intent? data)
+        public void HandleActivityResult(Result resultCode, Intent? data)
         {
-            if (requestCode != RequestCode)
+            Guid? requestId = _resultStore.SaveResult(resultCode, data);
+            if (!requestId.HasValue)
             {
-                return false;
+                return;
             }
 
             PendingDocumentTreePick? pendingPick = ClearPending();
-            if (pendingPick is null)
+            if (pendingPick is null || pendingPick.RequestId != requestId.Value)
             {
-                return true;
+                return;
             }
 
             pendingPick.Dispose();
-            if (resultCode == Result.Ok && data is not null)
+            if (!_resultStore.TryReadResult(requestId.Value, out Intent? savedResult))
             {
-                pendingPick.Completion.TrySetResult(data);
-            }
-            else
-            {
-                pendingPick.Completion.TrySetResult(null);
+                pendingPick.Completion.TrySetException(
+                    new InvalidDataException("Android document-tree result was not saved."));
+                return;
             }
 
-            return true;
+            pendingPick.Completion.TrySetResult(savedResult);
+        }
+
+        public void CompleteRequest(Guid requestId)
+        {
+            _resultStore.Complete(requestId);
         }
 
         public void Dispose()
@@ -101,6 +133,7 @@ namespace Cotton.Mobile.Platforms.Android
             }
 
             pendingPick.Dispose();
+            _resultStore.Complete(pendingPick.RequestId);
             pendingPick.Completion.TrySetCanceled();
         }
 

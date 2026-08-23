@@ -8,8 +8,11 @@ using Android.Content.Res;
 using Android.OS;
 using Android.Views;
 using AndroidX.Core.View;
+using AndroidX.Activity.Result;
+using AndroidX.Activity.Result.Contract;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.ApplicationModel;
 using AndroidIntentFilter = Android.App.IntentFilterAttribute;
 
 namespace Cotton.Mobile.Platforms.Android
@@ -34,8 +37,18 @@ namespace Cotton.Mobile.Platforms.Android
         DataHost = CottonMobileDeepLink.AuthorizationCompleteHost)]
     public class MainActivity : MauiAppCompatActivity
     {
+        private const int DocumentTreeBridgeAttemptCount = 20;
+        private static readonly TimeSpan DocumentTreeBridgeAttemptDelay = TimeSpan.FromMilliseconds(100);
+
+        private ActivityResultLauncher? _documentTreeLauncher;
+        private bool _documentTreeBridgeAttachmentScheduled;
+        private ActivityResult? _pendingDocumentTreeResult;
+
         protected override void OnCreate(Bundle? savedInstanceState)
         {
+            _documentTreeLauncher = RegisterForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new AndroidActivityResultCallback(HandleDocumentTreeResult));
             base.OnCreate(savedInstanceState);
 
             if (OperatingSystem.IsAndroidVersionAtLeast(31))
@@ -50,19 +63,21 @@ namespace Cotton.Mobile.Platforms.Android
         {
             base.OnResume();
             ApplySystemBars();
+            ScheduleDocumentTreeBridgeAttachment();
             GetForegroundService()?.NotifyResumed();
         }
 
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
+        private void HandleDocumentTreeResult(ActivityResult result)
         {
-            IAndroidDocumentTreeActivityResultBridge? resultBridge = IPlatformApplication.Current?.Services
-                .GetService<IAndroidDocumentTreeActivityResultBridge>();
-            if (resultBridge?.TryHandleActivityResult(requestCode, resultCode, data) == true)
+            IAndroidDocumentTreeActivityResultBridge? bridge = GetDocumentTreeResultBridge();
+            if (bridge is null)
             {
+                _pendingDocumentTreeResult = result;
+                ScheduleDocumentTreeBridgeAttachment();
                 return;
             }
 
-            base.OnActivityResult(requestCode, resultCode, data);
+            bridge.HandleActivityResult((Result)result.ResultCode, result.Data);
         }
 
         protected override void OnStop()
@@ -86,6 +101,61 @@ namespace Cotton.Mobile.Platforms.Android
         {
             return IPlatformApplication.Current?.Services
                 .GetService<IApplicationForegroundService>();
+        }
+
+        private static IAndroidDocumentTreeActivityResultBridge? GetDocumentTreeResultBridge()
+        {
+            return IPlatformApplication.Current?.Services
+                .GetService<IAndroidDocumentTreeActivityResultBridge>();
+        }
+
+        internal void LaunchDocumentTree(Intent intent)
+        {
+            ArgumentNullException.ThrowIfNull(intent);
+            ActivityResultLauncher launcher = _documentTreeLauncher
+                ?? throw new InvalidOperationException("Android document-tree launcher is unavailable.");
+            launcher.Launch(intent);
+        }
+
+        private void ScheduleDocumentTreeBridgeAttachment()
+        {
+            if (_documentTreeBridgeAttachmentScheduled)
+            {
+                return;
+            }
+
+            _documentTreeBridgeAttachmentScheduled = true;
+            _ = AttachDocumentTreeBridgeAsync();
+        }
+
+        private async Task AttachDocumentTreeBridgeAsync()
+        {
+            IAndroidDocumentTreeActivityResultBridge? bridge = null;
+            for (int attempt = 0; attempt < DocumentTreeBridgeAttemptCount && bridge is null; attempt++)
+            {
+                await Task.Delay(DocumentTreeBridgeAttemptDelay);
+                bridge = GetDocumentTreeResultBridge();
+            }
+
+            if (bridge is null)
+            {
+                _ = global::Android.Util.Log.Error(
+                    nameof(MainActivity),
+                    "Android document-tree result bridge is unavailable.");
+                _documentTreeBridgeAttachmentScheduled = false;
+                return;
+            }
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                ActivityResult? pendingResult = _pendingDocumentTreeResult;
+                if (pendingResult is not null)
+                {
+                    _pendingDocumentTreeResult = null;
+                    bridge.HandleActivityResult((Result)pendingResult.ResultCode, pendingResult.Data);
+                }
+
+            });
         }
 
         private void ApplySystemBars()

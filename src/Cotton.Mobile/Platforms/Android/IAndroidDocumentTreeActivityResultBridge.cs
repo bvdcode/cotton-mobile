@@ -12,9 +12,12 @@ namespace Cotton.Mobile.Platforms.Android
         Task<Intent?> StartOpenDocumentTreeAsync(
             Activity activity,
             Intent intent,
+            Guid requestId,
             CancellationToken cancellationToken = default);
 
-        bool TryHandleActivityResult(int requestCode, Result resultCode, Intent? data);
+        void CompleteRequest(Guid requestId);
+
+        void HandleActivityResult(Result resultCode, Intent? data);
     }
 }
 #endif

@@ -44,11 +44,18 @@ namespace Cotton.Mobile.Platforms.Android
 
         public Task<CottonSyncLocalRootSnapshot?> PickAsync(
             CottonSyncRootStorageKind storageKind,
+            Guid requestId,
             CancellationToken cancellationToken = default)
         {
+            if (requestId == Guid.Empty)
+            {
+                throw new ArgumentException("Local-root picker request id is required.", nameof(requestId));
+            }
+
             return storageKind switch
             {
-                CottonSyncRootStorageKind.UserSelectedDocumentTree => PickDocumentTreeAsync(cancellationToken),
+                CottonSyncRootStorageKind.UserSelectedDocumentTree =>
+                    PickDocumentTreeAsync(requestId, cancellationToken),
                 CottonSyncRootStorageKind.MediaStore => PickMediaStoreAsync(cancellationToken),
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(storageKind),
@@ -57,7 +64,13 @@ namespace Cotton.Mobile.Platforms.Android
             };
         }
 
+        public void CompletePick(Guid requestId)
+        {
+            _activityResultBridge.CompleteRequest(requestId);
+        }
+
         private async Task<CottonSyncLocalRootSnapshot?> PickDocumentTreeAsync(
+            Guid requestId,
             CancellationToken cancellationToken)
         {
             Activity activity = Platform.CurrentActivity
@@ -69,7 +82,11 @@ namespace Cotton.Mobile.Platforms.Android
             intent.AddFlags(PickerIntentFlags);
 
             Intent? resultIntent = await MainThread.InvokeOnMainThreadAsync(() =>
-                    _activityResultBridge.StartOpenDocumentTreeAsync(activity, intent, cancellationToken))
+                    _activityResultBridge.StartOpenDocumentTreeAsync(
+                        activity,
+                        intent,
+                        requestId,
+                        cancellationToken))
                 .ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             if (resultIntent is null || resultIntent.Data is not AndroidUri uri)

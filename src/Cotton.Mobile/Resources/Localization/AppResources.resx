@@ -25,6 +25,7 @@
   <data name="BackDescription" xml:space="preserve"><value>Back</value></data>
   <data name="AddSyncFolderDescription" xml:space="preserve"><value>Add sync folder</value></data>
   <data name="RunAllSyncFoldersDescription" xml:space="preserve"><value>Run all sync folders</value></data>
+  <data name="OpenSyncDescription" xml:space="preserve"><value>Open sync</value></data>
   <data name="RefreshSyncFoldersDescription" xml:space="preserve"><value>Refresh sync folders</value></data>
   <data name="SyncTitle" xml:space="preserve"><value>Sync</value></data>
   <data name="NoSyncFoldersTitle" xml:space="preserve"><value>No sync folders</value></data>

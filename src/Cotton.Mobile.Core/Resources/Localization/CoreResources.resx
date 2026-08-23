@@ -79,6 +79,7 @@
   <data name="ChooseMediaFolders" xml:space="preserve"><value>Choose media folders</value></data>
   <data name="ReconnectLocalFolder" xml:space="preserve"><value>Reconnect local folder</value></data>
   <data name="ReconnectMediaFolders" xml:space="preserve"><value>Reconnect media folders</value></data>
+  <data name="ShowFailureDetails" xml:space="preserve"><value>Show failure details</value></data>
   <data name="LocalFolderUnavailable" xml:space="preserve"><value>Local folder unavailable</value></data>
   <data name="MediaFoldersUnavailable" xml:space="preserve"><value>Media folders unavailable</value></data>
   <data name="LocalSyncTargetUnsupported" xml:space="preserve"><value>Local sync target unsupported</value></data>

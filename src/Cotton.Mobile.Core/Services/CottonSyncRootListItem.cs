@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Services
     {
         private readonly string _idleStatusText;
         private readonly bool _requiresAttention;
+        private readonly string _reconnectActionText;
         private CottonSyncProgressSnapshot? _progress;
         private string? _lastSyncStatusText;
         private string? _failureDetails;
@@ -37,6 +38,9 @@ namespace Cotton.Mobile.Services
             IsUnsupportedLocalRoot = !isPaused && CottonSyncRootRunCapability.HasUnsupportedLocalRoot(root);
             CanRunNow = !isPaused && CottonSyncRootRunCapability.CanRun(root);
             CanReconnect = root.NeedsUserAction;
+            _reconnectActionText = root.LocalRoot.UsesMediaStore
+                ? CoreResources.ReconnectMediaFolders
+                : CoreResources.ReconnectLocalFolder;
             CanUsePrimaryAction = CanReconnect || CanRunNow;
             _idleStatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot);
             IsReady = !isPaused && !IsUnsupportedLocalRoot && CanRunNow;
@@ -85,6 +89,12 @@ namespace Cotton.Mobile.Services
                 : null;
 
         public bool CanUseStatusAction => StatusAction is not null;
+
+        public string StatusActionText => CanShowFailureDetails
+            ? CoreResources.ShowFailureDetails
+            : CanReconnect
+                ? _reconnectActionText
+                : string.Empty;
 
         public bool IsProgressDeterminate =>
             (_progress?.Stage == CottonSyncProgressStage.ApplyingChanges
@@ -224,6 +234,7 @@ namespace Cotton.Mobile.Services
                 OnPropertyChanged(nameof(IsAttentionVisible));
                 OnPropertyChanged(nameof(StatusAction));
                 OnPropertyChanged(nameof(CanUseStatusAction));
+                OnPropertyChanged(nameof(StatusActionText));
             }
         }
 

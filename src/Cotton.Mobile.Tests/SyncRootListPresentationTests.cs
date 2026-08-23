@@ -77,6 +77,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(item.CanUseStatusAction);
             Assert.Same(item.PrimaryAction, item.StatusAction);
+            Assert.Equal("Reconnect local folder", item.StatusActionText);
         }
 
         [Fact]
@@ -118,6 +119,7 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.CanShowFailureDetails);
             Assert.True(item.IsAttentionVisible);
             Assert.Contains("connection", item.FailureDetails, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal("Show failure details", item.StatusActionText);
         }
 
         [Fact]

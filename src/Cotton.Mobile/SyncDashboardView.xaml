@@ -128,10 +128,6 @@
                                               ColumnDefinitions="Auto,*"
                                               ColumnSpacing="0"
                                               IsClippedToBounds="True">
-                                            <Grid.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
-                                                                      CommandParameter="{Binding StatusAction}" />
-                                            </Grid.GestureRecognizers>
                                             <ActivityIndicator IsRunning="{Binding IsRunning}"
                                                                IsVisible="{Binding IsRunning}"
                                                                WidthRequest="18"
@@ -153,11 +149,27 @@
                                                     <DataTrigger TargetType="Label"
                                                                  Binding="{Binding CanUseStatusAction}"
                                                                  Value="True">
-                                                        <Setter Property="TextDecorations"
-                                                                Value="Underline" />
+                                                        <Setter Property="IsVisible" Value="False" />
                                                     </DataTrigger>
                                                 </Label.Triggers>
                                             </Label>
+                                            <Button Grid.Column="1"
+                                                    Text="{Binding StatusText}"
+                                                    Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                    CommandParameter="{Binding StatusAction}"
+                                                    SemanticProperties.Description="{Binding StatusActionText}"
+                                                    HorizontalOptions="Start"
+                                                    Padding="0"
+                                                    IsVisible="False"
+                                                    StyleClass="TextButton, TouchTarget">
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button"
+                                                                 Binding="{Binding CanUseStatusAction}"
+                                                                 Value="True">
+                                                        <Setter Property="IsVisible" Value="True" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
                                         </Grid>
                                     </Grid>
 

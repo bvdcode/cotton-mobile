@@ -17,6 +17,52 @@ namespace Cotton.Mobile.Tests
                 "A FontImageSource without Color renders white and disappears on the light surface.");
         }
 
+        [Fact]
+        public void SyncNavigationAnnouncesTheActionItExecutes()
+        {
+            XDocument document = XDocument.Parse(RepositoryPath.ReadText($"{ViewDirectory}/MainPage.xaml"));
+            XElement button = document.Descendants().Single(element =>
+                element.Name.LocalName == "Button"
+                && GetAttribute(element, "Command")?.Value.Contains("ShowSyncCommand", StringComparison.Ordinal) == true);
+
+            Assert.Contains(
+                "OpenSyncDescription",
+                GetAttributeContaining(button, "Description")?.Value,
+                StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void SyncStatusActionUsesAnAccessibleButton()
+        {
+            XDocument document = XDocument.Parse(
+                RepositoryPath.ReadText($"{ViewDirectory}/SyncDashboardView.xaml"));
+            XElement button = document.Descendants().Single(element =>
+                element.Name.LocalName == "Button"
+                && GetAttribute(element, "CommandParameter")?.Value.Contains("StatusAction", StringComparison.Ordinal)
+                    == true);
+
+            Assert.Contains("TouchTarget", GetAttribute(button, "StyleClass")?.Value, StringComparison.Ordinal);
+            Assert.Contains(
+                "StatusActionText",
+                GetAttributeContaining(button, "Description")?.Value,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(document.Descendants(), element =>
+                element.Name.LocalName == "TapGestureRecognizer"
+                && GetAttribute(element, "CommandParameter")?.Value.Contains("StatusAction", StringComparison.Ordinal)
+                    == true);
+        }
+
+        private static XAttribute? GetAttribute(XElement element, string localName)
+        {
+            return element.Attributes().SingleOrDefault(attribute => attribute.Name.LocalName == localName);
+        }
+
+        private static XAttribute? GetAttributeContaining(XElement element, string namePart)
+        {
+            return element.Attributes().SingleOrDefault(attribute =>
+                attribute.Name.LocalName.Contains(namePart, StringComparison.Ordinal));
+        }
+
         private static List<string> FindUntintedFontImageSources()
         {
             List<string> offenders = [];

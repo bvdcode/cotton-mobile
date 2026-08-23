@@ -143,7 +143,7 @@ deep_link_output="$(
     -c android.intent.category.BROWSABLE \
     -d "$authorization_complete_uri"
 )"
-if [[ "$deep_link_output" != "$package_name/"* ]]; then
+if [[ "$deep_link_output" != *"$package_name/"* ]]; then
   printf 'Cotton authorization deep link did not resolve to the mobile application: %s\n' "$deep_link_output" >&2
   exit 1
 fi
@@ -153,7 +153,7 @@ unsupported_deep_link_output="$(
     -c android.intent.category.BROWSABLE \
     -d "$unsupported_deep_link_uri"
 )"
-if [[ "$unsupported_deep_link_output" == "$package_name/"* ]]; then
+if [[ "$unsupported_deep_link_output" == *"$package_name/"* ]]; then
   printf 'Unsupported Cotton deep link unexpectedly resolved to the mobile application: %s\n' \
     "$unsupported_deep_link_output" >&2
   exit 1

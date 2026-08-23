@@ -3,7 +3,6 @@
 
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
-using EasyExtensions.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
@@ -11,23 +10,23 @@ namespace Cotton.Mobile.ViewModels
     public class SyncSettingsExecutionHandler
     {
         private readonly SyncSettingsRootProvider _rootProvider;
-        private readonly IMediator _mediator;
+        private readonly SyncExecutionWorkflow _workflow;
         private readonly INetworkAccessService _networkAccess;
         private readonly ILogger<SyncSettingsExecutionHandler> _logger;
 
         public SyncSettingsExecutionHandler(
             SyncSettingsRootProvider rootProvider,
-            IMediator mediator,
+            SyncExecutionWorkflow workflow,
             INetworkAccessService networkAccess,
             ILogger<SyncSettingsExecutionHandler> logger)
         {
             ArgumentNullException.ThrowIfNull(rootProvider);
-            ArgumentNullException.ThrowIfNull(mediator);
+            ArgumentNullException.ThrowIfNull(workflow);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(logger);
 
             _rootProvider = rootProvider;
-            _mediator = mediator;
+            _workflow = workflow;
             _networkAccess = networkAccess;
             _logger = logger;
         }
@@ -75,11 +74,9 @@ namespace Cotton.Mobile.ViewModels
                         collection.Roots,
                         collection.PausedRootIds);
                 state.Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
-                state.Status = await _mediator.Send(
-                    new RunAllSyncRootsRequest(
-                        instanceUri,
-                        runnableRoots),
-                    cancellationToken);
+                state.Status = await _workflow
+                    .RunAllAsync(instanceUri, runnableRoots, cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -144,11 +141,9 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 state.Status = CottonSyncRootRunRouting.CreateStartingStatus(root);
-                state.Status = await _mediator.Send(
-                    new RunSyncRootRequest(
-                        instanceUri,
-                        root),
-                    cancellationToken);
+                state.Status = await _workflow
+                    .RunRootAsync(instanceUri, root, cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {

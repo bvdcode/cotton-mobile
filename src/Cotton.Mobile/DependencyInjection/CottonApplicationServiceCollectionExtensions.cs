@@ -4,7 +4,6 @@
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Sdk.Auth;
-using EasyExtensions.Mediator;
 
 namespace Cotton.Mobile.DependencyInjection
 {
@@ -13,8 +12,6 @@ namespace Cotton.Mobile.DependencyInjection
         public static IServiceCollection AddCottonApplicationServices(this IServiceCollection services)
         {
             ArgumentNullException.ThrowIfNull(services);
-            services.AddMediator(configuration =>
-                configuration.RegisterServicesFromAssemblyContaining<RunSyncRootRequest>());
             services.AddSingleton(
                 new CottonMobileOptions(
                     AppResources.AppTitle,

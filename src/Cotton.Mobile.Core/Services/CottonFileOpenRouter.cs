@@ -19,85 +19,6 @@ namespace Cotton.Mobile.Services
         public static string SvgOpenUnavailableStatus => CoreResources.SvgOpenUnavailable;
         public static string UnknownOpenUnavailableStatus => CoreResources.UnknownOpenUnavailable;
 
-        private static readonly Dictionary<string, string> ExtensionContentTypes =
-            new(StringComparer.OrdinalIgnoreCase)
-            {
-                [".7z"] = "application/x-7z-compressed",
-                [".bash"] = "text/plain",
-                [".c"] = "text/plain",
-                [".cc"] = "text/plain",
-                [".conf"] = "text/plain",
-                [".cpp"] = "text/plain",
-                [".cs"] = "text/plain",
-                [".csproj"] = "application/xml",
-                [".csv"] = "text/csv",
-                [".doc"] = "application/msword",
-                [".docx"] = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                [".env"] = "text/plain",
-                [".flac"] = "audio/flac",
-                [".gif"] = "image/gif",
-                [".go"] = "text/plain",
-                [".gradle"] = "text/plain",
-                [".gz"] = "application/gzip",
-                [".h"] = "text/plain",
-                [".hpp"] = "text/plain",
-                [".heic"] = "image/heic",
-                [".htm"] = "text/html",
-                [".html"] = "text/html",
-                [".ini"] = "text/plain",
-                [".java"] = "text/plain",
-                [".jpeg"] = "image/jpeg",
-                [".jpg"] = "image/jpeg",
-                [".js"] = "application/javascript",
-                [".json"] = "application/json",
-                [".kt"] = "text/plain",
-                [".kts"] = "text/plain",
-                [".m"] = "text/plain",
-                [".m4a"] = "audio/mp4",
-                [".markdown"] = "text/markdown",
-                [".md"] = "text/markdown",
-                [".mm"] = "text/plain",
-                [".mkv"] = "video/x-matroska",
-                [".mov"] = "video/quicktime",
-                [".mp3"] = "audio/mpeg",
-                [".mp4"] = "video/mp4",
-                [".odp"] = "application/vnd.oasis.opendocument.presentation",
-                [".ods"] = "application/vnd.oasis.opendocument.spreadsheet",
-                [".odt"] = "application/vnd.oasis.opendocument.text",
-                [".ogg"] = "audio/ogg",
-                [".pdf"] = "application/pdf",
-                [".php"] = "text/plain",
-                [".png"] = "image/png",
-                [".props"] = "application/xml",
-                [".ppt"] = "application/vnd.ms-powerpoint",
-                [".pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                [".py"] = "text/x-python",
-                [".rar"] = "application/vnd.rar",
-                [".rb"] = "text/plain",
-                [".rs"] = "text/plain",
-                [".rtf"] = "application/rtf",
-                [".sh"] = "application/x-sh",
-                [".sln"] = "text/plain",
-                [".svg"] = "image/svg+xml",
-                [".swift"] = "text/plain",
-                [".tar"] = "application/x-tar",
-                [".targets"] = "application/xml",
-                [".text"] = "text/plain",
-                [".toml"] = "text/plain",
-                [".ts"] = "application/typescript",
-                [".txt"] = "text/plain",
-                [".wav"] = "audio/wav",
-                [".webm"] = "video/webm",
-                [".webp"] = "image/webp",
-                [".xls"] = "application/vnd.ms-excel",
-                [".xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                [".xml"] = "application/xml",
-                [".yaml"] = "application/yaml",
-                [".yml"] = "application/yaml",
-                [".zip"] = "application/zip",
-                [".zsh"] = "text/plain",
-            };
-
         private static readonly HashSet<string> ArchiveFileExtensions =
             new(StringComparer.OrdinalIgnoreCase)
             {
@@ -118,7 +39,7 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Only file entries can be opened with a file route.", nameof(file));
             }
 
-            string? contentType = ResolvePreferredContentType(file.Name, file.ContentType);
+            string? contentType = CottonFileContentTypeResolver.Resolve(file.Name, file.ContentType);
             if (file.IsImage)
             {
                 return new CottonFileOpenRoute(
@@ -186,23 +107,12 @@ namespace Cotton.Mobile.Services
 
         public static string ResolveRequiredContentType(string? fileName, string? contentType)
         {
-            return ResolvePreferredContentType(fileName, contentType) ?? "application/octet-stream";
+            return CottonFileContentTypeResolver.ResolveRequired(fileName, contentType);
         }
 
         public static string? ResolvePreferredContentType(string? fileName, string? contentType)
         {
-            string mediaType = CottonFileKindClassifier.CreateContentTypeMediaType(contentType);
-            if (!string.IsNullOrWhiteSpace(mediaType))
-            {
-                return mediaType;
-            }
-
-            string extension = string.IsNullOrWhiteSpace(fileName)
-                ? string.Empty
-                : Path.GetExtension(fileName.Trim());
-            return ExtensionContentTypes.TryGetValue(extension, out string? resolvedContentType)
-                ? resolvedContentType
-                : null;
+            return CottonFileContentTypeResolver.Resolve(fileName, contentType);
         }
 
         private static bool CanPreviewText(CottonFileBrowserEntry file, long? availableSizeBytes)

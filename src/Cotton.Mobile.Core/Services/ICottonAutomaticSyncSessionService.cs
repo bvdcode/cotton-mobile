@@ -8,7 +8,7 @@ namespace Cotton.Mobile.Services
         void Initialize();
 
         Task SetSessionAsync(
-            Uri? instanceUri,
+            CottonAuthenticatedSessionScope? sessionScope,
             CancellationToken cancellationToken = default);
     }
 }

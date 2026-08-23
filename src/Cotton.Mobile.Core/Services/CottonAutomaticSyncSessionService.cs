@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Services
         private readonly ILogger<CottonAutomaticSyncSessionService> _logger =
             logger ?? throw new ArgumentNullException(nameof(logger));
 
-        private Uri? _instanceUri;
+        private CottonAuthenticatedSessionScope? _sessionScope;
         private bool _initialized;
 
         public void Initialize()
@@ -42,20 +42,20 @@ namespace Cotton.Mobile.Services
         }
 
         public async Task SetSessionAsync(
-            Uri? instanceUri,
+            CottonAuthenticatedSessionScope? sessionScope,
             CancellationToken cancellationToken = default)
         {
             await _lifecycleGate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                Uri? previousInstanceUri = _instanceUri;
-                _instanceUri = instanceUri;
-                if (previousInstanceUri is not null && !Uri.Equals(previousInstanceUri, instanceUri))
+                CottonAuthenticatedSessionScope? previousSessionScope = _sessionScope;
+                _sessionScope = sessionScope;
+                if (previousSessionScope is not null && !HasSameIdentity(previousSessionScope, sessionScope))
                 {
-                    _dispatcher.Cancel(previousInstanceUri);
+                    _dispatcher.Cancel(previousSessionScope);
                 }
 
-                if (instanceUri is null)
+                if (sessionScope is null)
                 {
                     await CancelBackgroundWorkBestEffortAsync(cancellationToken).ConfigureAwait(false);
                     return;
@@ -65,7 +65,7 @@ namespace Cotton.Mobile.Services
                 if (_foregroundService.IsForeground)
                 {
                     _ = RunBestEffortAsync(
-                        instanceUri,
+                        sessionScope,
                         CottonAutomaticSyncTrigger.ApplicationResumed,
                         CancellationToken.None);
                 }
@@ -79,9 +79,9 @@ namespace Cotton.Mobile.Services
         public void Dispose()
         {
             _foregroundService.Resumed -= OnApplicationResumed;
-            if (_instanceUri is not null)
+            if (_sessionScope is not null)
             {
-                _dispatcher.Cancel(_instanceUri);
+                _dispatcher.Cancel(_sessionScope);
             }
 
             _lifecycleGate.Dispose();
@@ -100,10 +100,10 @@ namespace Cotton.Mobile.Services
                 await _lifecycleGate.WaitAsync().ConfigureAwait(false);
                 try
                 {
-                    if (_instanceUri is not null)
+                    if (_sessionScope is not null)
                     {
                         _ = RunBestEffortAsync(
-                            _instanceUri,
+                            _sessionScope,
                             CottonAutomaticSyncTrigger.ApplicationResumed,
                             CancellationToken.None);
                     }
@@ -120,14 +120,14 @@ namespace Cotton.Mobile.Services
         }
 
         private async Task RunBestEffortAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             CottonAutomaticSyncTrigger trigger,
             CancellationToken cancellationToken)
         {
             try
             {
                 CottonAutomaticSyncRunResult result = await _dispatcher
-                    .RunAsync(instanceUri, trigger, cancellationToken)
+                    .RunAsync(sessionScope, trigger, cancellationToken)
                     .ConfigureAwait(false);
                 if (result.HasFailures)
                 {
@@ -168,6 +168,15 @@ namespace Cotton.Mobile.Services
             {
                 CottonAutomaticSyncLog.BackgroundCancelFailed(_logger, exception);
             }
+        }
+
+        private static bool HasSameIdentity(
+            CottonAuthenticatedSessionScope left,
+            CottonAuthenticatedSessionScope? right)
+        {
+            return right is not null
+                && Uri.Equals(left.InstanceUri, right.InstanceUri)
+                && string.Equals(left.AccountScopeKey, right.AccountScopeKey, StringComparison.Ordinal);
         }
     }
 }

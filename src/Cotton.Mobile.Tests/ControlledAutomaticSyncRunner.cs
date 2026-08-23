@@ -15,7 +15,7 @@ namespace Cotton.Mobile.Tests
         public CottonAutomaticSyncRunResult Result { get; set; } = CottonAutomaticSyncRunResult.Empty;
 
         public Task<CottonAutomaticSyncRunResult> RunAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             CottonAutomaticSyncTrigger trigger,
             CancellationToken cancellationToken = default)
         {
@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Tests
         }
 
         public Task<CottonAutomaticSyncRunResult> RunRootsAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             IReadOnlyCollection<Guid> rootIds,
             CancellationToken cancellationToken = default)
         {

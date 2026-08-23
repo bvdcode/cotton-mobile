@@ -24,11 +24,11 @@ namespace Cotton.Mobile.Services
             logger ?? throw new ArgumentNullException(nameof(logger));
 
         public Task<CottonAutomaticSyncRunResult> RunAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             CottonAutomaticSyncTrigger trigger,
             CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(sessionScope);
             if (!Enum.IsDefined(trigger))
             {
                 throw new ArgumentOutOfRangeException(nameof(trigger), "Automatic sync trigger is not supported.");
@@ -37,17 +37,17 @@ namespace Cotton.Mobile.Services
             CottonSyncDiagnosticLog.AutomaticRequested(_logger, trigger);
 
             return RunSelectedAsync(
-                instanceUri,
+                sessionScope,
                 root => ShouldRun(root, trigger),
                 cancellationToken);
         }
 
         public Task<CottonAutomaticSyncRunResult> RunRootsAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             IReadOnlyCollection<Guid> rootIds,
             CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(sessionScope);
             ArgumentNullException.ThrowIfNull(rootIds);
             HashSet<Guid> selectedRootIds = [.. rootIds];
             if (selectedRootIds.Contains(Guid.Empty))
@@ -58,22 +58,26 @@ namespace Cotton.Mobile.Services
             CottonSyncDiagnosticLog.AutomaticRootsRequested(_logger, selectedRootIds.Count);
 
             return RunSelectedAsync(
-                instanceUri,
+                sessionScope,
                 root => selectedRootIds.Contains(root.Id),
                 cancellationToken);
         }
 
         private async Task<CottonAutomaticSyncRunResult> RunSelectedAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             Func<CottonSyncRootSnapshot, bool> shouldRun,
             CancellationToken cancellationToken)
         {
             IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore
-                .LoadAsync(instanceUri, cancellationToken)
+                .LoadAsync(sessionScope.InstanceUri, cancellationToken)
                 .ConfigureAwait(false);
+            CottonSyncRootSnapshot[] accountRoots = [.. roots.Where(root => string.Equals(
+                root.AccountScopeKey,
+                sessionScope.AccountScopeKey,
+                StringComparison.Ordinal))];
             IReadOnlySet<Guid> activeRootIds = roots.Select(root => root.Id).ToHashSet();
-            CottonSyncRootSnapshot[] selectedRoots = [.. roots.Where(shouldRun)];
-            CottonSyncDiagnosticLog.AutomaticRootsSelected(_logger, selectedRoots.Length, roots.Count);
+            CottonSyncRootSnapshot[] selectedRoots = [.. accountRoots.Where(shouldRun)];
+            CottonSyncDiagnosticLog.AutomaticRootsSelected(_logger, selectedRoots.Length, accountRoots.Length);
             List<Guid> succeededRootIds = [];
             List<Guid> failedRootIds = [];
             List<CottonAutomaticSyncRootStatusSnapshot> updatedStatuses = [];
@@ -82,7 +86,9 @@ namespace Cotton.Mobile.Services
                 cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    await _coordinator.RunRootAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+                    await _coordinator
+                        .RunRootAsync(sessionScope.InstanceUri, root, cancellationToken)
+                        .ConfigureAwait(false);
                     succeededRootIds.Add(root.Id);
                     updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         root.Id,
@@ -104,7 +110,7 @@ namespace Cotton.Mobile.Services
             }
 
             await _statusStore
-                .UpdateAsync(instanceUri, activeRootIds, updatedStatuses, cancellationToken)
+                .UpdateAsync(sessionScope.InstanceUri, activeRootIds, updatedStatuses, cancellationToken)
                 .ConfigureAwait(false);
             CottonSyncDiagnosticLog.AutomaticCompleted(
                 _logger,

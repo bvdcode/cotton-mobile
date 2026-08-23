@@ -39,21 +39,25 @@ namespace Cotton.Mobile.Platforms.Android
 
             AndroidAutomaticSyncDiagnosticLog.Started(_logger, trigger, retryRootId.HasValue);
 
-            Uri? instanceUri = await _sessionService
-                .GetRememberedSessionInstanceAsync(cancellationToken)
+            CottonSessionResult session = await _sessionService
+                .RestoreAsync(cancellationToken)
                 .ConfigureAwait(false);
-            if (instanceUri is null)
+            if (!session.IsAuthenticated || session.InstanceUri is null || session.User is null)
             {
                 AndroidAutomaticSyncDiagnosticLog.SessionMissing(_logger);
                 return AndroidAutomaticSyncExecutionResult.NoSession;
             }
 
+            CottonAuthenticatedSessionScope sessionScope = new(
+                session.InstanceUri,
+                CottonAccountScopeKey.Create(session.User.Id));
+
             CottonAutomaticSyncRunResult result = retryRootId.HasValue
                 ? await _dispatcher
-                    .RunRootsAsync(instanceUri, [retryRootId.Value], cancellationToken)
+                    .RunRootsAsync(sessionScope, [retryRootId.Value], cancellationToken)
                     .ConfigureAwait(false)
                 : await _dispatcher
-                    .RunAsync(instanceUri, trigger, cancellationToken)
+                    .RunAsync(sessionScope, trigger, cancellationToken)
                     .ConfigureAwait(false);
             AndroidAutomaticSyncDiagnosticLog.DispatchCompleted(_logger, result.FailedRootIds.Count);
             if (!result.HasFailures)

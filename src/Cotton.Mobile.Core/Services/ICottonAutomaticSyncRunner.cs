@@ -6,12 +6,12 @@ namespace Cotton.Mobile.Services
     public interface ICottonAutomaticSyncRunner
     {
         Task<CottonAutomaticSyncRunResult> RunAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             CottonAutomaticSyncTrigger trigger,
             CancellationToken cancellationToken = default);
 
         Task<CottonAutomaticSyncRunResult> RunRootsAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             IReadOnlyCollection<Guid> rootIds,
             CancellationToken cancellationToken = default);
     }

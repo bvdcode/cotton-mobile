@@ -39,7 +39,7 @@ namespace Cotton.Mobile.Tests
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             await runner.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.MediaStoreChanged);
 
             Assert.Equal([mediaRoot.Id], coordinator.RootIds);
@@ -60,12 +60,48 @@ namespace Cotton.Mobile.Tests
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             await runner.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.PeriodicReconciliation);
 
             Assert.Equal(2, coordinator.RunRootCount);
             Assert.Contains(folderRoot.Id, coordinator.RootIds);
             Assert.Contains(mediaRoot.Id, coordinator.RootIds);
+        }
+
+        [Fact]
+        public async Task PeriodicTriggerRunsOnlyCurrentAccountRoots()
+        {
+            CottonSyncRootSnapshot currentRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
+            CottonSyncRootSnapshot otherAccountRoot = SyncTestRootFactory.CreateMediaStoreRoot(
+                accountScopeKey: "account-2");
+            await _rootStore.SaveAsync(
+                SyncTestRootFactory.InstanceUri,
+                [currentRoot, otherAccountRoot]);
+            await _statusStore.UpdateAsync(
+                SyncTestRootFactory.InstanceUri,
+                new HashSet<Guid> { currentRoot.Id, otherAccountRoot.Id },
+                [CottonAutomaticSyncRootStatusSnapshot.Failed(
+                    otherAccountRoot.Id,
+                    _timeProvider.GetUtcNow().UtcDateTime,
+                    CottonAutomaticSyncFailureKind.AuthenticationRequired)]);
+            RecordingDeviceToCloudSyncCoordinator coordinator = new();
+            CottonAutomaticSyncRunner runner = new(
+                _rootStore,
+                coordinator,
+                _statusStore,
+                _timeProvider,
+                NullLogger<CottonAutomaticSyncRunner>.Instance);
+
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(
+                SyncTestRootFactory.SessionScope,
+                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+
+            Assert.Equal([currentRoot.Id], coordinator.RootIds);
+            Assert.Equal([currentRoot.Id], result.SucceededRootIds);
+            IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
+                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
+            Assert.Equal(CottonAutomaticSyncOutcome.Succeeded, statuses[currentRoot.Id].Outcome);
+            Assert.Equal(CottonAutomaticSyncOutcome.Failed, statuses[otherAccountRoot.Id].Outcome);
         }
 
         [Fact]
@@ -86,7 +122,7 @@ namespace Cotton.Mobile.Tests
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.PeriodicReconciliation);
 
             Assert.Equal(2, coordinator.RunRootCount);
@@ -115,7 +151,7 @@ namespace Cotton.Mobile.Tests
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunRootsAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 [selectedRoot.Id]);
 
             Assert.Equal([selectedRoot.Id], coordinator.RootIds);
@@ -142,7 +178,7 @@ namespace Cotton.Mobile.Tests
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.PeriodicReconciliation);
 
             Assert.Equal([timedOutRoot.Id], result.FailedRootIds);

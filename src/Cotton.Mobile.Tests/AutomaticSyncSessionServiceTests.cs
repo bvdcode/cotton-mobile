@@ -20,7 +20,7 @@ namespace Cotton.Mobile.Tests
                 NullLogger<CottonAutomaticSyncSessionService>.Instance);
             sessionService.Initialize();
 
-            Task setSession = sessionService.SetSessionAsync(SyncTestRootFactory.InstanceUri);
+            Task setSession = sessionService.SetSessionAsync(SyncTestRootFactory.SessionScope);
 
             await setSession.WaitAsync(TimeSpan.FromSeconds(5));
             await runner.WaitForNextRunAsync();
@@ -43,12 +43,40 @@ namespace Cotton.Mobile.Tests
                 dispatcher,
                 NullLogger<CottonAutomaticSyncSessionService>.Instance);
             sessionService.Initialize();
-            await sessionService.SetSessionAsync(SyncTestRootFactory.InstanceUri);
+            await sessionService.SetSessionAsync(SyncTestRootFactory.SessionScope);
             await runner.WaitForNextRunAsync();
 
-            await sessionService.SetSessionAsync(instanceUri: null);
+            await sessionService.SetSessionAsync(sessionScope: null);
 
             Assert.Equal(1, scheduler.CancelCount);
+        }
+
+        [Fact]
+        public async Task ChangingAccountOnTheSameInstanceStartsAnIndependentSession()
+        {
+            TestApplicationForegroundService foregroundService = new();
+            foregroundService.NotifyResumed();
+            RecordingAutomaticSyncBackgroundScheduler scheduler = new();
+            using ControlledAutomaticSyncRunner runner = new();
+            CottonAutomaticSyncDispatcher dispatcher = new(runner);
+            using CottonAutomaticSyncSessionService sessionService = new(
+                foregroundService,
+                scheduler,
+                dispatcher,
+                NullLogger<CottonAutomaticSyncSessionService>.Instance);
+            sessionService.Initialize();
+            await sessionService.SetSessionAsync(SyncTestRootFactory.SessionScope);
+            await runner.WaitForNextRunAsync();
+            CottonAuthenticatedSessionScope otherAccountScope = new(
+                SyncTestRootFactory.InstanceUri,
+                "account-2");
+
+            await sessionService.SetSessionAsync(otherAccountScope);
+            await runner.WaitForNextRunAsync();
+
+            Assert.Equal(2, scheduler.ScheduleCount);
+            Assert.Equal(2, runner.Triggers.Count);
+            runner.ReleaseRun();
         }
 
         [Fact]
@@ -70,7 +98,7 @@ namespace Cotton.Mobile.Tests
                 NullLogger<CottonAutomaticSyncSessionService>.Instance);
             sessionService.Initialize();
 
-            await sessionService.SetSessionAsync(SyncTestRootFactory.InstanceUri);
+            await sessionService.SetSessionAsync(SyncTestRootFactory.SessionScope);
             await runner.WaitForNextRunAsync();
             runner.ReleaseRun();
             await scheduler.WaitForRootRetryAsync();

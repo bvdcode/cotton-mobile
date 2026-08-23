@@ -11,15 +11,15 @@ namespace Cotton.Mobile.Tests
             using ControlledAutomaticSyncRunner runner = new();
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
             Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.ApplicationResumed);
             await runner.WaitForNextRunAsync();
 
             Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.MediaStoreChanged);
             Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.MediaStoreChanged);
             runner.ReleaseRun();
             await runner.WaitForNextRunAsync();
@@ -36,15 +36,15 @@ namespace Cotton.Mobile.Tests
             using ControlledAutomaticSyncRunner runner = new();
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
             Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.MediaStoreChanged);
             await runner.WaitForNextRunAsync();
 
             Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.MediaStoreChanged);
             Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.PeriodicReconciliation);
             runner.ReleaseRun();
             await runner.WaitForNextRunAsync();
@@ -66,12 +66,12 @@ namespace Cotton.Mobile.Tests
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
             using CancellationTokenSource cancellationSource = new();
             Task<CottonAutomaticSyncRunResult> cancelledWait = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.PeriodicReconciliation,
                 cancellationSource.Token);
             await runner.WaitForNextRunAsync();
             Task<CottonAutomaticSyncRunResult> survivingWait = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.MediaStoreChanged);
 
             await cancellationSource.CancelAsync();
@@ -91,6 +91,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task DifferentAccountsOnTheSameInstanceDoNotShareExecution()
+        {
+            using ControlledAutomaticSyncRunner runner = new();
+            CottonAutomaticSyncDispatcher dispatcher = new(runner);
+            CottonAuthenticatedSessionScope otherAccountScope = new(
+                SyncTestRootFactory.InstanceUri,
+                "account-2");
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
+                SyncTestRootFactory.SessionScope,
+                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            await runner.WaitForNextRunAsync();
+
+            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(
+                otherAccountScope,
+                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            await runner.WaitForNextRunAsync();
+
+            Assert.Equal(2, runner.Triggers.Count);
+            runner.ReleaseRun();
+            runner.ReleaseRun();
+            await Task.WhenAll(first, second);
+        }
+
+        [Fact]
         public async Task SelectedRootsCollapseIntoOneFollowUpRun()
         {
             using ControlledAutomaticSyncRunner runner = new();
@@ -98,15 +122,15 @@ namespace Cotton.Mobile.Tests
             Guid firstRootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
             Guid secondRootId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
             Task<CottonAutomaticSyncRunResult> first = dispatcher.RunRootsAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 [firstRootId]);
             await runner.WaitForNextRunAsync();
 
             Task<CottonAutomaticSyncRunResult> second = dispatcher.RunRootsAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 [firstRootId]);
             Task<CottonAutomaticSyncRunResult> third = dispatcher.RunRootsAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 [secondRootId]);
             runner.ReleaseRun();
             await runner.WaitForNextRunAsync();
@@ -125,15 +149,15 @@ namespace Cotton.Mobile.Tests
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
             Guid rootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
             Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.MediaStoreChanged);
             await runner.WaitForNextRunAsync();
 
             Task<CottonAutomaticSyncRunResult> second = dispatcher.RunRootsAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 [rootId]);
             Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(
-                SyncTestRootFactory.InstanceUri,
+                SyncTestRootFactory.SessionScope,
                 CottonAutomaticSyncTrigger.PeriodicReconciliation);
             runner.ReleaseRun();
             await runner.WaitForNextRunAsync();

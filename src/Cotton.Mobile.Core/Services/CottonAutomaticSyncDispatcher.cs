@@ -6,34 +6,34 @@ namespace Cotton.Mobile.Services
     public class CottonAutomaticSyncDispatcher(ICottonAutomaticSyncRunner runner)
     {
         private readonly Lock _gate = new();
-        private readonly Dictionary<string, CottonAutomaticSyncDispatchState> _states =
-            new(StringComparer.Ordinal);
+        private readonly Dictionary<(string InstanceUri, string AccountScopeKey), CottonAutomaticSyncDispatchState>
+            _states = [];
         private readonly ICottonAutomaticSyncRunner _runner =
             runner ?? throw new ArgumentNullException(nameof(runner));
 
         public Task<CottonAutomaticSyncRunResult> RunAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             CottonAutomaticSyncTrigger trigger,
             CancellationToken cancellationToken = default)
         {
-            CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
+            ArgumentNullException.ThrowIfNull(sessionScope);
             if (!Enum.IsDefined(trigger))
             {
                 throw new ArgumentOutOfRangeException(nameof(trigger), "Automatic sync trigger is not supported.");
             }
 
             return QueueAsync(
-                instanceUri,
+                sessionScope,
                 state => state.Queue(trigger),
                 cancellationToken);
         }
 
         public Task<CottonAutomaticSyncRunResult> RunRootsAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             IReadOnlyCollection<Guid> rootIds,
             CancellationToken cancellationToken = default)
         {
-            CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
+            ArgumentNullException.ThrowIfNull(sessionScope);
             ArgumentNullException.ThrowIfNull(rootIds);
             Guid[] selectedRootIds = [.. rootIds.Distinct().Order()];
             if (selectedRootIds.Length == 0 || selectedRootIds.Contains(Guid.Empty))
@@ -42,30 +42,30 @@ namespace Cotton.Mobile.Services
             }
 
             return QueueAsync(
-                instanceUri,
+                sessionScope,
                 state => state.QueueRoots(selectedRootIds),
                 cancellationToken);
         }
 
-        public void Cancel(Uri instanceUri)
+        public void Cancel(CottonAuthenticatedSessionScope sessionScope)
         {
-            CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
+            ArgumentNullException.ThrowIfNull(sessionScope);
             CottonAutomaticSyncDispatchState? state;
             lock (_gate)
             {
-                _states.TryGetValue(instanceUri.AbsoluteUri, out state);
+                _states.TryGetValue(CreateKey(sessionScope), out state);
             }
 
             state?.Cancel();
         }
 
         private Task<CottonAutomaticSyncRunResult> QueueAsync(
-            Uri instanceUri,
+            CottonAuthenticatedSessionScope sessionScope,
             Action<CottonAutomaticSyncDispatchState> queue,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            string key = instanceUri.AbsoluteUri;
+            (string InstanceUri, string AccountScopeKey) key = CreateKey(sessionScope);
             CottonAutomaticSyncDispatchState state;
             Task<CottonAutomaticSyncRunResult> executionTask;
             lock (_gate)
@@ -77,7 +77,7 @@ namespace Cotton.Mobile.Services
                 }
 
                 queue(state);
-                state.ExecutionTask ??= ExecuteAsync(key, instanceUri, state);
+                state.ExecutionTask ??= ExecuteAsync(key, sessionScope, state);
                 executionTask = state.ExecutionTask;
             }
 
@@ -85,8 +85,8 @@ namespace Cotton.Mobile.Services
         }
 
         private async Task<CottonAutomaticSyncRunResult> ExecuteAsync(
-            string key,
-            Uri instanceUri,
+            (string InstanceUri, string AccountScopeKey) key,
+            CottonAuthenticatedSessionScope sessionScope,
             CottonAutomaticSyncDispatchState state)
         {
             CottonAutomaticSyncRunResult result = CottonAutomaticSyncRunResult.Empty;
@@ -110,13 +110,13 @@ namespace Cotton.Mobile.Services
                     if (request.Trigger.HasValue)
                     {
                         next = await _runner
-                            .RunAsync(instanceUri, request.Trigger.Value, state.CancellationToken)
+                            .RunAsync(sessionScope, request.Trigger.Value, state.CancellationToken)
                             .ConfigureAwait(false);
                     }
                     else
                     {
                         next = await _runner
-                            .RunRootsAsync(instanceUri, request.RootIds, state.CancellationToken)
+                            .RunRootsAsync(sessionScope, request.RootIds, state.CancellationToken)
                             .ConfigureAwait(false);
                     }
 
@@ -136,6 +136,12 @@ namespace Cotton.Mobile.Services
 
                 state.Dispose();
             }
+        }
+
+        private static (string InstanceUri, string AccountScopeKey) CreateKey(
+            CottonAuthenticatedSessionScope sessionScope)
+        {
+            return (sessionScope.InstanceUri.AbsoluteUri, sessionScope.AccountScopeKey);
         }
     }
 }

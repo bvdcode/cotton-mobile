@@ -138,7 +138,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 state.Status = result.Message;
-                QueueChangedRoot(state, instanceUri, state.AccountScopeKey, result, state.StatusRevision);
+                QueueChangedRoot(state, instanceUri, root.AccountScopeKey, result, state.StatusRevision);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -159,7 +159,7 @@ namespace Cotton.Mobile.ViewModels
         private void QueueChangedRoot(
             ISyncSettingsViewState state,
             Uri instanceUri,
-            string? accountScopeKey,
+            string accountScopeKey,
             SyncRootSetupResult setupResult,
             long statusRevision)
         {
@@ -176,14 +176,17 @@ namespace Cotton.Mobile.ViewModels
         private async Task RunChangedRootAsync(
             ISyncSettingsViewState state,
             Uri instanceUri,
-            string? accountScopeKey,
+            string accountScopeKey,
             Guid rootId,
             long statusRevision)
         {
             try
             {
                 CottonAutomaticSyncRunResult result = await _automaticSyncDispatcher
-                    .RunRootsAsync(instanceUri, [rootId], CancellationToken.None);
+                    .RunRootsAsync(
+                        new CottonAuthenticatedSessionScope(instanceUri, accountScopeKey),
+                        [rootId],
+                        CancellationToken.None);
                 if (result.HasFailures)
                 {
                     await _backgroundScheduler.ScheduleRootRetriesAsync(
@@ -213,7 +216,7 @@ namespace Cotton.Mobile.ViewModels
         private static bool IsCurrentAccount(
             ISyncSettingsViewState state,
             Uri instanceUri,
-            string? accountScopeKey)
+            string accountScopeKey)
         {
             return Uri.Equals(state.InstanceUri, instanceUri)
                 && string.Equals(state.AccountScopeKey, accountScopeKey, StringComparison.Ordinal);
@@ -222,7 +225,7 @@ namespace Cotton.Mobile.ViewModels
         private static bool HasExpectedStatus(
             ISyncSettingsViewState state,
             Uri instanceUri,
-            string? accountScopeKey,
+            string accountScopeKey,
             long statusRevision)
         {
             return IsCurrentAccount(state, instanceUri, accountScopeKey)

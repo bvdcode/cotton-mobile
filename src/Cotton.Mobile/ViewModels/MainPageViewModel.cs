@@ -211,13 +211,14 @@ namespace Cotton.Mobile.ViewModels
                 Display.ShowAuthenticated(profile, state.Status);
                 RefreshCommands();
                 await _notificationSessionService.SetSessionAsync(state.InstanceUriValue);
-                await _automaticSyncSessionService.SetSessionAsync(state.InstanceUriValue);
+                await _automaticSyncSessionService.SetSessionAsync(
+                    new CottonAuthenticatedSessionScope(state.InstanceUriValue, profile.AccountScopeKey));
 
                 return;
             }
 
             await _notificationSessionService.SetSessionAsync(instanceUri: null);
-            await _automaticSyncSessionService.SetSessionAsync(instanceUri: null);
+            await _automaticSyncSessionService.SetSessionAsync(sessionScope: null);
             Sync.Clear();
             Display.ShowSignIn(state.Status);
             RefreshCommands();

@@ -81,7 +81,7 @@ namespace Cotton.Mobile.Services
                 executionTask = state.ExecutionTask;
             }
 
-            return WaitForCompletionAsync(executionTask, state, cancellationToken);
+            return executionTask.WaitAsync(cancellationToken);
         }
 
         private async Task<CottonAutomaticSyncRunResult> ExecuteAsync(
@@ -136,17 +136,6 @@ namespace Cotton.Mobile.Services
 
                 state.Dispose();
             }
-        }
-
-        private static async Task<CottonAutomaticSyncRunResult> WaitForCompletionAsync(
-            Task<CottonAutomaticSyncRunResult> executionTask,
-            CottonAutomaticSyncDispatchState state,
-            CancellationToken cancellationToken)
-        {
-            using CancellationTokenRegistration registration = cancellationToken.Register(
-                static dispatchState => ((CottonAutomaticSyncDispatchState)dispatchState!).Cancel(),
-                state);
-            return await executionTask.ConfigureAwait(false);
         }
     }
 }

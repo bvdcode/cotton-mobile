@@ -60,20 +60,34 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task CallerCancellationStopsSharedRun()
+        public async Task CallerCancellationDoesNotStopSharedRun()
         {
             using ControlledAutomaticSyncRunner runner = new();
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
             using CancellationTokenSource cancellationSource = new();
-            Task<CottonAutomaticSyncRunResult> run = dispatcher.RunAsync(
+            Task<CottonAutomaticSyncRunResult> cancelledWait = dispatcher.RunAsync(
                 SyncTestRootFactory.InstanceUri,
                 CottonAutomaticSyncTrigger.PeriodicReconciliation,
                 cancellationSource.Token);
             await runner.WaitForNextRunAsync();
+            Task<CottonAutomaticSyncRunResult> survivingWait = dispatcher.RunAsync(
+                SyncTestRootFactory.InstanceUri,
+                CottonAutomaticSyncTrigger.MediaStoreChanged);
 
             await cancellationSource.CancelAsync();
 
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => run);
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => cancelledWait);
+            Assert.False(survivingWait.IsCompleted);
+            runner.ReleaseRun();
+            await runner.WaitForNextRunAsync();
+            runner.ReleaseRun();
+            await survivingWait;
+            Assert.Equal(
+                [
+                    CottonAutomaticSyncTrigger.PeriodicReconciliation,
+                    CottonAutomaticSyncTrigger.MediaStoreChanged,
+                ],
+                runner.Triggers);
         }
 
         [Fact]

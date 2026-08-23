@@ -1,0 +1,8 @@
+{
+  "direction": "device-to-cloud",
+  "uploadsNewFiles": true,
+  "uploadsChangedFiles": false,
+  "downloadsFiles": false,
+  "twoWaySync": false,
+  "deleteAfterConfirmedUpload": true
+}

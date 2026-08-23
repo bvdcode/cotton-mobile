@@ -1,1 +1,1 @@
-Securely sync Android folders with your Cotton Cloud
+Back up selected Android folders to your Cotton Cloud

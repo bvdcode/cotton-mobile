@@ -5,6 +5,7 @@ import argparse
 import logging
 import os
 import struct
+import json
 from pathlib import Path
 
 from google_play_listing import (
@@ -140,6 +141,8 @@ def load_store_listing(options: GooglePlayListingUploadOptions) -> StoreListing:
         icon_path=resolve_required_file(graphics_dir / "icon.png"),
         feature_graphic_path=resolve_required_file(graphics_dir / "feature-graphic.png"),
         phone_screenshot_paths=phone_screenshot_paths,
+        capabilities_path=resolve_required_file(options.listing_dir / "capabilities.json"),
+        metadata_path=resolve_required_file(graphics_dir / "metadata.json"),
     )
 
 
@@ -177,6 +180,42 @@ def validate_store_listing(listing: StoreListing) -> None:
     validate_icon_png(listing.icon_path)
     validate_feature_graphic_png(listing.feature_graphic_path)
     validate_phone_screenshots(listing.phone_screenshot_paths)
+    validate_product_capabilities(listing)
+
+
+def validate_product_capabilities(listing: StoreListing) -> None:
+    capabilities = json.loads(listing.capabilities_path.read_text(encoding="utf-8"))
+    expected = {
+        "direction": "device-to-cloud",
+        "uploadsNewFiles": True,
+        "uploadsChangedFiles": False,
+        "downloadsFiles": False,
+        "twoWaySync": False,
+        "deleteAfterConfirmedUpload": True,
+    }
+    if capabilities != expected:
+        raise GooglePlayListingUploadError("Listing capabilities do not match the upload-only product contract.")
+
+    listing_text = f"{listing.short_description}\n{listing.full_description}".casefold()
+    forbidden_claims = ("sync changes in both directions", "upload new and changed")
+    if any(claim in listing_text for claim in forbidden_claims):
+        raise GooglePlayListingUploadError("Listing text claims a capability the application does not support.")
+    if "two-way sync" in listing_text and "does not" not in listing_text:
+        raise GooglePlayListingUploadError("Listing text claims two-way sync support.")
+
+    metadata = json.loads(listing.metadata_path.read_text(encoding="utf-8"))
+    metadata_text = json.dumps(metadata, ensure_ascii=False).casefold()
+    if any(claim in metadata_text for claim in forbidden_claims):
+        raise GooglePlayListingUploadError("Listing image metadata claims an unsupported capability.")
+
+    declared_paths = tuple(
+        entry["path"] for entry in metadata.get("phoneScreenshots", [])
+    )
+    actual_paths = tuple(
+        f"phone-screenshots/{path.name}" for path in listing.phone_screenshot_paths
+    )
+    if declared_paths != actual_paths:
+        raise GooglePlayListingUploadError("Listing screenshot metadata does not match uploaded screenshots.")
 
 
 def validate_icon_png(path: Path) -> None:

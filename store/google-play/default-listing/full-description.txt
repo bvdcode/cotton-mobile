@@ -1,13 +1,13 @@
-Keep your Android folders connected to your Cotton Cloud — securely and on your terms.
+Back up new files from selected Android folders and media albums to your Cotton Cloud.
 
-Choose a cloud folder, pair it with a folder on your device, and decide how files should move.
+Choose an existing cloud folder, then select a folder or one or more media albums on your device.
 
-• Upload new and changed files from Android.
-• Sync changes in both directions.
-• Review destructive actions before anything is removed.
-• Keep local originals, or remove them only after a confirmed upload.
-• Run, pause, resume, refresh, or stop each sync folder independently.
+• Upload new files from Android to Cotton Cloud.
+• Keep local originals, or remove them only after the uploaded cloud revision is confirmed.
+• Run, pause, resume, reconnect, or remove each configured upload folder independently.
+• Continue periodic upload checks in the background when Android allows them.
+• Preserve your local file if its cloud revision changes before cleanup.
 
 Connect by entering your Cotton Cloud URL and approve access securely in your browser. Cotton Cloud restores your session on the next launch, while sign-out clears local session data when you need it.
 
-Cotton Cloud for Android is currently available through testing tracks while we continue refining the sync experience.
+Cotton Cloud for Android performs upload-only backup. It does not download cloud files to your device or provide two-way synchronization.

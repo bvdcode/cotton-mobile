@@ -129,10 +129,10 @@ namespace Cotton.Mobile.Services
                 CottonAutomaticSyncRunResult result = await _dispatcher
                     .RunAsync(sessionScope, trigger, cancellationToken)
                     .ConfigureAwait(false);
-                if (result.HasFailures)
+                if (result.RetryableRootIds.Count > 0)
                 {
                     await _backgroundScheduler
-                        .ScheduleRootRetriesAsync(result.FailedRootIds, cancellationToken)
+                        .ScheduleRootRetriesAsync(result.RetryableRootIds, cancellationToken)
                         .ConfigureAwait(false);
                 }
             }

@@ -11,8 +11,10 @@ namespace Cotton.Mobile.Services
         LocalAccessUnavailable,
         SourceChanged,
         TimedOut,
+        ServerUnavailable,
         ServerRejectedRequest,
         LocalReadFailed,
+        ActionRequired,
         Unexpected,
     }
 }

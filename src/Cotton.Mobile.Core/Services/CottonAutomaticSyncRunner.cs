@@ -79,20 +79,35 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot[] selectedRoots = [.. accountRoots.Where(shouldRun)];
             CottonSyncDiagnosticLog.AutomaticRootsSelected(_logger, selectedRoots.Length, accountRoots.Length);
             List<Guid> succeededRootIds = [];
-            List<Guid> failedRootIds = [];
+            List<CottonAutomaticSyncFailure> failures = [];
             List<CottonAutomaticSyncRootStatusSnapshot> updatedStatuses = [];
             foreach (CottonSyncRootSnapshot root in selectedRoots)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    await _coordinator
+                    CottonDeviceToCloudSyncRunSummary summary = await _coordinator
                         .RunRootAsync(sessionScope.InstanceUri, root, cancellationToken)
                         .ConfigureAwait(false);
-                    succeededRootIds.Add(root.Id);
-                    updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Succeeded(
-                        root.Id,
-                        _timeProvider.GetUtcNow().UtcDateTime));
+                    DateTime completedAt = _timeProvider.GetUtcNow().UtcDateTime;
+                    if (summary.HasBlockedItems)
+                    {
+                        CottonAutomaticSyncFailure failure = new(
+                            root.Id,
+                            CottonAutomaticSyncFailureKind.ActionRequired);
+                        failures.Add(failure);
+                        updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Failed(
+                            root.Id,
+                            completedAt,
+                            failure.Kind));
+                    }
+                    else
+                    {
+                        succeededRootIds.Add(root.Id);
+                        updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Succeeded(
+                            root.Id,
+                            completedAt));
+                    }
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
@@ -101,11 +116,14 @@ namespace Cotton.Mobile.Services
                 catch (Exception exception)
                 {
                     CottonAutomaticSyncLog.RootFailed(_logger, root.Id, exception);
-                    failedRootIds.Add(root.Id);
+                    CottonAutomaticSyncFailure failure = new(
+                        root.Id,
+                        CottonAutomaticSyncFailureClassifier.Classify(exception));
+                    failures.Add(failure);
                     updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Failed(
                         root.Id,
                         _timeProvider.GetUtcNow().UtcDateTime,
-                        CottonAutomaticSyncFailureClassifier.Classify(exception)));
+                        failure.Kind));
                 }
             }
 
@@ -115,8 +133,8 @@ namespace Cotton.Mobile.Services
             CottonSyncDiagnosticLog.AutomaticCompleted(
                 _logger,
                 succeededRootIds.Count,
-                failedRootIds.Count);
-            return new CottonAutomaticSyncRunResult(succeededRootIds, failedRootIds);
+                failures.Count);
+            return new CottonAutomaticSyncRunResult(succeededRootIds, failures);
         }
 
         private static bool ShouldRun(

@@ -11,6 +11,8 @@ namespace Cotton.Mobile.Tests
         [InlineData(HttpStatusCode.Unauthorized, CottonAutomaticSyncFailureKind.AuthenticationRequired)]
         [InlineData(HttpStatusCode.Forbidden, CottonAutomaticSyncFailureKind.AuthenticationRequired)]
         [InlineData(HttpStatusCode.GatewayTimeout, CottonAutomaticSyncFailureKind.TimedOut)]
+        [InlineData(HttpStatusCode.TooManyRequests, CottonAutomaticSyncFailureKind.ServerUnavailable)]
+        [InlineData(HttpStatusCode.ServiceUnavailable, CottonAutomaticSyncFailureKind.ServerUnavailable)]
         [InlineData(HttpStatusCode.BadRequest, CottonAutomaticSyncFailureKind.ServerRejectedRequest)]
         public void ApiStatusMapsToReadableFailureKind(
             HttpStatusCode statusCode,
@@ -33,6 +35,24 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(CottonAutomaticSyncFailureKind.LocalReadFailed, local);
             Assert.Equal(CottonAutomaticSyncFailureKind.NetworkUnavailable, network);
+        }
+
+        [Theory]
+        [InlineData(CottonAutomaticSyncFailureKind.NetworkUnavailable, true)]
+        [InlineData(CottonAutomaticSyncFailureKind.TimedOut, true)]
+        [InlineData(CottonAutomaticSyncFailureKind.ServerUnavailable, true)]
+        [InlineData(CottonAutomaticSyncFailureKind.LocalReadFailed, true)]
+        [InlineData(CottonAutomaticSyncFailureKind.AuthenticationRequired, false)]
+        [InlineData(CottonAutomaticSyncFailureKind.LocalAccessUnavailable, false)]
+        [InlineData(CottonAutomaticSyncFailureKind.SourceChanged, false)]
+        [InlineData(CottonAutomaticSyncFailureKind.ServerRejectedRequest, false)]
+        [InlineData(CottonAutomaticSyncFailureKind.ActionRequired, false)]
+        [InlineData(CottonAutomaticSyncFailureKind.Unexpected, false)]
+        public void RetryPolicyDistinguishesTransientFailures(
+            CottonAutomaticSyncFailureKind failureKind,
+            bool expected)
+        {
+            Assert.Equal(expected, CottonAutomaticSyncRetryPolicy.IsRetryable(failureKind));
         }
     }
 }

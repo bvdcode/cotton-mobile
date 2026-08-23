@@ -67,13 +67,19 @@ namespace Cotton.Mobile.Platforms.Android
 
             if (retryRootId.HasValue)
             {
-                return AndroidAutomaticSyncExecutionResult.RetryRequired;
+                return result.RetryableRootIds.Contains(retryRootId.Value)
+                    ? AndroidAutomaticSyncExecutionResult.RetryRequired
+                    : AndroidAutomaticSyncExecutionResult.PermanentFailure;
             }
 
-            await _backgroundScheduler
-                .ScheduleRootRetriesAsync(result.FailedRootIds, cancellationToken)
-                .ConfigureAwait(false);
-            AndroidAutomaticSyncDiagnosticLog.RetriesScheduled(_logger, result.FailedRootIds.Count);
+            if (result.RetryableRootIds.Count > 0)
+            {
+                await _backgroundScheduler
+                    .ScheduleRootRetriesAsync(result.RetryableRootIds, cancellationToken)
+                    .ConfigureAwait(false);
+                AndroidAutomaticSyncDiagnosticLog.RetriesScheduled(_logger, result.RetryableRootIds.Count);
+            }
+
             return AndroidAutomaticSyncExecutionResult.Completed;
         }
     }

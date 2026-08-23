@@ -21,10 +21,14 @@ namespace Cotton.Mobile.Services
                     CoreResources.SyncFailureSourceChanged,
                 CottonAutomaticSyncFailureKind.TimedOut =>
                     CoreResources.SyncFailureTimedOut,
+                CottonAutomaticSyncFailureKind.ServerUnavailable =>
+                    CoreResources.SyncFailureServerUnavailable,
                 CottonAutomaticSyncFailureKind.ServerRejectedRequest =>
                     CoreResources.SyncFailureServerRejectedRequest,
                 CottonAutomaticSyncFailureKind.LocalReadFailed =>
                     CoreResources.SyncFailureLocalReadFailed,
+                CottonAutomaticSyncFailureKind.ActionRequired =>
+                    CoreResources.SyncFailureActionRequired,
                 CottonAutomaticSyncFailureKind.Unexpected =>
                     CoreResources.SyncFailureUnexpected,
                 CottonAutomaticSyncFailureKind.None => throw new ArgumentOutOfRangeException(

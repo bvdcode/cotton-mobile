@@ -75,8 +75,10 @@ namespace Cotton.Mobile.Resources.Localization
         public static string SyncFailureLocalAccessUnavailable => GetString(nameof(SyncFailureLocalAccessUnavailable));
         public static string SyncFailureSourceChanged => GetString(nameof(SyncFailureSourceChanged));
         public static string SyncFailureTimedOut => GetString(nameof(SyncFailureTimedOut));
+        public static string SyncFailureServerUnavailable => GetString(nameof(SyncFailureServerUnavailable));
         public static string SyncFailureServerRejectedRequest => GetString(nameof(SyncFailureServerRejectedRequest));
         public static string SyncFailureLocalReadFailed => GetString(nameof(SyncFailureLocalReadFailed));
+        public static string SyncFailureActionRequired => GetString(nameof(SyncFailureActionRequired));
         public static string SyncFailureUnexpected => GetString(nameof(SyncFailureUnexpected));
         public static string SyncRootReady => GetString(nameof(SyncRootReady));
         public static string ChooseLocalFolder => GetString(nameof(ChooseLocalFolder));

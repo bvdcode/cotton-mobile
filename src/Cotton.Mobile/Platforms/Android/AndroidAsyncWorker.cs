@@ -23,6 +23,7 @@ namespace Cotton.Mobile.Platforms.Android
     {
         private const string LogTag = "CottonWorker";
         private const string FailureMessage = "Android background worker failed.";
+        private const int MaximumRetryCount = 3;
 
         private readonly CancellationTokenSource _stoppingSource = new();
 
@@ -67,6 +68,17 @@ namespace Cotton.Mobile.Platforms.Android
                 ?? throw new InvalidOperationException("Android WorkManager retry result is unavailable.");
         }
 
+        protected static ListenableWorker.Result Failure()
+        {
+            return ListenableWorker.Result.InvokeFailure()
+                ?? throw new InvalidOperationException("Android WorkManager failure result is unavailable.");
+        }
+
+        protected ListenableWorker.Result RetryOrFailure()
+        {
+            return RunAttemptCount < MaximumRetryCount ? Retry() : Failure();
+        }
+
         private async Task CompleteAsync(CallbackToFutureAdapter.Completer completer)
         {
             ListenableWorker.Result result;
@@ -76,12 +88,12 @@ namespace Cotton.Mobile.Platforms.Android
             }
             catch (OperationCanceledException) when (_stoppingSource.IsCancellationRequested)
             {
-                result = Retry();
+                result = RetryOrFailure();
             }
             catch (Exception exception)
             {
                 LogFailure(exception);
-                result = Retry();
+                result = RetryOrFailure();
             }
 
             _ = completer.Set(result);

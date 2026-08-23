@@ -36,6 +36,14 @@ namespace Cotton.Mobile.Services
                 return CreateUntrackedLocalFileItem(localFile);
             }
 
+            if (receipt.IsPending
+                && _index.RemoteByOperation.TryGetValue(
+                    receipt.OperationId,
+                    out CottonDeviceToCloudRemoteItemSnapshot? uploadedRemote))
+            {
+                return CreatePendingConfirmationItem(receipt, uploadedRemote);
+            }
+
             if (!receipt.MatchesLocalVersion(localFile)
                 || !string.Equals(receipt.RelativePath, localFile.RelativePath, StringComparison.Ordinal))
             {
@@ -47,13 +55,6 @@ namespace Cotton.Mobile.Services
             if (receipt.IsUploaded)
             {
                 return CreateUploadedReceiptItem(receipt);
-            }
-
-            if (_index.RemoteByOperation.TryGetValue(
-                receipt.OperationId,
-                out CottonDeviceToCloudRemoteItemSnapshot? uploadedRemote))
-            {
-                return CreatePendingConfirmationItem(receipt, uploadedRemote);
             }
 
             if (_index.RemoteByPath.TryGetValue(

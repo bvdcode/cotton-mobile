@@ -69,8 +69,10 @@
   <data name="SyncFailureLocalAccessUnavailable" xml:space="preserve"><value>Android no longer allows access to this source. Reconnect it, then retry.</value></data>
   <data name="SyncFailureSourceChanged" xml:space="preserve"><value>A file changed while Cotton was reading or uploading it. The next run will retry its current version.</value></data>
   <data name="SyncFailureTimedOut" xml:space="preserve"><value>The server did not respond in time. The next run will retry.</value></data>
+  <data name="SyncFailureServerUnavailable" xml:space="preserve"><value>Cotton Cloud is temporarily unavailable. The next run will retry.</value></data>
   <data name="SyncFailureServerRejectedRequest" xml:space="preserve"><value>Cotton Cloud could not complete the request. Retry, then contact support if it repeats.</value></data>
   <data name="SyncFailureLocalReadFailed" xml:space="preserve"><value>A local file could not be read. Check that it still exists and Android can access it.</value></data>
+  <data name="SyncFailureActionRequired" xml:space="preserve"><value>One or more files need your review before sync can continue.</value></data>
   <data name="SyncFailureUnexpected" xml:space="preserve"><value>An unexpected sync error occurred. Retry, then contact support if it repeats.</value></data>
   <data name="SyncRootReady" xml:space="preserve"><value>Sync root ready</value></data>
   <data name="ChooseLocalFolder" xml:space="preserve"><value>Choose local folder</value></data>

@@ -62,6 +62,11 @@ namespace Cotton.Mobile.Services
                 return CottonAutomaticSyncFailureKind.TimedOut;
             }
 
+            if (statusCode == HttpStatusCode.TooManyRequests || (int)statusCode >= 500)
+            {
+                return CottonAutomaticSyncFailureKind.ServerUnavailable;
+            }
+
             return CottonAutomaticSyncFailureKind.ServerRejectedRequest;
         }
     }

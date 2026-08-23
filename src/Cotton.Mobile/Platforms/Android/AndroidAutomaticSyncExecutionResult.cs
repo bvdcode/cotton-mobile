@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Platforms.Android
         Completed,
         NoSession,
         RetryRequired,
+        PermanentFailure,
     }
 }
 #endif

@@ -13,6 +13,8 @@ namespace Cotton.Mobile.Tests
 
         public Guid? FailingRootId { get; set; }
 
+        public Guid? BlockedRootId { get; set; }
+
         public Exception FailureException { get; set; } = new IOException("Simulated sync root failure.");
 
         public Task<CottonDeviceToCloudSyncRunSummary> RunAsync(
@@ -37,6 +39,32 @@ namespace Cotton.Mobile.Tests
             if (root.Id == FailingRootId)
             {
                 throw FailureException;
+            }
+
+            if (root.Id == BlockedRootId)
+            {
+                CottonDeviceToCloudSyncPlanItem blockedItem = new(
+                    CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged,
+                    CottonFileBrowserEntryType.File,
+                    "blocked.txt",
+                    "blocked.txt",
+                    cloudItemId: null,
+                    expectedRemoteETag: null,
+                    DateTime.UtcNow,
+                    1,
+                    "text/plain",
+                    "blocked-source",
+                    Guid.NewGuid(),
+                    TestContentHashes.First);
+                CottonDeviceToCloudSyncPlanSnapshot plan = new(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    [blockedItem]);
+                CottonDeviceToCloudSyncExecutionResult executionResult = new(0, 0, 0, 0, 0, 1);
+                CottonDeviceToCloudSyncRootRunResult rootResult =
+                    CottonDeviceToCloudSyncRootRunResult.Completed(root, plan, executionResult);
+                return Task.FromResult(new CottonDeviceToCloudSyncRunSummary([rootResult]));
             }
 
             return Task.FromResult(new CottonDeviceToCloudSyncRunSummary([]));

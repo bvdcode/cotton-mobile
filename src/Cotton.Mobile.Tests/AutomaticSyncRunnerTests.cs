@@ -188,6 +188,37 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonAutomaticSyncFailureKind.TimedOut, statuses[timedOutRoot.Id].FailureKind);
         }
 
+        [Fact]
+        public async Task BlockedItemsRequireActionAndAreNotReportedAsSuccess()
+        {
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [root]);
+            RecordingDeviceToCloudSyncCoordinator coordinator = new()
+            {
+                BlockedRootId = root.Id,
+            };
+            CottonAutomaticSyncRunner runner = new(
+                _rootStore,
+                coordinator,
+                _statusStore,
+                _timeProvider,
+                NullLogger<CottonAutomaticSyncRunner>.Instance);
+
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(
+                SyncTestRootFactory.SessionScope,
+                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+
+            Assert.Empty(result.SucceededRootIds);
+            CottonAutomaticSyncFailure failure = Assert.Single(result.Failures);
+            Assert.Equal(root.Id, failure.RootId);
+            Assert.Equal(CottonAutomaticSyncFailureKind.ActionRequired, failure.Kind);
+            Assert.Empty(result.RetryableRootIds);
+            IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
+                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
+            Assert.Equal(CottonAutomaticSyncOutcome.Failed, statuses[root.Id].Outcome);
+            Assert.Equal(CottonAutomaticSyncFailureKind.ActionRequired, statuses[root.Id].FailureKind);
+        }
+
         public void Dispose()
         {
             _statusStore.Dispose();

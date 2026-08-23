@@ -88,7 +88,11 @@ namespace Cotton.Mobile.Tests
             RecordingAutomaticSyncBackgroundScheduler scheduler = new();
             using ControlledAutomaticSyncRunner runner = new()
             {
-                Result = new CottonAutomaticSyncRunResult([], [failedRootId]),
+                Result = new CottonAutomaticSyncRunResult(
+                    [],
+                    [new CottonAutomaticSyncFailure(
+                        failedRootId,
+                        CottonAutomaticSyncFailureKind.NetworkUnavailable)]),
             };
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
             using CottonAutomaticSyncSessionService sessionService = new(

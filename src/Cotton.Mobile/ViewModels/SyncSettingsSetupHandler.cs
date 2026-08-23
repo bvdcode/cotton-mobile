@@ -187,10 +187,10 @@ namespace Cotton.Mobile.ViewModels
                         new CottonAuthenticatedSessionScope(instanceUri, accountScopeKey),
                         [rootId],
                         CancellationToken.None);
-                if (result.HasFailures)
+                if (result.RetryableRootIds.Count > 0)
                 {
                     await _backgroundScheduler.ScheduleRootRetriesAsync(
-                        result.FailedRootIds,
+                        result.RetryableRootIds,
                         CancellationToken.None);
                 }
 

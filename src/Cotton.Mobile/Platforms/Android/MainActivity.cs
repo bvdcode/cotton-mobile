@@ -10,6 +10,7 @@ using Android.Views;
 using AndroidX.Core.View;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
+using AndroidIntentFilter = Android.App.IntentFilterAttribute;
 
 namespace Cotton.Mobile.Platforms.Android
 {
@@ -26,6 +27,11 @@ namespace Cotton.Mobile.Platforms.Android
             | ConfigChanges.ScreenLayout
             | ConfigChanges.SmallestScreenSize
             | ConfigChanges.Density)]
+    [AndroidIntentFilter(
+        [Intent.ActionView],
+        Categories = [Intent.CategoryDefault, Intent.CategoryBrowsable],
+        DataScheme = CottonMobileDeepLink.Scheme,
+        DataHost = CottonMobileDeepLink.AuthorizationCompleteHost)]
     public class MainActivity : MauiAppCompatActivity
     {
         protected override void OnCreate(Bundle? savedInstanceState)

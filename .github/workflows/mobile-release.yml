@@ -43,10 +43,13 @@ env:
   JAVA_VERSION: "21"
   ANDROID_PLATFORM: "platforms;android-36"
   ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
+  BUNDLETOOL_VERSION: "1.18.3"
+  BUNDLETOOL_SHA256: "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29"
   ANDROID_VERSION_CODE_BASE: "1001000"
   ANDROID_VERSION_CODE_PUBLISHED_FLOOR: "1000449"
   GOOGLE_PLAY_DEFAULT_TRACK: alpha
   GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
+  ANDROID_RUNTIME_APIS: "26 29 33 34 36"
 
 jobs:
   android-signed-release:
@@ -131,13 +134,76 @@ jobs:
             -p:ApplicationDisplayVersion="$APPLICATION_DISPLAY_VERSION" \
             -p:ApplicationVersion="$ANDROID_VERSION_CODE"
 
+      - name: Stage and verify signed Android artifacts
+        run: |
+          signed_dir="$GITHUB_WORKSPACE/.artifacts/signed-android"
+          mkdir -p "$signed_dir"
+
+          mapfile -t signed_apks < <(find \
+            src/Cotton.Mobile/bin/Release/net10.0-android/android-arm64/publish \
+            -maxdepth 1 \
+            -name '*-Signed.apk' \
+            -type f)
+          mapfile -t signed_aabs < <(find \
+            src/Cotton.Mobile/bin/Release/net10.0-android/publish \
+            -maxdepth 1 \
+            -name '*-Signed.aab' \
+            -type f)
+          if [[ "${#signed_apks[@]}" -ne 1 || "${#signed_aabs[@]}" -ne 1 ]]; then
+            echo "Expected exactly one signed APK and one signed AAB." >&2
+            printf 'APKs: %s\nAABs: %s\n' "${signed_apks[*]}" "${signed_aabs[*]}" >&2
+            exit 1
+          fi
+
+          cp "${signed_apks[0]}" "$signed_dir/CottonCloud-Android.apk"
+          cp "${signed_aabs[0]}" "$signed_dir/CottonCloud-Android.aab"
+          apksigner verify --verbose --print-certs "$signed_dir/CottonCloud-Android.apk"
+          jarsigner -verify -certs "$signed_dir/CottonCloud-Android.aab"
+          echo "COTTON_SIGNED_ANDROID_DIR=$signed_dir" >> "$GITHUB_ENV"
+          echo "COTTON_SIGNED_APK=$signed_dir/CottonCloud-Android.apk" >> "$GITHUB_ENV"
+          echo "COTTON_SIGNED_AAB=$signed_dir/CottonCloud-Android.aab" >> "$GITHUB_ENV"
+
+      - name: Build signed runtime APK from the published AAB
+        run: |
+          bundletool_jar="$RUNNER_TEMP/bundletool-all-$BUNDLETOOL_VERSION.jar"
+          bundletool_apks="$RUNNER_TEMP/cotton-mobile-release.apks"
+          runtime_apk="$RUNNER_TEMP/CottonCloud-Android-AAB-universal.apk"
+          curl --fail --location --silent --show-error \
+            "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar" \
+            --output "$bundletool_jar"
+          printf '%s  %s\n' "$BUNDLETOOL_SHA256" "$bundletool_jar" | sha256sum --check
+          java -jar "$bundletool_jar" build-apks \
+            --bundle="$COTTON_SIGNED_AAB" \
+            --output="$bundletool_apks" \
+            --mode=universal \
+            --ks="$RUNNER_TEMP/cotton-upload.keystore" \
+            --ks-key-alias="$ANDROID_KEYSTORE_ALIAS" \
+            --ks-pass="pass:$ANDROID_KEYSTORE_PASSWORD" \
+            --key-pass="pass:$ANDROID_KEY_PASSWORD"
+          unzip -p "$bundletool_apks" universal.apk > "$runtime_apk"
+          apksigner verify --verbose --print-certs "$runtime_apk"
+          echo "COTTON_RELEASE_RUNTIME_APK=$runtime_apk" >> "$GITHUB_ENV"
+
+      - name: Allow Android emulator acceleration
+        run: |
+          if [[ -e /dev/kvm ]]; then
+            sudo chmod 666 /dev/kvm
+          fi
+
+      - name: Test signed Release APK across supported Android boundaries
+        timeout-minutes: 90
+        run: |
+          for api in $ANDROID_RUNTIME_APIS; do
+            scripts/mobile/test-android-release-runtime.sh \
+              "$COTTON_RELEASE_RUNTIME_APK" \
+              "$api"
+          done
+
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v7.0.1
         with:
           name: cotton-mobile-signed-android
-          path: |
-            src/Cotton.Mobile/bin/Release/net10.0-android/**/*.apk
-            src/Cotton.Mobile/bin/Release/net10.0-android/**/*.aab
+          path: .artifacts/signed-android
           if-no-files-found: error
           retention-days: 30
 
@@ -149,17 +215,8 @@ jobs:
           release_dir="$RUNNER_TEMP/cotton-mobile-github-release"
           mkdir -p "$release_dir"
 
-          apk_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.apk' -print -quit)"
-          if [[ -z "$apk_path" ]]; then
-            echo "Signed APK was not found." >&2
-            exit 1
-          fi
-          cp "$apk_path" "$release_dir/CottonCloud-Android.apk"
-
-          aab_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.aab' -print -quit)"
-          if [[ -n "$aab_path" ]]; then
-            cp "$aab_path" "$release_dir/CottonCloud-Android.aab"
-          fi
+          cp "$COTTON_SIGNED_APK" "$release_dir/CottonCloud-Android.apk"
+          cp "$COTTON_SIGNED_AAB" "$release_dir/CottonCloud-Android.aab"
 
           tag="${GITHUB_RELEASE_TAG_INPUT:-$ANDROID_DISPLAY_VERSION_TAG}"
           scripts/mobile/create-android-release-notes.sh \
@@ -198,12 +255,6 @@ jobs:
             exit 1
           fi
 
-          aab_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.aab' -print -quit)"
-          if [[ -z "$aab_path" ]]; then
-            echo "Signed AAB was not found." >&2
-            exit 1
-          fi
-
           changes_not_sent_flag=()
           if [[ "$CHANGES_NOT_SENT_FOR_REVIEW" == "true" ]]; then
             changes_not_sent_flag+=(--changes-not-sent-for-review)
@@ -211,7 +262,7 @@ jobs:
 
           python3 scripts/mobile/upload-google-play.py \
             --package-name "$GOOGLE_PLAY_PACKAGE_NAME" \
-            --bundle "$aab_path" \
+            --bundle "$COTTON_SIGNED_AAB" \
             --track "${GOOGLE_PLAY_TRACK_INPUT:-$GOOGLE_PLAY_DEFAULT_TRACK}" \
             --release-status "${GOOGLE_PLAY_RELEASE_STATUS_INPUT:-completed}" \
             --release-name "$GOOGLE_PLAY_RELEASE_NAME" \

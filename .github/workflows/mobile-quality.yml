@@ -38,6 +38,7 @@ jobs:
         run: >-
           bash -n
           scripts/mobile/test-android-runtime.sh
+          scripts/mobile/test-android-release-runtime.sh
           scripts/mobile/android-runtime-support.sh
           scripts/mobile/android-runtime-job-support.sh
 

@@ -26,8 +26,11 @@ jobs:
       fail-fast: false
       matrix:
         api:
+          - 26
           - 29
-          - 35
+          - 33
+          - 34
+          - 36
     steps:
       - name: Check repository
         uses: actions/checkout@v5

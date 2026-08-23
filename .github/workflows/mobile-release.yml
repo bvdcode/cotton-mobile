@@ -140,7 +140,7 @@ jobs:
           mkdir -p "$signed_dir"
 
           mapfile -t signed_apks < <(find \
-            src/Cotton.Mobile/bin/Release/net10.0-android/android-arm64/publish \
+            src/Cotton.Mobile/bin/Release/net10.0-android \
             -maxdepth 1 \
             -name '*-Signed.apk' \
             -type f)

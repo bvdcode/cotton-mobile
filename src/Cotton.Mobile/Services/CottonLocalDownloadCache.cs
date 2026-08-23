@@ -6,13 +6,13 @@ using Microsoft.Extensions.Logging;
 namespace Cotton.Mobile.Services
 {
     public class CottonLocalDownloadCache(
-        ILogger<CottonLocalDownloadCache> logger,
-        TimeProvider timeProvider) : ICottonLocalDownloadCache
+        CottonLocalDownloadFileStore fileStore,
+        ILogger<CottonLocalDownloadCache> logger) : ICottonLocalDownloadCache
     {
+        private readonly CottonLocalDownloadFileStore _fileStore =
+            fileStore ?? throw new ArgumentNullException(nameof(fileStore));
         private readonly ILogger<CottonLocalDownloadCache> _logger =
             logger ?? throw new ArgumentNullException(nameof(logger));
-        private readonly TimeProvider _timeProvider =
-            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
         public CottonLocalFileSnapshot? GetLocalDownload(Uri instanceUri, CottonFileBrowserEntry file)
         {
@@ -64,7 +64,7 @@ namespace Cotton.Mobile.Services
                         return null;
                     }
 
-                    Touch(info);
+                    _fileStore.Touch(info);
                     return new CottonFileDownloadResult(file.Name, info.FullName, info.Length, file.ContentType);
                 });
         }
@@ -77,20 +77,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            return Task.Run(
-                () =>
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    string directory = CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, file);
-                    if (!Directory.Exists(directory))
-                    {
-                        return false;
-                    }
-
-                    Directory.Delete(directory, recursive: true);
-                    return true;
-                },
-                cancellationToken);
+            return _fileStore.DeleteAsync(instanceUri, file, cancellationToken);
         }
 
         public void CommitDownload(
@@ -99,57 +86,12 @@ namespace Cotton.Mobile.Services
             string directory,
             CottonFileBrowserEntry file)
         {
-            try
-            {
-                File.SetLastWriteTimeUtc(
-                    temporaryPath,
-                    CottonLocalFileFreshness.NormalizeUtc(file.UpdatedAtUtc));
-            }
-            catch (Exception exception)
-            {
-                CottonLog.WarningWithContext(
-                    _logger,
-                    "Failed to stamp a Cotton mobile temporary download file.",
-                    temporaryPath,
-                    exception);
-                throw;
-            }
-
-            try
-            {
-                File.Move(temporaryPath, finalPath, overwrite: true);
-            }
-            catch (Exception exception)
-            {
-                CottonLog.WarningWithContext(
-                    _logger,
-                    "Failed to replace a Cotton mobile download file.",
-                    finalPath,
-                    exception);
-                throw;
-            }
-
-            Touch(new FileInfo(finalPath));
-            DeleteStaleSiblingDownloads(directory, finalPath);
+            _fileStore.Commit(temporaryPath, finalPath, directory, file);
         }
 
         public void DeleteTemporaryDownload(string temporaryPath)
         {
-            try
-            {
-                if (File.Exists(temporaryPath))
-                {
-                    File.Delete(temporaryPath);
-                }
-            }
-            catch (Exception exception)
-            {
-                CottonLog.WarningWithContext(
-                    _logger,
-                    "Failed to delete a temporary Cotton mobile download file.",
-                    temporaryPath,
-                    exception);
-            }
+            _fileStore.DeleteTemporary(temporaryPath);
         }
 
         private static FileInfo? GetLocalDownloadFile(Uri instanceUri, CottonFileBrowserEntry file)
@@ -220,69 +162,5 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private void Touch(FileInfo info)
-        {
-            try
-            {
-                info.LastAccessTimeUtc = _timeProvider.GetUtcNow().UtcDateTime;
-            }
-            catch (Exception exception)
-                when (exception is IOException
-                    or UnauthorizedAccessException
-                    or PlatformNotSupportedException
-                    or ArgumentException)
-            {
-                CottonLog.DebugWithContext(
-                    _logger,
-                    "Failed to update a Cotton mobile local file timestamp.",
-                    info.FullName,
-                    exception);
-            }
-        }
-
-        private void DeleteStaleSiblingDownloads(string directory, string protectedPath)
-        {
-            string normalizedProtectedPath = Path.GetFullPath(protectedPath);
-            try
-            {
-                foreach (string path in Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly))
-                {
-                    if (CottonMobileStoragePaths.IsTemporaryDownloadPath(path)
-                        || string.Equals(Path.GetFullPath(path), normalizedProtectedPath, StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    DeleteDownload(path);
-                }
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-            {
-                CottonLog.DebugWithContext(
-                    _logger,
-                    "Failed to inspect stale Cotton mobile download files.",
-                    directory,
-                    exception);
-            }
-        }
-
-        private void DeleteDownload(string filePath)
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-            }
-            catch (Exception exception)
-            {
-                CottonLog.WarningWithContext(
-                    _logger,
-                    "Failed to delete a Cotton mobile download file.",
-                    filePath,
-                    exception);
-            }
-        }
     }
 }

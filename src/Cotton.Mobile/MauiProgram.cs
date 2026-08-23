@@ -142,6 +142,7 @@ namespace Cotton.Mobile
             services.AddSingleton<FileDownloadCacheProtectionProvider>();
             services.AddSingleton<FileDownloadCacheFilePruner>();
             services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
+            services.AddSingleton<CottonLocalDownloadFileStore>();
             services.AddSingleton<ICottonLocalDownloadCache, CottonLocalDownloadCache>();
             services.AddSingleton<ICottonFileDownloadService, CottonFileDownloadService>();
             services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();

@@ -38,6 +38,54 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, await first);
             Assert.Equal(2, await second);
             Assert.True(secondStarted.Task.IsCompletedSuccessfully);
+            Assert.Equal(0, executionLock.ActiveEntryCount);
+        }
+
+        [Fact]
+        public async Task CompletedRootChurnDoesNotRetainLockEntries()
+        {
+            CottonSyncRootExecutionLock executionLock = new();
+
+            for (int index = 0; index < 1_000; index++)
+            {
+                CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot(
+                    rootKey: $"content://tree/root-{index}");
+                int result = await executionLock.ExecuteAsync(root, _ => Task.FromResult(index));
+                Assert.Equal(index, result);
+            }
+
+            Assert.Equal(0, executionLock.ActiveEntryCount);
+        }
+
+        [Fact]
+        public async Task CanceledWaiterDoesNotReleaseOrRetainTheActiveEntry()
+        {
+            CottonSyncRootExecutionLock executionLock = new();
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
+            TaskCompletionSource started = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource release = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            Task<int> active = executionLock.ExecuteAsync(
+                root,
+                async cancellationToken =>
+                {
+                    started.SetResult();
+                    await release.Task.WaitAsync(cancellationToken);
+                    return 1;
+                });
+            await started.Task;
+            using CancellationTokenSource cancellation = new();
+            Task<int> waiting = executionLock.ExecuteAsync(
+                root,
+                _ => Task.FromResult(2),
+                cancellation.Token);
+
+            cancellation.Cancel();
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waiting);
+            Assert.Equal(1, executionLock.ActiveEntryCount);
+            release.SetResult();
+
+            Assert.Equal(1, await active);
+            Assert.Equal(0, executionLock.ActiveEntryCount);
         }
     }
 }

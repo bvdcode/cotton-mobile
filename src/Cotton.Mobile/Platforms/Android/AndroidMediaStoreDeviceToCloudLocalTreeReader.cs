@@ -70,22 +70,7 @@ namespace Cotton.Mobile.Platforms.Android
                 throw new UnauthorizedAccessException("Android media access is not available.");
             }
 
-            if (!OperatingSystem.IsAndroidVersionAtLeast(30))
-            {
-                AndroidMediaStoreScanResult legacyResult = await Task.Run(
-                        () => ReadMedia(
-                            root,
-                            selectedScope,
-                            access,
-                            sourceVersion: null,
-                            previousIndex: null,
-                            cancellationToken),
-                    cancellationToken)
-                    .ConfigureAwait(false);
-                return legacyResult;
-            }
-
-            string sourceVersion = ReadSourceVersion();
+            string sourceVersion = CreateSourceVersion();
             CottonContentRevisionIndexSnapshot? storedIndex = await _revisionStore
                 .LoadAsync(instanceUri, root, cancellationToken)
                 .ConfigureAwait(false);
@@ -93,42 +78,53 @@ namespace Cotton.Mobile.Platforms.Android
                 string.Equals(storedIndex?.SourceVersion, sourceVersion, StringComparison.Ordinal)
                     ? storedIndex
                     : null;
+            CottonContentRevisionCheckpoint checkpoint = new(
+                _revisionStore,
+                instanceUri,
+                root,
+                sourceVersion,
+                previousIndex);
             AndroidMediaStoreScanResult result = await Task.Run(
-                    () => ReadMedia(root, selectedScope, access, sourceVersion, previousIndex, cancellationToken),
+                    () => ReadMediaAsync(
+                        root,
+                        selectedScope,
+                        access,
+                        sourceVersion,
+                        previousIndex,
+                        checkpoint,
+                        cancellationToken),
                     cancellationToken)
                 .ConfigureAwait(false);
             CottonContentRevisionIndexSnapshot revisionIndex = result.RevisionIndex
                 ?? throw new InvalidOperationException("Android MediaStore revision index was not produced.");
-            if (!revisionIndex.HasSameContentAs(storedIndex))
-            {
-                await _revisionStore
-                    .SaveAsync(instanceUri, root, revisionIndex, cancellationToken)
-                    .ConfigureAwait(false);
-            }
+            await checkpoint
+                .SaveFinalAsync(revisionIndex.Revisions, cancellationToken)
+                .ConfigureAwait(false);
 
             return result;
         }
 
-        private AndroidMediaStoreScanResult ReadMedia(
+        private async Task<AndroidMediaStoreScanResult> ReadMediaAsync(
             CottonSyncRootSnapshot root,
             AndroidMediaStoreScope scope,
             AndroidMediaReadAccessSnapshot access,
-            string? sourceVersion,
+            string sourceVersion,
             CottonContentRevisionIndexSnapshot? previousIndex,
+            CottonContentRevisionCheckpoint checkpoint,
             CancellationToken cancellationToken)
         {
             ContentResolver resolver = GetContentResolver();
             Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> items =
                 new(StringComparer.OrdinalIgnoreCase);
             List<CottonDeviceToCloudLocalProblemSnapshot> problems = [];
-            List<CottonContentRevisionSnapshot>? revisions = sourceVersion is null ? null : [];
+            List<CottonContentRevisionSnapshot> revisions = [];
             AndroidMediaStoreScanStatistics statistics = new();
             CottonSyncScanProgressReporter progress = new(root.Id, _progressHub, _timeProvider);
             DateTime scanStartedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
 
             if (access.CanReadImages)
             {
-                ReadCollection(
+                await ReadCollectionAsync(
                     resolver,
                     AndroidMediaStoreCollectionKind.Images,
                     scope,
@@ -139,12 +135,13 @@ namespace Cotton.Mobile.Platforms.Android
                     statistics,
                     progress,
                     scanStartedAtUtc,
-                    cancellationToken);
+                    checkpoint,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             if (access.CanReadVideos)
             {
-                ReadCollection(
+                await ReadCollectionAsync(
                     resolver,
                     AndroidMediaStoreCollectionKind.Videos,
                     scope,
@@ -155,7 +152,8 @@ namespace Cotton.Mobile.Platforms.Android
                     statistics,
                     progress,
                     scanStartedAtUtc,
-                    cancellationToken);
+                    checkpoint,
+                    cancellationToken).ConfigureAwait(false);
             }
 
             progress.Complete();
@@ -163,24 +161,17 @@ namespace Cotton.Mobile.Platforms.Android
                 root.LocalRoot.DisplayName,
                 [.. items.Values],
                 problems);
-            CottonContentRevisionIndexSnapshot? revisionIndex = CreateRevisionIndex(
+            CottonContentRevisionIndexSnapshot revisionIndex = CreateRevisionIndex(
                 sourceVersion,
                 revisions);
             return new AndroidMediaStoreScanResult(content, revisionIndex, statistics);
         }
 
-        private static CottonContentRevisionIndexSnapshot? CreateRevisionIndex(
-            string? sourceVersion,
-            List<CottonContentRevisionSnapshot>? revisions)
+        private static CottonContentRevisionIndexSnapshot CreateRevisionIndex(
+            string sourceVersion,
+            List<CottonContentRevisionSnapshot> revisions)
         {
-            if (sourceVersion is null)
-            {
-                return null;
-            }
-
-            return new CottonContentRevisionIndexSnapshot(
-                sourceVersion,
-                revisions ?? throw new InvalidOperationException("Android media revisions are unavailable."));
+            return new CottonContentRevisionIndexSnapshot(sourceVersion, revisions);
         }
 
         private static string ComputeContentHash(

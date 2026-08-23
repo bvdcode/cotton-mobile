@@ -203,15 +203,10 @@ fi
 second_output="$(run_diagnostic scan-media second)"
 second_hashed="$(read_metric "$second_output" hashed)"
 second_reused="$(read_metric "$second_output" reused)"
-if [[ "$device_api" -ge 30 ]]; then
   if [[ "$second_output" == *":failed:"* || "$second_hashed" -ne 0 || "$second_reused" -lt 1 ]]; then
     printf 'Warm MediaStore scan did not reuse the revision index: %s\n' "$second_output" >&2
     exit 1
   fi
-elif [[ "$second_output" == *":failed:"* || "$second_hashed" -lt 1 || "$second_reused" -ne 0 ]]; then
-  printf 'Legacy MediaStore scan did not preserve full hashing: %s\n' "$second_output" >&2
-  exit 1
-fi
 
 update_media_fixture
 
@@ -222,16 +217,14 @@ if [[ "$changed_output" == *":failed:"* || "$changed_hashed" -lt 1 ]]; then
   exit 1
 fi
 
-if [[ "$device_api" -ge 30 ]]; then
-  changed_warm_output="$(run_diagnostic scan-media changed-warm)"
-  changed_warm_hashed="$(read_metric "$changed_warm_output" hashed)"
-  changed_warm_reused="$(read_metric "$changed_warm_output" reused)"
-  if [[ "$changed_warm_output" == *":failed:"* \
-    || "$changed_warm_hashed" -ne 0 \
-    || "$changed_warm_reused" -lt 1 ]]; then
-    printf 'Changed MediaStore revision was not persisted: %s\n' "$changed_warm_output" >&2
-    exit 1
-  fi
+changed_warm_output="$(run_diagnostic scan-media changed-warm)"
+changed_warm_hashed="$(read_metric "$changed_warm_output" hashed)"
+changed_warm_reused="$(read_metric "$changed_warm_output" reused)"
+if [[ "$changed_warm_output" == *":failed:"* \
+  || "$changed_warm_hashed" -ne 0 \
+  || "$changed_warm_reused" -lt 1 ]]; then
+  printf 'Changed MediaStore revision was not persisted: %s\n' "$changed_warm_output" >&2
+  exit 1
 fi
 
 if [[ "$device_api" -ge 33 ]]; then

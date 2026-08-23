@@ -13,16 +13,70 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public partial class AndroidMediaStoreDeviceToCloudLocalTreeReader
     {
-        private static void ReadCollection(
+        private static async Task ReadCollectionAsync(
             ContentResolver resolver,
             AndroidMediaStoreCollectionKind collectionKind,
             AndroidMediaStoreScope scope,
             Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> items,
             List<CottonDeviceToCloudLocalProblemSnapshot> problems,
             CottonContentRevisionIndexSnapshot? previousIndex,
-            List<CottonContentRevisionSnapshot>? revisions,
+            List<CottonContentRevisionSnapshot> revisions,
             AndroidMediaStoreScanStatistics statistics,
             CottonSyncScanProgressReporter progress,
+            DateTime scanStartedAtUtc,
+            CottonContentRevisionCheckpoint checkpoint,
+            CancellationToken cancellationToken)
+        {
+            List<AndroidMediaStoreFileCandidate> candidates = ReadCollectionCandidates(
+                resolver,
+                collectionKind,
+                scope,
+                problems,
+                scanStartedAtUtc,
+                cancellationToken);
+            foreach (AndroidMediaStoreFileCandidate candidate in candidates)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                AndroidMediaStorePathMapper.AddParentFolders(
+                    items,
+                    candidate.RelativePath,
+                    scanStartedAtUtc);
+                string contentHash = ResolveContentHash(
+                    resolver,
+                    candidate.ContentUri,
+                    candidate.LocalSourceId,
+                    candidate.Revision,
+                    candidate.SizeBytes,
+                    previousIndex,
+                    revisions,
+                    statistics,
+                    cancellationToken);
+                CottonDeviceToCloudLocalItemSnapshot file = CottonDeviceToCloudLocalItemSnapshot.CreateFile(
+                    candidate.DisplayName,
+                    candidate.RelativePath,
+                    candidate.UpdatedAtUtc,
+                    candidate.SizeBytes,
+                    candidate.ContentType,
+                    candidate.LocalSourceId,
+                    contentHash);
+                if (!items.TryAdd(file.RelativePath, file))
+                {
+                    throw new IOException(
+                        $"Android media collection contains a duplicate path: {file.RelativePath}.");
+                }
+
+                progress.RecordScannedItem();
+                await checkpoint
+                    .SaveProgressIfDueAsync(revisions, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+        }
+
+        private static List<AndroidMediaStoreFileCandidate> ReadCollectionCandidates(
+            ContentResolver resolver,
+            AndroidMediaStoreCollectionKind collectionKind,
+            AndroidMediaStoreScope scope,
+            List<CottonDeviceToCloudLocalProblemSnapshot> problems,
             DateTime scanStartedAtUtc,
             CancellationToken cancellationToken)
         {
@@ -44,6 +98,7 @@ namespace Cotton.Mobile.Platforms.Android
                     selectionArguments,
                     null)
                 ?? throw new IOException("Could not read Android media collection.");
+            List<AndroidMediaStoreFileCandidate> candidates = [];
 
             while (cursor.MoveToNext())
             {
@@ -76,36 +131,22 @@ namespace Cotton.Mobile.Platforms.Android
                     continue;
                 }
 
-                AndroidMediaStorePathMapper.AddParentFolders(items, relativePath, scanStartedAtUtc);
                 AndroidUri contentUri = ContentUris.WithAppendedId(collectionUri, mediaId)
                     ?? throw new IOException("Could not create Android media content URI.");
                 string localSourceId = contentUri.ToString()
                     ?? throw new IOException("Could not create Android media source id.");
-                string contentHash = ResolveContentHash(
-                    resolver,
-                    cursor,
+                candidates.Add(new AndroidMediaStoreFileCandidate(
                     contentUri,
-                    localSourceId,
-                    previousIndex,
-                    revisions,
-                    statistics,
-                    cancellationToken);
-                CottonDeviceToCloudLocalItemSnapshot file = CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                     displayName,
-                    relativePath,
+                    relativePath!,
+                    localSourceId,
                     ReadLastModifiedUtc(cursor, scanStartedAtUtc),
                     ReadSizeBytes(cursor),
                     ReadOptionalString(cursor, MimeTypeColumnIndex),
-                    localSourceId,
-                    contentHash);
-                if (!items.TryAdd(file.RelativePath, file))
-                {
-                    throw new IOException(
-                        $"Android media collection contains a duplicate path: {file.RelativePath}.");
-                }
-
-                progress.RecordScannedItem();
+                    ReadRevision(cursor)));
             }
+
+            return candidates;
         }
 
         private static AndroidUri GetCollectionUri(AndroidMediaStoreCollectionKind collectionKind)

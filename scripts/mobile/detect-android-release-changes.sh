@@ -14,13 +14,13 @@ release_required="false"
 
 requires_android_release() {
   case "$1" in
-    .github/workflows/mobile-android.yml|Directory.Build.props|GitVersion.yml|src/Cotton.Mobile/*|src/Cotton.Mobile.Core/*)
+    .github/workflows/mobile-*.yml|Directory.Build.props|GitVersion.yml|src/Cotton.Mobile/*|src/Cotton.Mobile.Core/*)
       return 0
       ;;
     scripts/mobile/compute-android-release-version.sh|scripts/mobile/create-android-release-notes.sh)
       return 0
       ;;
-    scripts/mobile/test-android-runtime.sh|scripts/mobile/android-runtime-*.sh)
+    scripts/mobile/test-android-runtime.sh|scripts/mobile/test-android-release-runtime.sh|scripts/mobile/android-runtime-*.sh)
       return 0
       ;;
     scripts/mobile/detect-android-release-changes.sh|scripts/mobile/resolve-android-release-policy.sh|scripts/mobile/upload-google-play.py)

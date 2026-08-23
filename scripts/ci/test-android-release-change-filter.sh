@@ -51,9 +51,14 @@ workflow_head="$(commit_all "workflow")"
 output="$("$detect_script" "$docs_head" "$workflow_head")"
 assert_contains "$output" "Android release required: true"
 
+printf 'name: Mobile Signed Release\n' > .github/workflows/mobile-release.yml
+release_workflow_head="$(commit_all "release workflow")"
+output="$("$detect_script" "$workflow_head" "$release_workflow_head")"
+assert_contains "$output" "Android release required: true"
+
 printf '#!/usr/bin/env python3\n' > scripts/mobile/upload-google-play.py
 upload_script_head="$(commit_all "upload script")"
-output="$("$detect_script" "$workflow_head" "$upload_script_head")"
+output="$("$detect_script" "$release_workflow_head" "$upload_script_head")"
 assert_contains "$output" "Android release required: true"
 
 printf '#!/usr/bin/env bash\n' > scripts/mobile/test-android-runtime.sh
@@ -61,9 +66,14 @@ runtime_test_head="$(commit_all "runtime test")"
 output="$("$detect_script" "$upload_script_head" "$runtime_test_head")"
 assert_contains "$output" "Android release required: true"
 
+printf '#!/usr/bin/env bash\n' > scripts/mobile/test-android-release-runtime.sh
+release_runtime_test_head="$(commit_all "release runtime test")"
+output="$("$detect_script" "$runtime_test_head" "$release_runtime_test_head")"
+assert_contains "$output" "Android release required: true"
+
 printf '#!/usr/bin/env bash\n' > scripts/mobile/android-runtime-support.sh
 runtime_support_head="$(commit_all "runtime support")"
-output="$("$detect_script" "$runtime_test_head" "$runtime_support_head")"
+output="$("$detect_script" "$release_runtime_test_head" "$runtime_support_head")"
 assert_contains "$output" "Android release required: true"
 
 printf '#!/usr/bin/env bash\n' > scripts/mobile/detect-android-release-changes.sh

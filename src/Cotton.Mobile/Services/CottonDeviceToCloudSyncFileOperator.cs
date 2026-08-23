@@ -61,6 +61,27 @@ namespace Cotton.Mobile.Services
                 cancellationToken);
         }
 
+        public async Task<bool> MatchesExpectedRemoteFileAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CottonDeviceToCloudSyncPlanItem item,
+            CottonFolderHandle parentFolder,
+            CancellationToken cancellationToken = default)
+        {
+            EnsureDeleteItem(instanceUri, root, item);
+            ArgumentNullException.ThrowIfNull(parentFolder);
+
+            CottonFolderContent folder = await _fileBrowserService
+                .GetFolderAsync(instanceUri, parentFolder, cancellationToken)
+                .ConfigureAwait(false);
+            CottonFileBrowserEntry? remoteFile = folder.Entries.FirstOrDefault(entry => entry.Id == item.CloudItemId);
+            return remoteFile is not null
+                && remoteFile.Type == CottonFileBrowserEntryType.File
+                && string.Equals(remoteFile.ETag, item.ExpectedRemoteETag, StringComparison.Ordinal)
+                && remoteFile.SizeBytes == item.SizeBytes
+                && string.Equals(remoteFile.ContentHash, item.ContentHash, StringComparison.Ordinal);
+        }
+
         private CottonFileUploadSource CreateUploadSource(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
@@ -113,6 +134,25 @@ namespace Cotton.Mobile.Services
             if (string.IsNullOrWhiteSpace(item.LocalSourceId))
             {
                 throw new InvalidOperationException("Device-to-cloud upload item is missing local content.");
+            }
+        }
+
+        private static void EnsureDeleteItem(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CottonDeviceToCloudSyncPlanItem item)
+        {
+            EnsureRoot(instanceUri, root);
+            ArgumentNullException.ThrowIfNull(item);
+            if (!item.RequiresLocalDelete
+                || item.TargetType != CottonFileBrowserEntryType.File
+                || !item.CloudItemId.HasValue
+                || string.IsNullOrWhiteSpace(item.ExpectedRemoteETag)
+                || !item.SizeBytes.HasValue
+                || item.ContentHash is null)
+            {
+                throw new InvalidOperationException(
+                    "Local cleanup requires a complete expected remote file revision.");
             }
         }
 

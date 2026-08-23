@@ -101,7 +101,7 @@ namespace Cotton.Mobile.Services
                     case CottonDeviceToCloudSyncActionKind.ConfirmPendingUpload:
                         CottonDeviceToCloudLocalFileDeleteStatus? confirmedDeleteStatus =
                             await _fileWorkflow
-                                .ConfirmUploadAsync(instanceUri, root, item, cancellationToken)
+                                .ConfirmUploadAsync(instanceUri, root, item, folderIndex, cancellationToken)
                                 .ConfigureAwait(false);
                         confirmedUploadCount++;
                         CountDeleteStatus(
@@ -114,7 +114,7 @@ namespace Cotton.Mobile.Services
                     case CottonDeviceToCloudSyncActionKind.DeleteUploadedLocalFile:
                         CottonDeviceToCloudLocalFileDeleteStatus deleteStatus =
                             await _fileWorkflow
-                                .DeleteOriginalAsync(instanceUri, root, item, cancellationToken)
+                                .DeleteOriginalAsync(instanceUri, root, item, folderIndex, cancellationToken)
                                 .ConfigureAwait(false);
                         CountDeleteStatus(
                             deleteStatus,
@@ -210,6 +210,7 @@ namespace Cotton.Mobile.Services
                     break;
 
                 case CottonDeviceToCloudLocalFileDeleteStatus.Changed:
+                case CottonDeviceToCloudLocalFileDeleteStatus.RemoteChanged:
                 case CottonDeviceToCloudLocalFileDeleteStatus.Unsupported:
                     blockedCount++;
                     break;

@@ -9,6 +9,8 @@ namespace Cotton.Mobile.Tests
 
         public Exception? UploadException { get; set; }
 
+        public bool RemoteFileMatches { get; set; } = true;
+
         public Task<CottonFileBrowserEntry> UploadNewFileAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
@@ -53,6 +55,17 @@ namespace Cotton.Mobile.Tests
             CancellationToken cancellationToken = default)
         {
             throw new InvalidOperationException("Folder creation was not expected.");
+        }
+
+        public Task<bool> MatchesExpectedRemoteFileAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CottonDeviceToCloudSyncPlanItem item,
+            CottonFolderHandle parentFolder,
+            CancellationToken cancellationToken = default)
+        {
+            events.Add("remote:verify");
+            return Task.FromResult(RemoteFileMatches);
         }
     }
 }

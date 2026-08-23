@@ -19,5 +19,12 @@ namespace Cotton.Mobile.Services
             CottonDeviceToCloudSyncPlanItem item,
             CottonFolderHandle parentFolder,
             CancellationToken cancellationToken = default);
+
+        Task<bool> MatchesExpectedRemoteFileAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CottonDeviceToCloudSyncPlanItem item,
+            CottonFolderHandle parentFolder,
+            CancellationToken cancellationToken = default);
     }
 }

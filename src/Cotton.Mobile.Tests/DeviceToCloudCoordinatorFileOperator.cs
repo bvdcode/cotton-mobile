@@ -44,5 +44,15 @@ namespace Cotton.Mobile.Tests
         {
             throw new NotSupportedException("Folder creation is not used by these tests.");
         }
+
+        public Task<bool> MatchesExpectedRemoteFileAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CottonDeviceToCloudSyncPlanItem item,
+            CottonFolderHandle parentFolder,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult(true);
+        }
     }
 }

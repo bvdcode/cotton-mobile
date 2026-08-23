@@ -60,10 +60,15 @@ namespace Cotton.Mobile.Services
                 .SaveAsync(instanceUri, root, uploadedReceipt, cancellationToken)
                 .ConfigureAwait(false);
 
+            CottonDeviceToCloudSyncPlanItem deleteItem = CottonDeviceToCloudSyncPlanItemFactory.CreateReceipt(
+                CottonDeviceToCloudSyncActionKind.DeleteUploadedLocalFile,
+                uploadedReceipt);
+
             return await DeleteOriginalIfEnabledAsync(
                 instanceUri,
                 root,
-                uploadItem,
+                deleteItem,
+                folderIndex,
                 cancellationToken).ConfigureAwait(false);
         }
 
@@ -71,6 +76,7 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
+            CottonDeviceToCloudRemoteFolderIndex folderIndex,
             CancellationToken cancellationToken)
         {
             CottonUploadReceiptSnapshot uploadedReceipt =
@@ -85,6 +91,7 @@ namespace Cotton.Mobile.Services
                 instanceUri,
                 root,
                 item,
+                folderIndex,
                 cancellationToken).ConfigureAwait(false);
         }
 
@@ -92,6 +99,7 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
+            CottonDeviceToCloudRemoteFolderIndex folderIndex,
             CancellationToken cancellationToken)
         {
             if (!root.DeletesOriginalsAfterUpload || !item.RequiresLocalDelete)
@@ -99,7 +107,7 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("Local cleanup requires delete-after-upload retention.");
             }
 
-            return _localFileOperator.DeleteIfUnchangedAsync(instanceUri, root, item, cancellationToken);
+            return DeleteOriginalCoreAsync(instanceUri, root, item, folderIndex, cancellationToken);
         }
 
         private async Task EnsurePendingReceiptAsync(
@@ -126,26 +134,43 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private Task<CottonDeviceToCloudLocalFileDeleteStatus?> DeleteOriginalIfEnabledAsync(
+        private async Task<CottonDeviceToCloudLocalFileDeleteStatus?> DeleteOriginalIfEnabledAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
+            CottonDeviceToCloudRemoteFolderIndex folderIndex,
             CancellationToken cancellationToken)
         {
             if (!root.DeletesOriginalsAfterUpload)
             {
-                return Task.FromResult<CottonDeviceToCloudLocalFileDeleteStatus?>(null);
+                return null;
             }
 
-            return DeleteOriginalCoreAsync(instanceUri, root, item, cancellationToken);
+            return await DeleteOriginalCoreAsync(instanceUri, root, item, folderIndex, cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        private async Task<CottonDeviceToCloudLocalFileDeleteStatus?> DeleteOriginalCoreAsync(
+        private async Task<CottonDeviceToCloudLocalFileDeleteStatus> DeleteOriginalCoreAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
+            CottonDeviceToCloudRemoteFolderIndex folderIndex,
             CancellationToken cancellationToken)
         {
+            CottonFolderHandle parentFolder = folderIndex.ResolveParent(item);
+            bool remoteMatches = await _fileOperator
+                .MatchesExpectedRemoteFileAsync(
+                    instanceUri,
+                    root,
+                    item,
+                    parentFolder,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            if (!remoteMatches)
+            {
+                return CottonDeviceToCloudLocalFileDeleteStatus.RemoteChanged;
+            }
+
             CottonDeviceToCloudLocalFileDeleteStatus status = await _localFileOperator
                 .DeleteIfUnchangedAsync(instanceUri, root, item, cancellationToken)
                 .ConfigureAwait(false);

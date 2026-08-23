@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Tests
     public class UploadOnlySyncPlanExecutorTests
     {
         private static readonly string[] SuccessfulDeleteEvents =
-            ["receipt:pending", "remote:upload", "receipt:uploaded", "local:delete"];
+            ["receipt:pending", "remote:upload", "receipt:uploaded", "remote:verify", "local:delete"];
         private static readonly string[] SuccessfulUploadEvents =
             ["receipt:pending", "remote:upload", "receipt:uploaded"];
         private static readonly string[] RetryUploadEvents =
@@ -181,7 +181,7 @@ namespace Cotton.Mobile.Tests
                 CreatePlan(CreateConfirmationItem()));
 
             string[] expectedEvents = expectsDelete
-                ? ["receipt:uploaded", "local:delete"]
+                ? ["receipt:uploaded", "remote:verify", "local:delete"]
                 : ["receipt:uploaded"];
             Assert.Equal(expectedEvents, harness.Events);
             Assert.Empty(harness.FileOperator.UploadCalls);
@@ -212,12 +212,29 @@ namespace Cotton.Mobile.Tests
                 harness.Root,
                 CreatePlan(CreateCleanupItem()));
 
-            Assert.Equal(LocalDeleteEvents, harness.Events);
+            Assert.Equal(["remote:verify", .. LocalDeleteEvents], harness.Events);
             Assert.Empty(harness.FileOperator.UploadCalls);
             Assert.Empty(harness.ReceiptStore.SaveHistory);
             Assert.Equal(expectedDeleted, result.DeletedLocalFileCount);
             Assert.Equal(expectedSkipped, result.SkippedCount);
             Assert.Equal(expectedBlocked, result.BlockedCount);
+        }
+
+        [Fact]
+        public async Task ExecuteRetainsOriginalWhenRemoteRevisionChangedAfterPlanning()
+        {
+            ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
+            harness.FileOperator.RemoteFileMatches = false;
+
+            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(
+                InstanceUri,
+                harness.Root,
+                CreatePlan(CreateCleanupItem()));
+
+            Assert.Equal(["remote:verify"], harness.Events);
+            Assert.Empty(harness.LocalFileOperator.DeleteCalls);
+            Assert.Equal(0, result.DeletedLocalFileCount);
+            Assert.Equal(1, result.BlockedCount);
         }
 
         [Theory]

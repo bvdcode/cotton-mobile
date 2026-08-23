@@ -9,20 +9,20 @@ namespace Cotton.Mobile.Services
 {
     public class CottonClientFactory : ICottonClientFactory
     {
-        private readonly ICottonTokenStore _tokenStore;
+        private readonly CottonAccessTokenStore _accessTokenStore;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICottonMobileApplicationMetadata _metadata;
 
         public CottonClientFactory(
-            ICottonTokenStore tokenStore,
+            CottonAccessTokenStore accessTokenStore,
             ILoggerFactory loggerFactory,
             ICottonMobileApplicationMetadata metadata)
         {
-            ArgumentNullException.ThrowIfNull(tokenStore);
+            ArgumentNullException.ThrowIfNull(accessTokenStore);
             ArgumentNullException.ThrowIfNull(loggerFactory);
             ArgumentNullException.ThrowIfNull(metadata);
 
-            _tokenStore = tokenStore;
+            _accessTokenStore = accessTokenStore;
             _loggerFactory = loggerFactory;
             _metadata = metadata;
         }
@@ -38,7 +38,7 @@ namespace Cotton.Mobile.Services
                 UserAgent = _metadata.UserAgent,
             };
 
-            return new CottonCloudClient(_tokenStore, options, _loggerFactory);
+            return new CottonCloudClient(_accessTokenStore, options, _loggerFactory);
         }
     }
 }

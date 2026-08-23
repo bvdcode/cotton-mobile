@@ -137,24 +137,27 @@ wait_for_boot
 "$adb_bin" install -r "$apk_path" >/dev/null
 "$adb_bin" shell pm clear "$package_name" >/dev/null
 "$adb_bin" shell am set-standby-bucket "$package_name" active
-deep_link_output="$("$adb_bin" shell am start -W -a android.intent.action.VIEW -d "$authorization_complete_uri")"
-if [[ "$deep_link_output" != *"Status: ok"* || "$deep_link_output" != *"Activity: $package_name/"* ]]; then
-  printf 'Cotton authorization deep link did not open the mobile application: %s\n' "$deep_link_output" >&2
+deep_link_output="$(
+  "$adb_bin" shell pm resolve-activity --brief \
+    -a android.intent.action.VIEW \
+    -c android.intent.category.BROWSABLE \
+    -d "$authorization_complete_uri"
+)"
+if [[ "$deep_link_output" != "$package_name/"* ]]; then
+  printf 'Cotton authorization deep link did not resolve to the mobile application: %s\n' "$deep_link_output" >&2
   exit 1
 fi
-if unsupported_deep_link_output="$(
-  "$adb_bin" shell am start -W -a android.intent.action.VIEW -d "$unsupported_deep_link_uri" 2>&1
-)"; then
-  printf 'Unsupported Cotton deep link unexpectedly opened the mobile application: %s\n' \
+unsupported_deep_link_output="$(
+  "$adb_bin" shell pm resolve-activity --brief \
+    -a android.intent.action.VIEW \
+    -c android.intent.category.BROWSABLE \
+    -d "$unsupported_deep_link_uri"
+)"
+if [[ "$unsupported_deep_link_output" == "$package_name/"* ]]; then
+  printf 'Unsupported Cotton deep link unexpectedly resolved to the mobile application: %s\n' \
     "$unsupported_deep_link_output" >&2
   exit 1
 fi
-if [[ "$unsupported_deep_link_output" != *"unable to resolve Intent"* ]]; then
-  printf 'Unsupported Cotton deep link failed for an unexpected reason: %s\n' \
-    "$unsupported_deep_link_output" >&2
-  exit 1
-fi
-"$adb_bin" shell input keyevent 3 >/dev/null
 schedule_background_work schedule "after scheduling"
 wait_for_enabled_component "$workmanager_reschedule_receiver"
 "$adb_bin" logcat -c

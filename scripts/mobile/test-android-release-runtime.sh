@@ -26,8 +26,22 @@ export ANDROID_AVD_HOME="$avd_home"
 cleanup() {
   if [[ -n "$emulator_pid" ]] && kill -0 "$emulator_pid" 2>/dev/null; then
     "$adb_bin" -s emulator-5554 emu kill >/dev/null 2>&1 || true
-    kill "$emulator_pid" 2>/dev/null || true
-    wait "$emulator_pid" 2>/dev/null || true
+
+    local attempt
+    for attempt in {1..10}; do
+      if ! kill -0 "$emulator_pid" 2>/dev/null; then
+        wait "$emulator_pid" 2>/dev/null || true
+        emulator_pid=""
+        break
+      fi
+
+      sleep 1
+    done
+
+    if [[ -n "$emulator_pid" ]]; then
+      kill -KILL "$emulator_pid" 2>/dev/null || true
+      wait "$emulator_pid" 2>/dev/null || true
+    fi
   fi
 
   rm -rf "$avd_home"
@@ -78,6 +92,7 @@ wait_for_process() {
 }
 
 trap cleanup EXIT
+printf 'Testing signed Release runtime on Android API %s.\n' "$runtime_api"
 timeout 300 "$sdkmanager_bin" --install emulator platform-tools "$system_image" >/dev/null
 mkdir -p "$ANDROID_AVD_HOME"
 printf 'no\n' | "$avdmanager_bin" create avd \

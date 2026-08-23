@@ -9,7 +9,7 @@ fi
 readonly apk_path="$1"
 readonly runtime_api="$2"
 readonly package_name="dev.cottoncloud.app"
-readonly authorization_complete_uri="cotton://authorization-complete"
+readonly deprecated_authorization_complete_uri="cotton://authorization-complete"
 readonly avd_name="cotton-release-runtime-$runtime_api"
 readonly system_image="system-images;android-$runtime_api;google_apis;x86_64"
 
@@ -117,9 +117,10 @@ fi
 deep_link_activity="$($adb_bin -s emulator-5554 shell cmd package resolve-activity --brief \
   -a android.intent.action.VIEW \
   -c android.intent.category.BROWSABLE \
-  -d "$authorization_complete_uri" | tr -d '\r' | tail -1)"
-if [[ "$deep_link_activity" != "$package_name/"* ]]; then
-  printf 'Signed Release authorization callback is missing: %s\n' "$deep_link_activity" >&2
+  -d "$deprecated_authorization_complete_uri" | tr -d '\r' | tail -1)"
+if [[ "$deep_link_activity" == "$package_name/"* ]]; then
+  printf 'Signed Release still claims the deprecated generic authorization callback: %s\n' \
+    "$deep_link_activity" >&2
   exit 1
 fi
 

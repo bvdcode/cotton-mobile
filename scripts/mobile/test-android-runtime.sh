@@ -16,8 +16,7 @@ readonly workmanager_reschedule_receiver="androidx.work.impl.background.systemal
 readonly media_sync_job_id="1129598209"
 readonly media_sync_job_service="dev.cottoncloud.mobile.AndroidMediaStoreSyncJobService"
 readonly media_sync_log_tag="CottonMediaSyncJob"
-readonly authorization_complete_uri="cotton://authorization-complete"
-readonly unsupported_deep_link_uri="cotton://unsupported"
+readonly deprecated_authorization_complete_uri="cotton://authorization-complete"
 readonly runtime_api="${COTTON_ANDROID_RUNTIME_API:-35}"
 readonly avd_name="cotton-runtime-$runtime_api"
 readonly system_image="system-images;android-$runtime_api;google_apis;x86_64"
@@ -141,21 +140,11 @@ deep_link_output="$(
   "$adb_bin" shell pm resolve-activity --brief \
     -a android.intent.action.VIEW \
     -c android.intent.category.BROWSABLE \
-    -d "$authorization_complete_uri"
+    -d "$deprecated_authorization_complete_uri"
 )"
-if [[ "$deep_link_output" != *"$package_name/"* ]]; then
-  printf 'Cotton authorization deep link did not resolve to the mobile application: %s\n' "$deep_link_output" >&2
-  exit 1
-fi
-unsupported_deep_link_output="$(
-  "$adb_bin" shell pm resolve-activity --brief \
-    -a android.intent.action.VIEW \
-    -c android.intent.category.BROWSABLE \
-    -d "$unsupported_deep_link_uri"
-)"
-if [[ "$unsupported_deep_link_output" == *"$package_name/"* ]]; then
-  printf 'Unsupported Cotton deep link unexpectedly resolved to the mobile application: %s\n' \
-    "$unsupported_deep_link_output" >&2
+if [[ "$deep_link_output" == *"$package_name/"* ]]; then
+  printf 'Deprecated generic authorization callback still resolves to the mobile application: %s\n' \
+    "$deep_link_output" >&2
   exit 1
 fi
 schedule_background_work schedule "after scheduling"

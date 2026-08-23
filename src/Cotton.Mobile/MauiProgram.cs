@@ -139,6 +139,8 @@ namespace Cotton.Mobile
             services.AddSingleton(FileDownloadCacheOptions.Default);
             services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();
             services.AddSingleton<ICottonOfflineFilePinStore, FileSystemCottonOfflineFilePinStore>();
+            services.AddSingleton<FileDownloadCacheProtectionProvider>();
+            services.AddSingleton<FileDownloadCacheFilePruner>();
             services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
             services.AddSingleton<ICottonLocalDownloadCache, CottonLocalDownloadCache>();
             services.AddSingleton<ICottonFileDownloadService, CottonFileDownloadService>();

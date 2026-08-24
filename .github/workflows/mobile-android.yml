@@ -98,11 +98,22 @@ jobs:
           BUILD_SIGNED_RELEASE: ${{ inputs.build_signed_release }}
           GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
           PUBLISH_GITHUB_RELEASE: ${{ inputs.publish_github_release }}
+          UPLOAD_STORE_LISTING: ${{ inputs.upload_store_listing }}
           UPLOAD_TO_GOOGLE_PLAY: ${{ inputs.upload_to_google_play }}
         run: |
+          listing_only_develop_dispatch=false
+          if [[ "$GITHUB_REF" == "refs/heads/develop" \
+            && "$UPLOAD_STORE_LISTING" == "true" \
+            && "$BUILD_SIGNED_RELEASE" != "true" \
+            && "$PUBLISH_GITHUB_RELEASE" != "true" \
+            && "$UPLOAD_TO_GOOGLE_PLAY" != "true" ]]; then
+            listing_only_develop_dispatch=true
+          fi
+
           if [[ "$GITHUB_REF" != "refs/heads/main" ]] \
-            && [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Manual production operations require main or a SemVer tag." >&2
+            && [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+            && [[ "$listing_only_develop_dispatch" != "true" ]]; then
+            echo "Manual production operations require main or a SemVer tag; develop permits listing-only publication." >&2
             exit 1
           fi
 

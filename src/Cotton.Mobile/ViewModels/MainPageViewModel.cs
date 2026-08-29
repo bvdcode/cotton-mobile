@@ -166,18 +166,17 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private Task CancelAuthorizationAsync()
+        private async Task CancelAuthorizationAsync()
         {
             CancellationTokenSource? authorizationCancellation = _authorizationCancellation;
             if (authorizationCancellation is null)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             Display.ShowAuthorizationCancelling();
             RefreshCommands();
-            authorizationCancellation.Cancel();
-            return Task.CompletedTask;
+            await authorizationCancellation.CancelAsync();
         }
 
         private async Task ConfirmLogoutAsync()

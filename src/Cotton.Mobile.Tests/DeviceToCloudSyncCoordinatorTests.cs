@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task RunReturnsEmptySummaryWhenNoRootsAreSaved()
         {
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri);
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Equal(0, summary.RootCount);
             Assert.Equal(0, summary.CompletedRootCount);
@@ -68,14 +68,14 @@ namespace Cotton.Mobile.Tests
         public async Task RunUploadsNewLocalFileAndRecordsUploadedReceipt()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
-            await _rootStore.SaveAsync(InstanceUri, [root]);
+            await _rootStore.SaveAsync(InstanceUri, [root], TestContext.Current.CancellationToken);
             _localTreeReader.SetContent(
                 root.Id,
                 CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt", "document:alpha")));
             _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
             _fileOperator.SetUploadResult("alpha.txt", FirstFileId, "\"etag-1\"");
 
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri);
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Equal(1, summary.RootCount);
             Assert.Equal(1, summary.CompletedRootCount);
@@ -89,7 +89,7 @@ namespace Cotton.Mobile.Tests
             Guid uploadOperationId = Assert.IsType<Guid>(uploadedItem.UploadOperationId);
 
             CottonUploadReceiptSnapshot receipt = Assert.Single(
-                await _uploadReceiptStore.LoadAsync(InstanceUri, root));
+                await _uploadReceiptStore.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
             Assert.True(receipt.IsUploaded);
             Assert.Equal("document:alpha", receipt.LocalSourceId);
             Assert.Equal(uploadOperationId, receipt.OperationId);
@@ -106,16 +106,16 @@ namespace Cotton.Mobile.Tests
         public async Task RunDoesNotUploadSameLocalSourceAgainWhenRemoteFileDisappears()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
-            await _rootStore.SaveAsync(InstanceUri, [root]);
+            await _rootStore.SaveAsync(InstanceUri, [root], TestContext.Current.CancellationToken);
             _localTreeReader.SetContent(
                 root.Id,
                 CreateLocalContent(CreateLocalFile("photo.jpg", "photo.jpg", "document:photo")));
             _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
             _fileOperator.SetUploadResult("photo.jpg", FirstFileId, "\"etag-photo\"");
 
-            CottonDeviceToCloudSyncRunSummary firstRun = await _coordinator.RunAsync(InstanceUri);
+            CottonDeviceToCloudSyncRunSummary firstRun = await _coordinator.RunAsync(InstanceUri, TestContext.Current.CancellationToken);
             _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
-            CottonDeviceToCloudSyncRunSummary secondRun = await _coordinator.RunAsync(InstanceUri);
+            CottonDeviceToCloudSyncRunSummary secondRun = await _coordinator.RunAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Equal(1, firstRun.UploadedCount);
             Assert.Equal(0, secondRun.UploadedCount);
@@ -123,7 +123,7 @@ namespace Cotton.Mobile.Tests
             Assert.False(secondRun.HasAppliedChanges);
             Assert.Single(_fileOperator.UploadedItems);
             CottonUploadReceiptSnapshot receipt = Assert.Single(
-                await _uploadReceiptStore.LoadAsync(InstanceUri, root));
+                await _uploadReceiptStore.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
             Assert.True(receipt.IsUploaded);
             Assert.Equal(FirstFileId, receipt.RemoteFileId);
         }
@@ -133,7 +133,7 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             CottonSyncRootSnapshot secondRoot = CreateRoot(SecondSyncRootId, SecondFolderId, "Archive");
-            await _rootStore.SaveAsync(InstanceUri, [root, secondRoot]);
+            await _rootStore.SaveAsync(InstanceUri, [root, secondRoot], TestContext.Current.CancellationToken);
             _localTreeReader.SetContent(
                 root.Id,
                 CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt", "document:alpha")));
@@ -145,15 +145,15 @@ namespace Cotton.Mobile.Tests
             _fileOperator.SetUploadResult("alpha.txt", FirstFileId, "\"etag-1\"");
             _fileOperator.SetUploadResult("beta.txt", SecondFileId, "\"etag-2\"");
 
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root, TestContext.Current.CancellationToken);
 
             Assert.Equal(1, summary.RootCount);
             Assert.Equal(1, summary.UploadedCount);
             Assert.Equal([root.Id], _localTreeReader.ReadRootIds);
             Assert.Equal([FolderId], _remoteFolderContentSource.RequestedFolderIds);
             Assert.Equal("alpha.txt", Assert.Single(_fileOperator.UploadedItems).RelativePath);
-            Assert.Single(await _uploadReceiptStore.LoadAsync(InstanceUri, root));
-            Assert.Empty(await _uploadReceiptStore.LoadAsync(InstanceUri, secondRoot));
+            Assert.Single(await _uploadReceiptStore.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
+            Assert.Empty(await _uploadReceiptStore.LoadAsync(InstanceUri, secondRoot, TestContext.Current.CancellationToken));
         }
 
         [Fact]
@@ -168,7 +168,7 @@ namespace Cotton.Mobile.Tests
             List<CottonSyncProgressSnapshot?> progress = [];
             _progressHub.ProgressChanged += (_, eventArgs) => progress.Add(eventArgs.Progress);
 
-            _ = await _coordinator.RunRootAsync(InstanceUri, root);
+            _ = await _coordinator.RunRootAsync(InstanceUri, root, TestContext.Current.CancellationToken);
 
             Assert.Collection(
                 progress,
@@ -191,7 +191,7 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootPermissionStatus.Unavailable,
                 CottonSyncDirection.DeviceToCloud);
             CottonDeviceToCloudSyncRunSummary notReadySummary =
-                await _coordinator.RunRootAsync(InstanceUri, notReady);
+                await _coordinator.RunRootAsync(InstanceUri, notReady, TestContext.Current.CancellationToken);
 
             Assert.Equal(
                 CottonDeviceToCloudSyncRootRunStatus.SkippedNotReady,
@@ -204,9 +204,9 @@ namespace Cotton.Mobile.Tests
         public async Task RunRootSkipsPausedRootWithoutReads()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
-            await _pauseStore.SetPausedAsync(InstanceUri, root.Id, isPaused: true);
+            await _pauseStore.SetPausedAsync(InstanceUri, root.Id, isPaused: true, cancellationToken: TestContext.Current.CancellationToken);
 
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root, TestContext.Current.CancellationToken);
 
             CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
             Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.SkippedPaused, result.Status);
@@ -226,7 +226,7 @@ namespace Cotton.Mobile.Tests
                 CottonSyncDirection.DeviceToCloud,
                 CottonSyncRootStorageKind.AppPrivateDirectory);
 
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root, TestContext.Current.CancellationToken);
 
             CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
             Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedLocalRoot, result.Status);
@@ -244,14 +244,14 @@ namespace Cotton.Mobile.Tests
                 Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                 "summer.jpg",
                 "\"etag-summer\"");
-            await _rootStore.SaveAsync(InstanceUri, [root]);
+            await _rootStore.SaveAsync(InstanceUri, [root], TestContext.Current.CancellationToken);
             _localTreeReader.SetContent(root.Id, CreateLocalContent());
             _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root, folder));
             _remoteFolderContentSource.SetContent(
                 folder.Id,
                 new CottonFolderContent(folder.Id, folder.Name, [nestedFile]));
 
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri);
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
             Assert.True(result.IsCompleted);
@@ -278,7 +278,7 @@ namespace Cotton.Mobile.Tests
                 CottonUploadOriginalRetention.KeepOriginals);
 
             await Assert.ThrowsAsync<ArgumentException>(
-                () => _coordinator.RunRootAsync(InstanceUri, root));
+                () => _coordinator.RunRootAsync(InstanceUri, root, TestContext.Current.CancellationToken));
         }
 
         public void Dispose()

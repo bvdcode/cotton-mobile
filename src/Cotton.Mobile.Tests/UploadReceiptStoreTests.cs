@@ -32,9 +32,9 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
 
-            await _store.SaveAsync(InstanceUri, root, receipt);
+            await _store.SaveAsync(InstanceUri, root, receipt, TestContext.Current.CancellationToken);
 
-            CottonUploadReceiptSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, root));
+            CottonUploadReceiptSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
             Assert.Equal(receipt.LocalSourceId, loaded.LocalSourceId);
             Assert.Equal(receipt.RelativePath, loaded.RelativePath);
             Assert.Equal(receipt.LocalUpdatedAtUtc, loaded.LocalUpdatedAtUtc);
@@ -66,10 +66,10 @@ namespace Cotton.Mobile.Tests
                     TestContentHashes.First),
                 RecordedAtUtc);
 
-            await _store.SaveAsync(InstanceUri, root, pending);
-            await _store.SaveAsync(InstanceUri, root, uploaded);
+            await _store.SaveAsync(InstanceUri, root, pending, TestContext.Current.CancellationToken);
+            await _store.SaveAsync(InstanceUri, root, uploaded, TestContext.Current.CancellationToken);
 
-            CottonUploadReceiptSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, root));
+            CottonUploadReceiptSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
             Assert.True(loaded.IsUploaded);
             Assert.Equal(RemoteFileId, loaded.RemoteFileId);
             Assert.Equal("etag-uploaded", loaded.RemoteETag);
@@ -105,11 +105,11 @@ namespace Cotton.Mobile.Tests
             CottonUploadReceiptSnapshot uploaded = pending.MarkUploaded(
                 CreateUploadedFile(),
                 pending.RecordedAtUtc.AddMinutes(-1));
-            await _store.SaveAsync(InstanceUri, root, pending);
+            await _store.SaveAsync(InstanceUri, root, pending, TestContext.Current.CancellationToken);
 
-            await _store.SaveAsync(InstanceUri, root, uploaded);
+            await _store.SaveAsync(InstanceUri, root, uploaded, TestContext.Current.CancellationToken);
 
-            Assert.True(Assert.Single(await _store.LoadAsync(InstanceUri, root)).IsUploaded);
+            Assert.True(Assert.Single(await _store.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken)).IsUploaded);
         }
 
         [Fact]
@@ -120,10 +120,10 @@ namespace Cotton.Mobile.Tests
                 Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                 "content://tree/downloads");
 
-            await _store.SaveAsync(InstanceUri, firstRoot, CreatePendingReceipt());
+            await _store.SaveAsync(InstanceUri, firstRoot, CreatePendingReceipt(), TestContext.Current.CancellationToken);
 
-            Assert.Single(await _store.LoadAsync(InstanceUri, firstRoot));
-            Assert.Empty(await _store.LoadAsync(InstanceUri, secondRoot));
+            Assert.Single(await _store.LoadAsync(InstanceUri, firstRoot, TestContext.Current.CancellationToken));
+            Assert.Empty(await _store.LoadAsync(InstanceUri, secondRoot, TestContext.Current.CancellationToken));
         }
 
         [Fact]
@@ -135,9 +135,9 @@ namespace Cotton.Mobile.Tests
                 RecordedAtUtc);
 
             await Assert.ThrowsAsync<InvalidDataException>(() =>
-                _store.SaveAsync(InstanceUri, root, uploaded));
+                _store.SaveAsync(InstanceUri, root, uploaded, TestContext.Current.CancellationToken));
 
-            Assert.Empty(await _store.LoadAsync(InstanceUri, root));
+            Assert.Empty(await _store.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
         }
 
         [Fact]
@@ -148,13 +148,13 @@ namespace Cotton.Mobile.Tests
             CottonUploadReceiptSnapshot uploaded = pending.MarkUploaded(
                 CreateUploadedFile(),
                 RecordedAtUtc.AddSeconds(1));
-            await _store.SaveAsync(InstanceUri, root, pending);
-            await _store.SaveAsync(InstanceUri, root, uploaded);
+            await _store.SaveAsync(InstanceUri, root, pending, TestContext.Current.CancellationToken);
+            await _store.SaveAsync(InstanceUri, root, uploaded, TestContext.Current.CancellationToken);
 
             await Assert.ThrowsAsync<InvalidDataException>(() =>
-                _store.SaveAsync(InstanceUri, root, pending));
+                _store.SaveAsync(InstanceUri, root, pending, TestContext.Current.CancellationToken));
 
-            CottonUploadReceiptSnapshot preserved = Assert.Single(await _store.LoadAsync(InstanceUri, root));
+            CottonUploadReceiptSnapshot preserved = Assert.Single(await _store.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
             Assert.True(preserved.IsUploaded);
             Assert.Equal(RemoteFileId, preserved.RemoteFileId);
         }
@@ -175,12 +175,12 @@ namespace Cotton.Mobile.Tests
                 pending.RecordedAtUtc.AddSeconds(1),
                 RemoteFileId,
                 "etag-uploaded");
-            await _store.SaveAsync(InstanceUri, root, pending);
+            await _store.SaveAsync(InstanceUri, root, pending, TestContext.Current.CancellationToken);
 
             await Assert.ThrowsAsync<InvalidDataException>(() =>
-                _store.SaveAsync(InstanceUri, root, changedOperation));
+                _store.SaveAsync(InstanceUri, root, changedOperation, TestContext.Current.CancellationToken));
 
-            CottonUploadReceiptSnapshot preserved = Assert.Single(await _store.LoadAsync(InstanceUri, root));
+            CottonUploadReceiptSnapshot preserved = Assert.Single(await _store.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
             Assert.True(preserved.IsPending);
             Assert.Equal(OperationId, preserved.OperationId);
         }
@@ -189,13 +189,13 @@ namespace Cotton.Mobile.Tests
         public async Task LoadFailsClosedAndPreservesCorruptReceipt()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
-            await _store.SaveAsync(InstanceUri, root, CreatePendingReceipt());
+            await _store.SaveAsync(InstanceUri, root, CreatePendingReceipt(), TestContext.Current.CancellationToken);
             string receiptDirectory = new ScopedUploadReceiptPathProvider(_directory)
                 .CreateUploadReceiptDirectory(InstanceUri, root);
             string receiptPath = Assert.Single(Directory.GetFiles(receiptDirectory, "*.json"));
-            await File.WriteAllTextAsync(receiptPath, "{ not valid json");
+            await File.WriteAllTextAsync(receiptPath, "{ not valid json", TestContext.Current.CancellationToken);
 
-            await Assert.ThrowsAsync<JsonException>(() => _store.LoadAsync(InstanceUri, root));
+            await Assert.ThrowsAsync<JsonException>(() => _store.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
 
             Assert.True(File.Exists(receiptPath));
         }
@@ -205,15 +205,12 @@ namespace Cotton.Mobile.Tests
         {
             string blockerPath = Path.Combine(_directory, "blocker");
             Directory.CreateDirectory(_directory);
-            await File.WriteAllTextAsync(blockerPath, "not a directory");
+            await File.WriteAllTextAsync(blockerPath, "not a directory", TestContext.Current.CancellationToken);
             FileSystemCottonUploadReceiptStore store = new(
                 new FixedUploadReceiptPathProvider(Path.Combine(blockerPath, "receipts")));
 
             await Assert.ThrowsAnyAsync<IOException>(() =>
-                store.SaveAsync(
-                    InstanceUri,
-                    CreateRoot(RootId, "content://tree/camera"),
-                    CreatePendingReceipt()));
+                store.SaveAsync(InstanceUri, CreateRoot(RootId, "content://tree/camera"), CreatePendingReceipt(), TestContext.Current.CancellationToken));
         }
 
         [Fact]
@@ -223,13 +220,13 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot secondRoot = CreateRoot(
                 Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                 "content://tree/downloads");
-            await _store.SaveAsync(InstanceUri, firstRoot, CreatePendingReceipt());
-            await _store.SaveAsync(InstanceUri, secondRoot, CreatePendingReceipt());
+            await _store.SaveAsync(InstanceUri, firstRoot, CreatePendingReceipt(), TestContext.Current.CancellationToken);
+            await _store.SaveAsync(InstanceUri, secondRoot, CreatePendingReceipt(), TestContext.Current.CancellationToken);
 
-            await _store.ClearAsync(InstanceUri, firstRoot);
+            await _store.ClearAsync(InstanceUri, firstRoot, TestContext.Current.CancellationToken);
 
-            Assert.Empty(await _store.LoadAsync(InstanceUri, firstRoot));
-            Assert.Single(await _store.LoadAsync(InstanceUri, secondRoot));
+            Assert.Empty(await _store.LoadAsync(InstanceUri, firstRoot, TestContext.Current.CancellationToken));
+            Assert.Single(await _store.LoadAsync(InstanceUri, secondRoot, TestContext.Current.CancellationToken));
         }
 
         public void Dispose()

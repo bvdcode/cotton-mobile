@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Tests
                 cursorStore,
                 localNotificationService);
 
-            await pollingService.CheckAsync();
+            await pollingService.CheckAsync(TestContext.Current.CancellationToken);
 
             Assert.Same(originalCursor, batchProvider.RequestedCursor);
             Assert.Equal(ExpectedDetailLimit, batchProvider.RequestedDetailLimit);
@@ -54,7 +54,7 @@ namespace Cotton.Mobile.Tests
                 cursorStore,
                 localNotificationService);
 
-            await pollingService.CheckAsync();
+            await pollingService.CheckAsync(TestContext.Current.CancellationToken);
 
             Assert.Equal(1, localNotificationService.CallCount);
             Assert.Equal(1, cursorStore.SaveCount);
@@ -76,7 +76,7 @@ namespace Cotton.Mobile.Tests
                 cursorStore,
                 localNotificationService);
 
-            await pollingService.CheckAsync();
+            await pollingService.CheckAsync(TestContext.Current.CancellationToken);
 
             Assert.Equal(0, localNotificationService.CallCount);
             Assert.Equal(1, cursorStore.SaveCount);
@@ -96,7 +96,7 @@ namespace Cotton.Mobile.Tests
                 cursorStore,
                 localNotificationService);
 
-            await pollingService.CheckAsync();
+            await pollingService.CheckAsync(TestContext.Current.CancellationToken);
 
             Assert.Equal(0, localNotificationService.CallCount);
             Assert.Equal(0, cursorStore.SaveCount);
@@ -114,7 +114,7 @@ namespace Cotton.Mobile.Tests
                 cursorStore,
                 localNotificationService);
 
-            await pollingService.CheckAsync();
+            await pollingService.CheckAsync(TestContext.Current.CancellationToken);
 
             Assert.Equal(1, batchProvider.CallCount);
             Assert.Equal(0, localNotificationService.CallCount);

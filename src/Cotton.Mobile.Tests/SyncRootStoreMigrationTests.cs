@@ -26,9 +26,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot uploadRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             Directory.CreateDirectory(_directory);
             string metadataPath = CreateSyncRootMetadataPath(_directory);
-            await File.WriteAllTextAsync(
-                metadataPath,
-                $$"""
+            await File.WriteAllTextAsync(metadataPath, $$"""
                 {
                   "schemaVersion": 1,
                   "savedAtUtc": "2026-06-20T09:00:00Z",
@@ -57,10 +55,10 @@ namespace Cotton.Mobile.Tests
                     }
                   ]
                 }
-                """);
+                """, TestContext.Current.CancellationToken);
 
-            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
-            using JsonDocument migrated = JsonDocument.Parse(await File.ReadAllTextAsync(metadataPath));
+            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
+            using JsonDocument migrated = JsonDocument.Parse(await File.ReadAllTextAsync(metadataPath, TestContext.Current.CancellationToken));
 
             Assert.Equal(uploadRoot.Id, loaded.Id);
             Assert.Equal(2, migrated.RootElement.GetProperty("schemaVersion").GetInt32());

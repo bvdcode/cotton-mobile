@@ -30,9 +30,9 @@ namespace Cotton.Mobile.Tests
         {
             CottonOfflineFilePinSnapshot pin = CreatePin(FileId, "report.pdf");
 
-            await _store.SaveAsync(InstanceUri, [pin]);
+            await _store.SaveAsync(InstanceUri, [pin], TestContext.Current.CancellationToken);
 
-            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(FileId, loaded.FileId);
             Assert.Equal("report.pdf", loaded.FileName);
             Assert.Equal(PinnedAt, loaded.PinnedAtUtc);
@@ -53,10 +53,10 @@ namespace Cotton.Mobile.Tests
                 4096,
                 "application/pdf");
 
-            await _store.AddOrReplaceAsync(InstanceUri, first);
-            await _store.AddOrReplaceAsync(InstanceUri, replacement);
+            await _store.AddOrReplaceAsync(InstanceUri, first, TestContext.Current.CancellationToken);
+            await _store.AddOrReplaceAsync(InstanceUri, replacement, TestContext.Current.CancellationToken);
 
-            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal("report-renamed.pdf", loaded.FileName);
             Assert.Equal(PinnedAt.AddMinutes(1), loaded.PinnedAtUtc);
             Assert.Equal(4096, loaded.SizeBytes);
@@ -68,9 +68,9 @@ namespace Cotton.Mobile.Tests
             CottonOfflineFilePinSnapshot first = CreatePin(FileId, "report.pdf");
             CottonOfflineFilePinSnapshot replacement = CreatePin(FileId, "report-new.pdf");
 
-            await _store.SaveAsync(InstanceUri, [first, replacement]);
+            await _store.SaveAsync(InstanceUri, [first, replacement], TestContext.Current.CancellationToken);
 
-            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal("report-new.pdf", loaded.FileName);
         }
 
@@ -78,16 +78,16 @@ namespace Cotton.Mobile.Tests
         public async Task SavePropagatesFileSystemFailures()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_rootDirectory)!);
-            await File.WriteAllTextAsync(_rootDirectory, "blocked directory");
+            await File.WriteAllTextAsync(_rootDirectory, "blocked directory", TestContext.Current.CancellationToken);
 
             await Assert.ThrowsAnyAsync<IOException>(() =>
-                _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]));
+                _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")], TestContext.Current.CancellationToken));
         }
 
         [Fact]
         public async Task LoadReturnsEmptyWhenMetadataIsMissing()
         {
-            IReadOnlyList<CottonOfflineFilePinSnapshot> loaded = await _store.LoadAsync(InstanceUri);
+            IReadOnlyList<CottonOfflineFilePinSnapshot> loaded = await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Empty(loaded);
         }
@@ -97,9 +97,9 @@ namespace Cotton.Mobile.Tests
         {
             string metadataPath = CreateMetadataPath(InstanceUri);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
-            await File.WriteAllTextAsync(metadataPath, "{ not valid json");
+            await File.WriteAllTextAsync(metadataPath, "{ not valid json", TestContext.Current.CancellationToken);
 
-            IReadOnlyList<CottonOfflineFilePinSnapshot> loaded = await _store.LoadAsync(InstanceUri);
+            IReadOnlyList<CottonOfflineFilePinSnapshot> loaded = await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Empty(loaded);
             Assert.False(File.Exists(metadataPath));
@@ -110,9 +110,7 @@ namespace Cotton.Mobile.Tests
         {
             string metadataPath = CreateMetadataPath(InstanceUri);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
-            await File.WriteAllTextAsync(
-                metadataPath,
-                """
+            await File.WriteAllTextAsync(metadataPath, """
                 {
                   "schemaVersion": 1,
                   "savedAtUtc": "2026-06-19T12:00:00Z",
@@ -133,9 +131,9 @@ namespace Cotton.Mobile.Tests
                     }
                   ]
                 }
-                """);
+                """, TestContext.Current.CancellationToken);
 
-            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
 
             Assert.Equal(FileId, loaded.FileId);
             Assert.Equal("good.pdf", loaded.FileName);
@@ -148,40 +146,38 @@ namespace Cotton.Mobile.Tests
             await _store.SaveAsync(InstanceUri, [
                 CreatePin(FileId, "report.pdf"),
                 CreatePin(otherFileId, "photo.jpg"),
-            ]);
+            ], TestContext.Current.CancellationToken);
 
-            bool removed = await _store.RemoveAsync(InstanceUri, FileId);
+            bool removed = await _store.RemoveAsync(InstanceUri, FileId, TestContext.Current.CancellationToken);
 
             Assert.True(removed);
-            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(otherFileId, loaded.FileId);
         }
 
         [Fact]
         public async Task RemoveReturnsFalseWhenFilePinIsMissing()
         {
-            await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]);
+            await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")], TestContext.Current.CancellationToken);
 
-            bool removed = await _store.RemoveAsync(
-                InstanceUri,
-                Guid.Parse("bbbbbbbb-cccc-dddd-eeee-ffffffffffff"));
+            bool removed = await _store.RemoveAsync(InstanceUri, Guid.Parse("bbbbbbbb-cccc-dddd-eeee-ffffffffffff"), TestContext.Current.CancellationToken);
 
             Assert.False(removed);
-            Assert.Single(await _store.LoadAsync(InstanceUri));
+            Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
         }
 
         [Fact]
         public async Task StoreIsolatesOfflineFilePinsByInstance()
         {
-            await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]);
+            await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")], TestContext.Current.CancellationToken);
             await _store.SaveAsync(OtherInstanceUri, [
                 CreatePin(
                     Guid.Parse("bbbbbbbb-cccc-dddd-eeee-ffffffffffff"),
                     "other.pdf"),
-            ]);
+            ], TestContext.Current.CancellationToken);
 
-            CottonOfflineFilePinSnapshot first = Assert.Single(await _store.LoadAsync(InstanceUri));
-            CottonOfflineFilePinSnapshot second = Assert.Single(await _store.LoadAsync(OtherInstanceUri));
+            CottonOfflineFilePinSnapshot first = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
+            CottonOfflineFilePinSnapshot second = Assert.Single(await _store.LoadAsync(OtherInstanceUri, TestContext.Current.CancellationToken));
 
             Assert.Equal("report.pdf", first.FileName);
             Assert.Equal("other.pdf", second.FileName);
@@ -193,12 +189,12 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task ClearRemovesOfflineFilePinMetadata()
         {
-            await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]);
+            await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")], TestContext.Current.CancellationToken);
 
-            await _store.ClearAsync(InstanceUri);
+            await _store.ClearAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.False(File.Exists(CreateMetadataPath(InstanceUri)));
-            Assert.Empty(await _store.LoadAsync(InstanceUri));
+            Assert.Empty(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
         }
 
         [Fact]

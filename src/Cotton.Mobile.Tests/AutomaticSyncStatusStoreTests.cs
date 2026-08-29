@@ -31,10 +31,7 @@ namespace Cotton.Mobile.Tests
             DateTime firstAttempt = new(2026, 8, 14, 17, 0, 0, DateTimeKind.Utc);
             DateTime retryAttempt = new(2026, 8, 14, 17, 30, 0, DateTimeKind.Utc);
             HashSet<Guid> activeRootIds = [FirstRootId, SecondRootId];
-            await _store.UpdateAsync(
-                SyncTestRootFactory.InstanceUri,
-                activeRootIds,
-                [
+            await _store.UpdateAsync(SyncTestRootFactory.InstanceUri, activeRootIds, [
                     CottonAutomaticSyncRootStatusSnapshot.Failed(
                         FirstRootId,
                         firstAttempt,
@@ -43,19 +40,16 @@ namespace Cotton.Mobile.Tests
                         SecondRootId,
                         firstAttempt,
                         CottonAutomaticSyncFailureKind.NetworkUnavailable),
-                ]);
+                ], TestContext.Current.CancellationToken);
 
-            await _store.UpdateAsync(
-                SyncTestRootFactory.InstanceUri,
-                activeRootIds,
-                [
+            await _store.UpdateAsync(SyncTestRootFactory.InstanceUri, activeRootIds, [
                     CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         FirstRootId,
                         retryAttempt),
-                ]);
+                ], TestContext.Current.CancellationToken);
 
             IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
-                await _store.LoadAsync(SyncTestRootFactory.InstanceUri);
+                await _store.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken);
             Assert.Equal(2, statuses.Count);
             Assert.Equal(CottonAutomaticSyncOutcome.Succeeded, statuses[FirstRootId].Outcome);
             Assert.Equal(retryAttempt, statuses[FirstRootId].CompletedAtUtc);
@@ -72,10 +66,7 @@ namespace Cotton.Mobile.Tests
         public async Task UpdateRemovesStatusesForDeletedRoots()
         {
             DateTime attempt = new(2026, 8, 14, 17, 0, 0, DateTimeKind.Utc);
-            await _store.UpdateAsync(
-                SyncTestRootFactory.InstanceUri,
-                new HashSet<Guid> { FirstRootId, SecondRootId },
-                [
+            await _store.UpdateAsync(SyncTestRootFactory.InstanceUri, new HashSet<Guid> { FirstRootId, SecondRootId }, [
                     CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         FirstRootId,
                         attempt),
@@ -83,15 +74,12 @@ namespace Cotton.Mobile.Tests
                         SecondRootId,
                         attempt,
                         CottonAutomaticSyncFailureKind.LocalReadFailed),
-                ]);
+                ], TestContext.Current.CancellationToken);
 
-            await _store.UpdateAsync(
-                SyncTestRootFactory.InstanceUri,
-                new HashSet<Guid> { FirstRootId },
-                []);
+            await _store.UpdateAsync(SyncTestRootFactory.InstanceUri, new HashSet<Guid> { FirstRootId }, [], TestContext.Current.CancellationToken);
 
             IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
-                await _store.LoadAsync(SyncTestRootFactory.InstanceUri);
+                await _store.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken);
             Assert.Equal([FirstRootId], statuses.Keys);
         }
 
@@ -102,14 +90,11 @@ namespace Cotton.Mobile.Tests
             _store.StatusesChanged += (_, args) => eventArgs = args;
             DateTime attempt = new(2026, 8, 14, 17, 0, 0, DateTimeKind.Utc);
 
-            await _store.UpdateAsync(
-                SyncTestRootFactory.InstanceUri,
-                new HashSet<Guid> { FirstRootId },
-                [
+            await _store.UpdateAsync(SyncTestRootFactory.InstanceUri, new HashSet<Guid> { FirstRootId }, [
                     CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         FirstRootId,
                         attempt),
-                ]);
+                ], TestContext.Current.CancellationToken);
 
             Assert.NotNull(eventArgs);
             Assert.Equal(SyncTestRootFactory.InstanceUri, eventArgs.InstanceUri);

@@ -32,7 +32,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonSyncDirection.DeviceToCloud, result.Root.Direction);
             Assert.Equal(retention, result.Root.UploadOriginalRetention);
             Assert.True(result.Root.CanRunSync);
-            Assert.Single(await _rootStore.LoadAsync(SyncTestRootFactory.InstanceUri));
+            Assert.Single(await _rootStore.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken));
         }
 
         [Fact]
@@ -61,16 +61,11 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootConfigurationResult first = await ConfigureAsync(
                 CreateDocumentTreeLocalRoot(),
                 CottonUploadOriginalRetention.KeepOriginals);
-            CottonSyncRootConfigurationResult second = await _service.ConfigureRootAsync(
-                SyncTestRootFactory.InstanceUri,
-                "account-1",
-                new CottonUploadDestinationSnapshot(Guid.NewGuid(), "Archive", "Files / Archive"),
-                CreateDocumentTreeLocalRoot(),
-                CottonUploadOriginalRetention.KeepOriginals);
+            CottonSyncRootConfigurationResult second = await _service.ConfigureRootAsync(SyncTestRootFactory.InstanceUri, "account-1", new CottonUploadDestinationSnapshot(Guid.NewGuid(), "Archive", "Files / Archive"), CreateDocumentTreeLocalRoot(), CottonUploadOriginalRetention.KeepOriginals, TestContext.Current.CancellationToken);
 
             Assert.True(second.AlreadyConfigured);
             Assert.Equal(first.Root.Id, second.Root.Id);
-            Assert.Single(await _rootStore.LoadAsync(SyncTestRootFactory.InstanceUri));
+            Assert.Single(await _rootStore.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken));
         }
 
         public void Dispose()

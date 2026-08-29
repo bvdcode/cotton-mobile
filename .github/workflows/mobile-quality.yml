@@ -60,7 +60,7 @@ jobs:
         run: dotnet format "$TEST_PROJECT_PATH" --no-restore --verify-no-changes --severity info
 
       - name: Test mobile core
-        run: dotnet test "$TEST_PROJECT_PATH" --no-restore --configuration Release --verbosity normal
+        run: dotnet test --project "$TEST_PROJECT_PATH" --no-restore --configuration Release --verbosity normal
 
   google-play-store-listing-dry-run:
     name: Validate Google Play Store Listing

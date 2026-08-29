@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Tests
                 realtimeService,
                 pollingService);
 
-            await service.SetSessionAsync(InstanceUri);
+            await service.SetSessionAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Equal(1, backgroundScheduler.ScheduleCount);
             Assert.Equal(1, permissionService.RequestCount);
@@ -52,7 +52,7 @@ namespace Cotton.Mobile.Tests
                 realtimeService,
                 pollingService);
 
-            await service.SetSessionAsync(InstanceUri);
+            await service.SetSessionAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Equal(1, backgroundScheduler.ScheduleCount);
             Assert.Equal(0, permissionService.RequestCount);
@@ -75,11 +75,11 @@ namespace Cotton.Mobile.Tests
                 realtimeService,
                 pollingService);
             service.Initialize();
-            await service.SetSessionAsync(InstanceUri);
+            await service.SetSessionAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             foregroundService.NotifyResumed();
             await Task.WhenAll(realtimeService.FirstStart, pollingService.FirstCheck)
-                .WaitAsync(CompletionTimeout);
+                .WaitAsync(CompletionTimeout, TestContext.Current.CancellationToken);
 
             Assert.Equal(1, permissionService.RequestCount);
             Assert.Equal(1, realtimeService.StartCount);
@@ -102,15 +102,15 @@ namespace Cotton.Mobile.Tests
                 realtimeService,
                 new RecordingNotificationPollingService());
             service.Initialize();
-            await service.SetSessionAsync(InstanceUri);
+            await service.SetSessionAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             foregroundService.NotifyStopped();
-            await realtimeService.StopEntered.WaitAsync(CompletionTimeout);
+            await realtimeService.StopEntered.WaitAsync(CompletionTimeout, TestContext.Current.CancellationToken);
             foregroundService.NotifyResumed();
 
             Assert.False(realtimeService.SecondStart.IsCompleted);
             realtimeService.ReleaseStop();
-            await realtimeService.SecondStart.WaitAsync(CompletionTimeout);
+            await realtimeService.SecondStart.WaitAsync(CompletionTimeout, TestContext.Current.CancellationToken);
             Assert.Equal(2, realtimeService.StartCount);
         }
 
@@ -127,7 +127,7 @@ namespace Cotton.Mobile.Tests
                 realtimeService,
                 new RecordingNotificationPollingService());
 
-            await service.SetSessionAsync(instanceUri: null);
+            await service.SetSessionAsync(instanceUri: null, cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.Equal(1, backgroundScheduler.CancelCount);
             Assert.Equal(1, realtimeService.StopCount);
@@ -150,7 +150,7 @@ namespace Cotton.Mobile.Tests
                 realtimeService,
                 pollingService);
 
-            await service.SetSessionAsync(InstanceUri);
+            await service.SetSessionAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Equal(1, backgroundScheduler.ScheduleCount);
             Assert.Equal(1, permissionService.RequestCount);
@@ -170,7 +170,7 @@ namespace Cotton.Mobile.Tests
                 new RecordingNotificationRealtimeService(),
                 new RecordingNotificationPollingService());
             using CancellationTokenSource cancellation = new();
-            cancellation.Cancel();
+            await cancellation.CancelAsync();
 
             await Assert.ThrowsAnyAsync<OperationCanceledException>(
                 () => service.SetSessionAsync(InstanceUri, cancellation.Token));
@@ -190,7 +190,7 @@ namespace Cotton.Mobile.Tests
                 realtimeService,
                 new RecordingNotificationPollingService());
             service.Initialize();
-            await service.SetSessionAsync(InstanceUri);
+            await service.SetSessionAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             service.Dispose();
             foregroundService.NotifyResumed();

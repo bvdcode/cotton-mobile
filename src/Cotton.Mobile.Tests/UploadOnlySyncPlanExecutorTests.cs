@@ -25,10 +25,7 @@ namespace Cotton.Mobile.Tests
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             harness.LocalFileOperator.DeleteStatus = CottonDeviceToCloudLocalFileDeleteStatus.Deleted;
 
-            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateUploadItem()));
+            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateUploadItem()), TestContext.Current.CancellationToken);
 
             Assert.Equal(
                 SuccessfulDeleteEvents,
@@ -53,10 +50,7 @@ namespace Cotton.Mobile.Tests
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.KeepOriginals);
 
-            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateUploadItem()));
+            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateUploadItem()), TestContext.Current.CancellationToken);
 
             Assert.Equal(
                 SuccessfulUploadEvents,
@@ -78,7 +72,7 @@ namespace Cotton.Mobile.Tests
                 CottonUploadOriginalRetention.KeepOriginals,
                 [pending]);
 
-            await harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(retryItem));
+            await harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(retryItem), TestContext.Current.CancellationToken);
 
             Assert.Equal(
                 RetryUploadEvents,
@@ -94,10 +88,7 @@ namespace Cotton.Mobile.Tests
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.KeepOriginals);
 
-            await Assert.ThrowsAsync<InvalidDataException>(() => harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateUploadItem(OperationId))));
+            await Assert.ThrowsAsync<InvalidDataException>(() => harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateUploadItem(OperationId)), TestContext.Current.CancellationToken));
 
             Assert.Equal(ReceiptLoadEvents, harness.Events);
             Assert.Empty(harness.FileOperator.UploadCalls);
@@ -117,10 +108,7 @@ namespace Cotton.Mobile.Tests
                 CottonUploadOriginalRetention.KeepOriginals,
                 [staleReceipt]);
 
-            await Assert.ThrowsAsync<InvalidDataException>(() => harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateUploadItem(OperationId))));
+            await Assert.ThrowsAsync<InvalidDataException>(() => harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateUploadItem(OperationId)), TestContext.Current.CancellationToken));
 
             Assert.Equal(ReceiptLoadEvents, harness.Events);
             Assert.Empty(harness.FileOperator.UploadCalls);
@@ -132,10 +120,7 @@ namespace Cotton.Mobile.Tests
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             harness.FileOperator.UploadException = new IOException("Upload failed.");
 
-            await Assert.ThrowsAsync<IOException>(() => harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateUploadItem())));
+            await Assert.ThrowsAsync<IOException>(() => harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateUploadItem()), TestContext.Current.CancellationToken));
 
             Assert.Equal(FailedUploadEvents, harness.Events);
             CottonUploadReceiptSnapshot receipt = Assert.Single(harness.ReceiptStore.Receipts);
@@ -149,10 +134,7 @@ namespace Cotton.Mobile.Tests
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             harness.ReceiptStore.ThrowOnUploadedSave = true;
 
-            await Assert.ThrowsAsync<IOException>(() => harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateUploadItem())));
+            await Assert.ThrowsAsync<IOException>(() => harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateUploadItem()), TestContext.Current.CancellationToken));
 
             Assert.Equal(
                 SuccessfulUploadEvents,
@@ -175,10 +157,7 @@ namespace Cotton.Mobile.Tests
                 RecordedAt.AddMinutes(-1));
             ExecutionHarness harness = new(retention, [pending]);
 
-            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateConfirmationItem()));
+            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateConfirmationItem()), TestContext.Current.CancellationToken);
 
             string[] expectedEvents = expectsDelete
                 ? ["receipt:uploaded", "remote:verify", "local:delete"]
@@ -207,10 +186,7 @@ namespace Cotton.Mobile.Tests
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             harness.LocalFileOperator.DeleteStatus = deleteStatus;
 
-            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateCleanupItem()));
+            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateCleanupItem()), TestContext.Current.CancellationToken);
 
             Assert.Equal(["remote:verify", .. LocalDeleteEvents], harness.Events);
             Assert.Empty(harness.FileOperator.UploadCalls);
@@ -226,10 +202,7 @@ namespace Cotton.Mobile.Tests
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             harness.FileOperator.RemoteFileMatches = false;
 
-            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(CreateCleanupItem()));
+            CottonDeviceToCloudSyncExecutionResult result = await harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(CreateCleanupItem()), TestContext.Current.CancellationToken);
 
             Assert.Equal(["remote:verify"], harness.Events);
             Assert.Empty(harness.LocalFileOperator.DeleteCalls);
@@ -250,7 +223,7 @@ namespace Cotton.Mobile.Tests
                 [CreateUploadItem()]);
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                harness.Executor.ExecuteAsync(InstanceUri, harness.Root, plan));
+                harness.Executor.ExecuteAsync(InstanceUri, harness.Root, plan, TestContext.Current.CancellationToken));
 
             Assert.Empty(harness.Events);
         }

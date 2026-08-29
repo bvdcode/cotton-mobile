@@ -40,9 +40,9 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncedFileSnapshot file = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
 
-            await _store.SaveAsync(InstanceUri, _syncRoot, [file]);
+            await _store.SaveAsync(InstanceUri, _syncRoot, [file], TestContext.Current.CancellationToken);
 
-            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
             Assert.Equal(FileId, loaded.FileId);
             Assert.Equal("report.pdf", loaded.FileName);
             Assert.Equal("report.pdf", loaded.RelativePath);
@@ -67,10 +67,10 @@ namespace Cotton.Mobile.Tests
                 "application/pdf",
                 SyncedAt.AddMinutes(3));
 
-            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, first);
-            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, replacement);
+            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, first, TestContext.Current.CancellationToken);
+            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, replacement, TestContext.Current.CancellationToken);
 
-            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
             Assert.Equal("report-renamed.pdf", loaded.FileName);
             Assert.Equal("\"etag-2\"", loaded.ETag);
             Assert.Equal(4096, loaded.SizeBytes);
@@ -83,10 +83,10 @@ namespace Cotton.Mobile.Tests
             CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
             CottonSyncedFileSnapshot replacement = CreateSyncedFile(replacementFileId, "report.pdf", "\"etag-2\"");
 
-            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, first);
-            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, replacement);
+            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, first, TestContext.Current.CancellationToken);
+            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, replacement, TestContext.Current.CancellationToken);
 
-            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
             Assert.Equal(replacementFileId, loaded.FileId);
             Assert.Equal("report.pdf", loaded.RelativePath);
             Assert.Equal("\"etag-2\"", loaded.ETag);
@@ -98,9 +98,9 @@ namespace Cotton.Mobile.Tests
             CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
             CottonSyncedFileSnapshot replacement = CreateSyncedFile(FileId, "report-new.pdf", "\"etag-2\"");
 
-            await _store.SaveAsync(InstanceUri, _syncRoot, [first, replacement]);
+            await _store.SaveAsync(InstanceUri, _syncRoot, [first, replacement], TestContext.Current.CancellationToken);
 
-            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
             Assert.Equal("report-new.pdf", loaded.FileName);
             Assert.Equal("\"etag-2\"", loaded.ETag);
         }
@@ -112,9 +112,9 @@ namespace Cotton.Mobile.Tests
             CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
             CottonSyncedFileSnapshot replacement = CreateSyncedFile(replacementFileId, "report.pdf", "\"etag-2\"");
 
-            await _store.SaveAsync(InstanceUri, _syncRoot, [first, replacement]);
+            await _store.SaveAsync(InstanceUri, _syncRoot, [first, replacement], TestContext.Current.CancellationToken);
 
-            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
             Assert.Equal(replacementFileId, loaded.FileId);
             Assert.Equal("report.pdf", loaded.RelativePath);
             Assert.Equal("\"etag-2\"", loaded.ETag);
@@ -124,19 +124,16 @@ namespace Cotton.Mobile.Tests
         public async Task SavePropagatesFileSystemFailures()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_rootDirectory)!);
-            await File.WriteAllTextAsync(_rootDirectory, "blocked directory");
+            await File.WriteAllTextAsync(_rootDirectory, "blocked directory", TestContext.Current.CancellationToken);
 
             await Assert.ThrowsAnyAsync<IOException>(() =>
-                _store.SaveAsync(
-                    InstanceUri,
-                    _syncRoot,
-                    [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")]));
+                _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")], TestContext.Current.CancellationToken));
         }
 
         [Fact]
         public async Task LoadReturnsEmptyWhenMetadataIsMissing()
         {
-            IReadOnlyList<CottonSyncedFileSnapshot> loaded = await _store.LoadAsync(InstanceUri, _syncRoot);
+            IReadOnlyList<CottonSyncedFileSnapshot> loaded = await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken);
 
             Assert.Empty(loaded);
         }
@@ -146,9 +143,9 @@ namespace Cotton.Mobile.Tests
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
-            await File.WriteAllTextAsync(metadataPath, "{ not valid json");
+            await File.WriteAllTextAsync(metadataPath, "{ not valid json", TestContext.Current.CancellationToken);
 
-            await Assert.ThrowsAsync<JsonException>(() => _store.LoadAsync(InstanceUri, _syncRoot));
+            await Assert.ThrowsAsync<JsonException>(() => _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
 
             Assert.True(File.Exists(metadataPath));
         }
@@ -158,18 +155,16 @@ namespace Cotton.Mobile.Tests
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
-            await File.WriteAllTextAsync(
-                metadataPath,
-                """
+            await File.WriteAllTextAsync(metadataPath, """
                 {
                   "schemaVersion": 2,
                   "syncRootStableKey": "wrong-root",
                   "savedAtUtc": "2026-06-20T14:00:00Z",
                   "items": []
                 }
-                """);
+                """, TestContext.Current.CancellationToken);
 
-            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri, _syncRoot));
+            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
 
             Assert.True(File.Exists(metadataPath));
         }
@@ -179,9 +174,7 @@ namespace Cotton.Mobile.Tests
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
-            await File.WriteAllTextAsync(
-                metadataPath,
-                $$"""
+            await File.WriteAllTextAsync(metadataPath, $$"""
                 {
                   "schemaVersion": 2,
                   "syncRootStableKey": "{{_syncRoot.StableKey}}",
@@ -208,9 +201,9 @@ namespace Cotton.Mobile.Tests
                     }
                   ]
                 }
-                """);
+                """, TestContext.Current.CancellationToken);
 
-            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri, _syncRoot));
+            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
             Assert.True(File.Exists(metadataPath));
         }
 
@@ -221,27 +214,24 @@ namespace Cotton.Mobile.Tests
             await _store.SaveAsync(InstanceUri, _syncRoot, [
                 CreateSyncedFile(FileId, "report.pdf", "\"etag-1\""),
                 CreateSyncedFile(otherFileId, "photo.jpg", "\"etag-2\""),
-            ]);
+            ], TestContext.Current.CancellationToken);
 
-            bool removed = await _store.RemoveAsync(InstanceUri, _syncRoot, FileId);
+            bool removed = await _store.RemoveAsync(InstanceUri, _syncRoot, FileId, TestContext.Current.CancellationToken);
 
             Assert.True(removed);
-            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
             Assert.Equal(otherFileId, loaded.FileId);
         }
 
         [Fact]
         public async Task RemoveReturnsFalseWhenFileIsMissing()
         {
-            await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")]);
+            await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")], TestContext.Current.CancellationToken);
 
-            bool removed = await _store.RemoveAsync(
-                InstanceUri,
-                _syncRoot,
-                Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"));
+            bool removed = await _store.RemoveAsync(InstanceUri, _syncRoot, Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"), TestContext.Current.CancellationToken);
 
             Assert.False(removed);
-            Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
         }
 
         [Fact]
@@ -252,16 +242,16 @@ namespace Cotton.Mobile.Tests
                 SyncRootId,
                 CloudFolderId,
                 "other-sync-root");
-            await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")]);
+            await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")], TestContext.Current.CancellationToken);
             await _store.SaveAsync(InstanceUri, otherRoot, [
                 CreateSyncedFile(
                     Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                     "other.pdf",
                     "\"etag-2\""),
-            ]);
+            ], TestContext.Current.CancellationToken);
 
-            CottonSyncedFileSnapshot first = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
-            CottonSyncedFileSnapshot second = Assert.Single(await _store.LoadAsync(InstanceUri, otherRoot));
+            CottonSyncedFileSnapshot first = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
+            CottonSyncedFileSnapshot second = Assert.Single(await _store.LoadAsync(InstanceUri, otherRoot, TestContext.Current.CancellationToken));
 
             Assert.Equal("report.pdf", first.FileName);
             Assert.Equal("other.pdf", second.FileName);
@@ -273,12 +263,12 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task ClearRemovesManifestMetadata()
         {
-            await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")]);
+            await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")], TestContext.Current.CancellationToken);
 
-            await _store.ClearAsync(InstanceUri, _syncRoot);
+            await _store.ClearAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken);
 
             Assert.False(File.Exists(CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot)));
-            Assert.Empty(await _store.LoadAsync(InstanceUri, _syncRoot));
+            Assert.Empty(await _store.LoadAsync(InstanceUri, _syncRoot, TestContext.Current.CancellationToken));
         }
 
         public void Dispose()

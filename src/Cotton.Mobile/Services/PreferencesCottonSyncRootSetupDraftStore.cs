@@ -36,7 +36,7 @@ namespace Cotton.Mobile.Services
 
             if (schemaVersion != SchemaVersion)
             {
-                Clear();
+                ClearValues();
                 throw new InvalidDataException("Saved sync-root setup version is not supported.");
             }
 
@@ -64,7 +64,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is ArgumentException or FormatException or InvalidDataException)
             {
-                Clear();
+                ClearValues();
                 throw new InvalidDataException("Saved sync-root setup is invalid.", exception);
             }
         }
@@ -75,7 +75,7 @@ namespace Cotton.Mobile.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             ArgumentNullException.ThrowIfNull(draft);
-            Clear();
+            ClearValues();
             _preferences.Set(RequestIdKey, draft.RequestId.ToString("N"));
             _preferences.Set(OperationKey, (int)draft.Operation);
             _preferences.Set(InstanceUriKey, draft.InstanceUri.AbsoluteUri);
@@ -101,7 +101,7 @@ namespace Cotton.Mobile.Services
         public Task ClearAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            Clear();
+            ClearValues();
             return Task.CompletedTask;
         }
 
@@ -128,7 +128,7 @@ namespace Cotton.Mobile.Services
             };
         }
 
-        private void Clear()
+        private void ClearValues()
         {
             _preferences.Remove(SchemaVersionKey);
             _preferences.Remove(RequestIdKey);

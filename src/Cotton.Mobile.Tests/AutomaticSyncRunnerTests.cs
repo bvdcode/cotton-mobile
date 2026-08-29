@@ -29,7 +29,7 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot folderRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonSyncRootSnapshot mediaRoot = SyncTestRootFactory.CreateMediaStoreRoot();
-            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [folderRoot, mediaRoot]);
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [folderRoot, mediaRoot], TestContext.Current.CancellationToken);
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
@@ -38,9 +38,7 @@ namespace Cotton.Mobile.Tests
                 _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            await runner.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.MediaStoreChanged);
+            await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
 
             Assert.Equal([mediaRoot.Id], coordinator.RootIds);
         }
@@ -50,7 +48,7 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot folderRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonSyncRootSnapshot mediaRoot = SyncTestRootFactory.CreateMediaStoreRoot();
-            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [folderRoot, mediaRoot]);
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [folderRoot, mediaRoot], TestContext.Current.CancellationToken);
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
@@ -59,9 +57,7 @@ namespace Cotton.Mobile.Tests
                 _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            await runner.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
 
             Assert.Equal(2, coordinator.RunRootCount);
             Assert.Contains(folderRoot.Id, coordinator.RootIds);
@@ -74,16 +70,11 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot currentRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonSyncRootSnapshot otherAccountRoot = SyncTestRootFactory.CreateMediaStoreRoot(
                 accountScopeKey: "account-2");
-            await _rootStore.SaveAsync(
-                SyncTestRootFactory.InstanceUri,
-                [currentRoot, otherAccountRoot]);
-            await _statusStore.UpdateAsync(
-                SyncTestRootFactory.InstanceUri,
-                new HashSet<Guid> { currentRoot.Id, otherAccountRoot.Id },
-                [CottonAutomaticSyncRootStatusSnapshot.Failed(
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [currentRoot, otherAccountRoot], TestContext.Current.CancellationToken);
+            await _statusStore.UpdateAsync(SyncTestRootFactory.InstanceUri, new HashSet<Guid> { currentRoot.Id, otherAccountRoot.Id }, [CottonAutomaticSyncRootStatusSnapshot.Failed(
                     otherAccountRoot.Id,
                     _timeProvider.GetUtcNow().UtcDateTime,
-                    CottonAutomaticSyncFailureKind.AuthenticationRequired)]);
+                    CottonAutomaticSyncFailureKind.AuthenticationRequired)], TestContext.Current.CancellationToken);
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
@@ -92,14 +83,12 @@ namespace Cotton.Mobile.Tests
                 _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            CottonAutomaticSyncRunResult result = await runner.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
 
             Assert.Equal([currentRoot.Id], coordinator.RootIds);
             Assert.Equal([currentRoot.Id], result.SucceededRootIds);
             IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
-                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
+                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken);
             Assert.Equal(CottonAutomaticSyncOutcome.Succeeded, statuses[currentRoot.Id].Outcome);
             Assert.Equal(CottonAutomaticSyncOutcome.Failed, statuses[otherAccountRoot.Id].Outcome);
         }
@@ -109,7 +98,7 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot failingRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonSyncRootSnapshot succeedingRoot = SyncTestRootFactory.CreateMediaStoreRoot();
-            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [failingRoot, succeedingRoot]);
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [failingRoot, succeedingRoot], TestContext.Current.CancellationToken);
             RecordingDeviceToCloudSyncCoordinator coordinator = new()
             {
                 FailingRootId = failingRoot.Id,
@@ -121,16 +110,14 @@ namespace Cotton.Mobile.Tests
                 _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            CottonAutomaticSyncRunResult result = await runner.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
 
             Assert.Equal(2, coordinator.RunRootCount);
             Assert.Contains(succeedingRoot.Id, coordinator.RootIds);
             Assert.Equal([succeedingRoot.Id], result.SucceededRootIds);
             Assert.Equal([failingRoot.Id], result.FailedRootIds);
             IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
-                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
+                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken);
             Assert.Equal(CottonAutomaticSyncOutcome.Failed, statuses[failingRoot.Id].Outcome);
             Assert.Equal(CottonAutomaticSyncFailureKind.LocalReadFailed, statuses[failingRoot.Id].FailureKind);
             Assert.Equal(CottonAutomaticSyncOutcome.Succeeded, statuses[succeedingRoot.Id].Outcome);
@@ -141,7 +128,7 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot selectedRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonSyncRootSnapshot otherRoot = SyncTestRootFactory.CreateMediaStoreRoot();
-            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [selectedRoot, otherRoot]);
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [selectedRoot, otherRoot], TestContext.Current.CancellationToken);
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
@@ -150,9 +137,7 @@ namespace Cotton.Mobile.Tests
                 _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            CottonAutomaticSyncRunResult result = await runner.RunRootsAsync(
-                SyncTestRootFactory.SessionScope,
-                [selectedRoot.Id]);
+            CottonAutomaticSyncRunResult result = await runner.RunRootsAsync(SyncTestRootFactory.SessionScope, [selectedRoot.Id], TestContext.Current.CancellationToken);
 
             Assert.Equal([selectedRoot.Id], coordinator.RootIds);
             Assert.Equal([selectedRoot.Id], result.SucceededRootIds);
@@ -164,7 +149,7 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot timedOutRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonSyncRootSnapshot succeedingRoot = SyncTestRootFactory.CreateMediaStoreRoot();
-            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [timedOutRoot, succeedingRoot]);
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [timedOutRoot, succeedingRoot], TestContext.Current.CancellationToken);
             RecordingDeviceToCloudSyncCoordinator coordinator = new()
             {
                 FailingRootId = timedOutRoot.Id,
@@ -177,14 +162,12 @@ namespace Cotton.Mobile.Tests
                 _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            CottonAutomaticSyncRunResult result = await runner.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
 
             Assert.Equal([timedOutRoot.Id], result.FailedRootIds);
             Assert.Equal([succeedingRoot.Id], result.SucceededRootIds);
             IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
-                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
+                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken);
             Assert.Equal(CottonAutomaticSyncFailureKind.TimedOut, statuses[timedOutRoot.Id].FailureKind);
         }
 
@@ -192,7 +175,7 @@ namespace Cotton.Mobile.Tests
         public async Task BlockedItemsRequireActionAndAreNotReportedAsSuccess()
         {
             CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
-            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [root]);
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [root], TestContext.Current.CancellationToken);
             RecordingDeviceToCloudSyncCoordinator coordinator = new()
             {
                 BlockedRootId = root.Id,
@@ -204,9 +187,7 @@ namespace Cotton.Mobile.Tests
                 _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            CottonAutomaticSyncRunResult result = await runner.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
 
             Assert.Empty(result.SucceededRootIds);
             CottonAutomaticSyncFailure failure = Assert.Single(result.Failures);
@@ -214,7 +195,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonAutomaticSyncFailureKind.ActionRequired, failure.Kind);
             Assert.Empty(result.RetryableRootIds);
             IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
-                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
+                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken);
             Assert.Equal(CottonAutomaticSyncOutcome.Failed, statuses[root.Id].Outcome);
             Assert.Equal(CottonAutomaticSyncFailureKind.ActionRequired, statuses[root.Id].FailureKind);
         }

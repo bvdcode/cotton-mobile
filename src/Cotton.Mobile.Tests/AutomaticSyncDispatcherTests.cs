@@ -10,17 +10,11 @@ namespace Cotton.Mobile.Tests
         {
             using ControlledAutomaticSyncRunner runner = new();
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
-            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.ApplicationResumed);
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.ApplicationResumed, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
-            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.MediaStoreChanged);
-            Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.MediaStoreChanged);
+            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
+            Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
             runner.ReleaseRun();
             await runner.WaitForNextRunAsync();
 
@@ -35,17 +29,11 @@ namespace Cotton.Mobile.Tests
         {
             using ControlledAutomaticSyncRunner runner = new();
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
-            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.MediaStoreChanged);
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
-            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.MediaStoreChanged);
-            Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
+            Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
             runner.ReleaseRun();
             await runner.WaitForNextRunAsync();
             runner.ReleaseRun();
@@ -70,9 +58,7 @@ namespace Cotton.Mobile.Tests
                 CottonAutomaticSyncTrigger.PeriodicReconciliation,
                 cancellationSource.Token);
             await runner.WaitForNextRunAsync();
-            Task<CottonAutomaticSyncRunResult> survivingWait = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.MediaStoreChanged);
+            Task<CottonAutomaticSyncRunResult> survivingWait = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
 
             await cancellationSource.CancelAsync();
 
@@ -98,14 +84,10 @@ namespace Cotton.Mobile.Tests
             CottonAuthenticatedSessionScope otherAccountScope = new(
                 SyncTestRootFactory.InstanceUri,
                 "account-2");
-            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
-            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(
-                otherAccountScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(otherAccountScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
             Assert.Equal(2, runner.Triggers.Count);
@@ -121,17 +103,11 @@ namespace Cotton.Mobile.Tests
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
             Guid firstRootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
             Guid secondRootId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
-            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunRootsAsync(
-                SyncTestRootFactory.SessionScope,
-                [firstRootId]);
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunRootsAsync(SyncTestRootFactory.SessionScope, [firstRootId], TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
-            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunRootsAsync(
-                SyncTestRootFactory.SessionScope,
-                [firstRootId]);
-            Task<CottonAutomaticSyncRunResult> third = dispatcher.RunRootsAsync(
-                SyncTestRootFactory.SessionScope,
-                [secondRootId]);
+            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunRootsAsync(SyncTestRootFactory.SessionScope, [firstRootId], TestContext.Current.CancellationToken);
+            Task<CottonAutomaticSyncRunResult> third = dispatcher.RunRootsAsync(SyncTestRootFactory.SessionScope, [secondRootId], TestContext.Current.CancellationToken);
             runner.ReleaseRun();
             await runner.WaitForNextRunAsync();
             runner.ReleaseRun();
@@ -148,17 +124,11 @@ namespace Cotton.Mobile.Tests
             using ControlledAutomaticSyncRunner runner = new();
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
             Guid rootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.MediaStoreChanged);
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
-            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunRootsAsync(
-                SyncTestRootFactory.SessionScope,
-                [rootId]);
-            Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation);
+            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunRootsAsync(SyncTestRootFactory.SessionScope, [rootId], TestContext.Current.CancellationToken);
+            Task<CottonAutomaticSyncRunResult> third = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
             runner.ReleaseRun();
             await runner.WaitForNextRunAsync();
             runner.ReleaseRun();

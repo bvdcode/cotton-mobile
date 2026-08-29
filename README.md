@@ -31,6 +31,6 @@ Cotton Mobile connects Android devices to a Cotton Cloud instance for file brows
 
 ```shell
 dotnet restore Cotton.Mobile.slnx
-dotnet test src/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
+dotnet test --project src/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
 dotnet build src/Cotton.Mobile/Cotton.Mobile.csproj -f net10.0-android -c Debug
 ```

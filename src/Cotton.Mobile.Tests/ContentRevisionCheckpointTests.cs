@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Tests
                 itemInterval: 1);
             CottonContentRevisionSnapshot changedFirst = CreateRevision("first", 2);
 
-            await checkpoint.SaveProgressIfDueAsync([changedFirst]);
+            await checkpoint.SaveProgressIfDueAsync([changedFirst], TestContext.Current.CancellationToken);
 
             CottonContentRevisionIndexSnapshot saved = Assert.Single(store.SavedIndexes);
             Assert.Equal(2, saved.Revisions.Count);
@@ -49,7 +49,7 @@ namespace Cotton.Mobile.Tests
                 persisted,
                 itemInterval: 1);
 
-            await checkpoint.SaveFinalAsync([retained]);
+            await checkpoint.SaveFinalAsync([retained], TestContext.Current.CancellationToken);
 
             CottonContentRevisionIndexSnapshot saved = Assert.Single(store.SavedIndexes);
             Assert.Equal([retained.LocalSourceId], saved.Revisions.Select(revision => revision.LocalSourceId));
@@ -70,8 +70,8 @@ namespace Cotton.Mobile.Tests
                 persisted,
                 itemInterval: 1);
 
-            await checkpoint.SaveProgressIfDueAsync([revision]);
-            await checkpoint.SaveFinalAsync([revision]);
+            await checkpoint.SaveProgressIfDueAsync([revision], TestContext.Current.CancellationToken);
+            await checkpoint.SaveFinalAsync([revision], TestContext.Current.CancellationToken);
 
             Assert.Empty(store.SavedIndexes);
         }

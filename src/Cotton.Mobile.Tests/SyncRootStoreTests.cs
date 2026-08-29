@@ -29,9 +29,9 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, FolderId, "Projects");
 
-            await _store.SaveAsync(InstanceUri, [root]);
+            await _store.SaveAsync(InstanceUri, [root], TestContext.Current.CancellationToken);
 
-            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(root.Id, loaded.Id);
             Assert.Equal(root.InstanceUri, loaded.InstanceUri);
             Assert.Equal(root.AccountScopeKey, loaded.AccountScopeKey);
@@ -60,9 +60,9 @@ namespace Cotton.Mobile.Tests
                 CottonSyncDirection.DeviceToCloud,
                 CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
 
-            await _store.SaveAsync(InstanceUri, [root]);
+            await _store.SaveAsync(InstanceUri, [root], TestContext.Current.CancellationToken);
 
-            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(CottonSyncDirection.DeviceToCloud, loaded.Direction);
             Assert.Equal(
                 CottonUploadOriginalRetention.DeleteAfterConfirmedUpload,
@@ -75,9 +75,9 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot root = SyncTestRootFactory.CreateMediaStoreRoot(rootId: RootId);
 
-            await _store.SaveAsync(InstanceUri, [root]);
+            await _store.SaveAsync(InstanceUri, [root], TestContext.Current.CancellationToken);
 
-            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(root.LocalRoot.ScopeKey, loaded.LocalRoot.ScopeKey);
             Assert.Equal(root.StableKey, loaded.StableKey);
         }
@@ -88,10 +88,10 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot original = CreateRoot(RootId, FolderId, "Projects");
             CottonSyncRootSnapshot replacement = CreateRoot(RootId, OtherFolderId, "Archive");
 
-            await _store.AddOrReplaceAsync(InstanceUri, original);
-            await _store.AddOrReplaceAsync(InstanceUri, replacement);
+            await _store.AddOrReplaceAsync(InstanceUri, original, TestContext.Current.CancellationToken);
+            await _store.AddOrReplaceAsync(InstanceUri, replacement, TestContext.Current.CancellationToken);
 
-            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(OtherFolderId, loaded.CloudFolder.FolderId);
             Assert.Equal("Files / Archive", loaded.CloudFolder.Path);
         }
@@ -103,10 +103,10 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot replacement =
                 CreateRoot(Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"), FolderId, "Projects");
 
-            await _store.AddOrReplaceAsync(InstanceUri, original);
-            await _store.AddOrReplaceAsync(InstanceUri, replacement);
+            await _store.AddOrReplaceAsync(InstanceUri, original, TestContext.Current.CancellationToken);
+            await _store.AddOrReplaceAsync(InstanceUri, replacement, TestContext.Current.CancellationToken);
 
-            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(replacement.Id, loaded.Id);
             Assert.Equal(original.StableKey, loaded.StableKey);
         }
@@ -114,24 +114,22 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task RemoveDeletesRootById()
         {
-            await _store.SaveAsync(
-                InstanceUri,
-                [
+            await _store.SaveAsync(InstanceUri, [
                     CreateRoot(RootId, FolderId, "Projects"),
                     CreateRoot(Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"), OtherFolderId, "Archive"),
-                ]);
+                ], TestContext.Current.CancellationToken);
 
-            bool removed = await _store.RemoveAsync(InstanceUri, RootId);
+            bool removed = await _store.RemoveAsync(InstanceUri, RootId, TestContext.Current.CancellationToken);
 
             Assert.True(removed);
-            CottonSyncRootSnapshot remaining = Assert.Single(await _store.LoadAsync(InstanceUri));
+            CottonSyncRootSnapshot remaining = Assert.Single(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(OtherFolderId, remaining.CloudFolder.FolderId);
         }
 
         [Fact]
         public async Task RemoveReturnsFalseWhenRootIsMissing()
         {
-            bool removed = await _store.RemoveAsync(InstanceUri, RootId);
+            bool removed = await _store.RemoveAsync(InstanceUri, RootId, TestContext.Current.CancellationToken);
 
             Assert.False(removed);
         }
@@ -139,7 +137,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task LoadReturnsEmptyListWhenMetadataFileIsMissing()
         {
-            IReadOnlyList<CottonSyncRootSnapshot> loaded = await _store.LoadAsync(InstanceUri);
+            IReadOnlyList<CottonSyncRootSnapshot> loaded = await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Empty(loaded);
         }
@@ -149,9 +147,9 @@ namespace Cotton.Mobile.Tests
         {
             Directory.CreateDirectory(_directory);
             string metadataPath = CreateSyncRootMetadataPath(_directory);
-            await File.WriteAllTextAsync(metadataPath, "{ not valid json");
+            await File.WriteAllTextAsync(metadataPath, "{ not valid json", TestContext.Current.CancellationToken);
 
-            await Assert.ThrowsAsync<JsonException>(() => _store.LoadAsync(InstanceUri));
+            await Assert.ThrowsAsync<JsonException>(() => _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
 
             Assert.True(File.Exists(metadataPath));
         }
@@ -161,9 +159,7 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, FolderId, "Projects");
             Directory.CreateDirectory(_directory);
-            await File.WriteAllTextAsync(
-                CreateSyncRootMetadataPath(_directory),
-                $$"""
+            await File.WriteAllTextAsync(CreateSyncRootMetadataPath(_directory), $$"""
                 {
                   "schemaVersion": 1,
                   "savedAtUtc": "2026-06-20T09:00:00Z",
@@ -199,9 +195,9 @@ namespace Cotton.Mobile.Tests
                     }
                   ]
                 }
-                """);
+                """, TestContext.Current.CancellationToken);
 
-            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri));
+            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.True(File.Exists(CreateSyncRootMetadataPath(_directory)));
         }
 
@@ -215,9 +211,7 @@ namespace Cotton.Mobile.Tests
                 "Archive",
                 OtherInstanceUri);
             Directory.CreateDirectory(_directory);
-            await File.WriteAllTextAsync(
-                CreateSyncRootMetadataPath(_directory),
-                $$"""
+            await File.WriteAllTextAsync(CreateSyncRootMetadataPath(_directory), $$"""
                 {
                   "schemaVersion": 1,
                   "savedAtUtc": "2026-06-20T09:00:00Z",
@@ -252,9 +246,9 @@ namespace Cotton.Mobile.Tests
                     }
                   ]
                 }
-                """);
+                """, TestContext.Current.CancellationToken);
 
-            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri));
+            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
         }
 
         [Fact]
@@ -263,28 +257,28 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot other = CreateRoot(RootId, FolderId, "Projects", OtherInstanceUri);
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _store.SaveAsync(InstanceUri, [other]));
+                _store.SaveAsync(InstanceUri, [other], TestContext.Current.CancellationToken));
         }
 
         [Fact]
         public async Task SavePropagatesFileSystemFailures()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_directory)!);
-            await File.WriteAllTextAsync(_directory, "blocked directory");
+            await File.WriteAllTextAsync(_directory, "blocked directory", TestContext.Current.CancellationToken);
 
             await Assert.ThrowsAnyAsync<IOException>(() =>
-                _store.SaveAsync(InstanceUri, [CreateRoot(RootId, FolderId, "Projects")]));
+                _store.SaveAsync(InstanceUri, [CreateRoot(RootId, FolderId, "Projects")], TestContext.Current.CancellationToken));
         }
 
         [Fact]
         public async Task ClearRemovesMetadataFile()
         {
-            await _store.SaveAsync(InstanceUri, [CreateRoot(RootId, FolderId, "Projects")]);
+            await _store.SaveAsync(InstanceUri, [CreateRoot(RootId, FolderId, "Projects")], TestContext.Current.CancellationToken);
 
-            await _store.ClearAsync(InstanceUri);
+            await _store.ClearAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.False(File.Exists(CreateSyncRootMetadataPath(_directory)));
-            Assert.Empty(await _store.LoadAsync(InstanceUri));
+            Assert.Empty(await _store.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
         }
 
         public void Dispose()

@@ -14,23 +14,19 @@ namespace Cotton.Mobile.Tests
             TaskCompletionSource releaseFirst = new(TaskCreationOptions.RunContinuationsAsynchronously);
             TaskCompletionSource secondStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            Task<int> first = executionLock.ExecuteAsync(
-                root,
-                async cancellationToken =>
+            Task<int> first = executionLock.ExecuteAsync(root, async cancellationToken =>
                 {
                     firstStarted.SetResult();
                     await releaseFirst.Task.WaitAsync(cancellationToken);
                     return 1;
-                });
+                }, TestContext.Current.CancellationToken);
             await firstStarted.Task;
-            Task<int> second = executionLock.ExecuteAsync(
-                root,
-                cancellationToken =>
+            Task<int> second = executionLock.ExecuteAsync(root, cancellationToken =>
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     secondStarted.SetResult();
                     return Task.FromResult(2);
-                });
+                }, TestContext.Current.CancellationToken);
 
             Assert.False(secondStarted.Task.IsCompleted);
             releaseFirst.SetResult();
@@ -50,7 +46,7 @@ namespace Cotton.Mobile.Tests
             {
                 CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot(
                     rootKey: $"content://tree/root-{index}");
-                int result = await executionLock.ExecuteAsync(root, _ => Task.FromResult(index));
+                int result = await executionLock.ExecuteAsync(root, _ => Task.FromResult(index), TestContext.Current.CancellationToken);
                 Assert.Equal(index, result);
             }
 
@@ -64,14 +60,12 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
             TaskCompletionSource started = new(TaskCreationOptions.RunContinuationsAsynchronously);
             TaskCompletionSource release = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            Task<int> active = executionLock.ExecuteAsync(
-                root,
-                async cancellationToken =>
+            Task<int> active = executionLock.ExecuteAsync(root, async cancellationToken =>
                 {
                     started.SetResult();
                     await release.Task.WaitAsync(cancellationToken);
                     return 1;
-                });
+                }, TestContext.Current.CancellationToken);
             await started.Task;
             using CancellationTokenSource cancellation = new();
             Task<int> waiting = executionLock.ExecuteAsync(
@@ -79,7 +73,7 @@ namespace Cotton.Mobile.Tests
                 _ => Task.FromResult(2),
                 cancellation.Token);
 
-            cancellation.Cancel();
+            await cancellation.CancelAsync();
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waiting);
             Assert.Equal(1, executionLock.ActiveEntryCount);
             release.SetResult();

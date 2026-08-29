@@ -26,7 +26,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task LoadReturnsEmptySetWhenMetadataIsMissing()
         {
-            IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri);
+            IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Empty(pausedRootIds);
         }
@@ -34,21 +34,21 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task SetPausedAddsAndRemovesRootId()
         {
-            bool added = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true);
-            bool duplicateAdd = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true);
+            bool added = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true, cancellationToken: TestContext.Current.CancellationToken);
+            bool duplicateAdd = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true, cancellationToken: TestContext.Current.CancellationToken);
 
-            IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri);
+            IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.True(added);
             Assert.False(duplicateAdd);
             Assert.Contains(RootId, pausedRootIds);
 
-            bool removed = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: false);
-            bool duplicateRemove = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: false);
+            bool removed = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: false, cancellationToken: TestContext.Current.CancellationToken);
+            bool duplicateRemove = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: false, cancellationToken: TestContext.Current.CancellationToken);
 
             Assert.True(removed);
             Assert.False(duplicateRemove);
-            Assert.Empty(await _store.LoadPausedRootIdsAsync(InstanceUri));
+            Assert.Empty(await _store.LoadPausedRootIdsAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.False(File.Exists(CreateMetadataPath()));
         }
 
@@ -56,9 +56,7 @@ namespace Cotton.Mobile.Tests
         public async Task LoadFiltersEmptyAndDuplicateRootIds()
         {
             Directory.CreateDirectory(_directory);
-            await File.WriteAllTextAsync(
-                CreateMetadataPath(),
-                $$"""
+            await File.WriteAllTextAsync(CreateMetadataPath(), $$"""
                 {
                   "schemaVersion": 1,
                   "savedAtUtc": "2026-06-20T18:00:00Z",
@@ -69,9 +67,9 @@ namespace Cotton.Mobile.Tests
                     "{{OtherRootId:D}}"
                   ]
                 }
-                """);
+                """, TestContext.Current.CancellationToken);
 
-            IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri);
+            IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Equal(2, pausedRootIds.Count);
             Assert.Contains(RootId, pausedRootIds);
@@ -82,9 +80,9 @@ namespace Cotton.Mobile.Tests
         public async Task LoadDeletesCorruptMetadataAndReturnsEmpty()
         {
             Directory.CreateDirectory(_directory);
-            await File.WriteAllTextAsync(CreateMetadataPath(), "{ not valid json");
+            await File.WriteAllTextAsync(CreateMetadataPath(), "{ not valid json", TestContext.Current.CancellationToken);
 
-            IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri);
+            IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri, TestContext.Current.CancellationToken);
 
             Assert.Empty(pausedRootIds);
             Assert.False(File.Exists(CreateMetadataPath()));
@@ -94,20 +92,20 @@ namespace Cotton.Mobile.Tests
         public async Task SavePropagatesFileSystemFailures()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_directory)!);
-            await File.WriteAllTextAsync(_directory, "blocked directory");
+            await File.WriteAllTextAsync(_directory, "blocked directory", TestContext.Current.CancellationToken);
 
             await Assert.ThrowsAnyAsync<IOException>(() =>
-                _store.SetPausedAsync(InstanceUri, RootId, isPaused: true));
+                _store.SetPausedAsync(InstanceUri, RootId, isPaused: true, cancellationToken: TestContext.Current.CancellationToken));
         }
 
         [Fact]
         public async Task ClearRemovesPauseMetadata()
         {
-            await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true);
+            await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true, cancellationToken: TestContext.Current.CancellationToken);
 
-            await _store.ClearAsync(InstanceUri);
+            await _store.ClearAsync(InstanceUri, TestContext.Current.CancellationToken);
 
-            Assert.Empty(await _store.LoadPausedRootIdsAsync(InstanceUri));
+            Assert.Empty(await _store.LoadPausedRootIdsAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.False(File.Exists(CreateMetadataPath()));
         }
 

@@ -34,14 +34,14 @@ namespace Cotton.Mobile.Tests
             CottonUploadReceiptSnapshot uploaded = confirmedPending.MarkUploaded(
                 CreateSecondUploadedFile(),
                 RecordedAt.AddSeconds(1));
-            await _store.SaveAsync(InstanceUri, root, pending);
-            await _store.SaveAsync(InstanceUri, root, confirmedPending);
-            await _store.SaveAsync(InstanceUri, root, uploaded);
+            await _store.SaveAsync(InstanceUri, root, pending, TestContext.Current.CancellationToken);
+            await _store.SaveAsync(InstanceUri, root, confirmedPending, TestContext.Current.CancellationToken);
+            await _store.SaveAsync(InstanceUri, root, uploaded, TestContext.Current.CancellationToken);
 
-            int removedCount = await _store.ClearPendingAsync(InstanceUri, root);
+            int removedCount = await _store.ClearPendingAsync(InstanceUri, root, TestContext.Current.CancellationToken);
 
             CottonUploadReceiptSnapshot remaining = Assert.Single(
-                await _store.LoadAsync(InstanceUri, root));
+                await _store.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
             Assert.Equal(1, removedCount);
             Assert.True(remaining.IsUploaded);
             Assert.Equal(uploaded.LocalSourceId, remaining.LocalSourceId);

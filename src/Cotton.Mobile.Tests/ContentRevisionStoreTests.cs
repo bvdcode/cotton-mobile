@@ -23,9 +23,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task MissingIndexReturnsNull()
         {
-            CottonContentRevisionIndexSnapshot? index = await _store.LoadAsync(
-                SyncTestRootFactory.InstanceUri,
-                _root);
+            CottonContentRevisionIndexSnapshot? index = await _store.LoadAsync(SyncTestRootFactory.InstanceUri, _root, TestContext.Current.CancellationToken);
 
             Assert.Null(index);
         }
@@ -35,10 +33,8 @@ namespace Cotton.Mobile.Tests
         {
             CottonContentRevisionIndexSnapshot expected = CreateIndex();
 
-            await _store.SaveAsync(SyncTestRootFactory.InstanceUri, _root, expected);
-            CottonContentRevisionIndexSnapshot? actual = await _store.LoadAsync(
-                SyncTestRootFactory.InstanceUri,
-                _root);
+            await _store.SaveAsync(SyncTestRootFactory.InstanceUri, _root, expected, TestContext.Current.CancellationToken);
+            CottonContentRevisionIndexSnapshot? actual = await _store.LoadAsync(SyncTestRootFactory.InstanceUri, _root, TestContext.Current.CancellationToken);
 
             Assert.NotNull(actual);
             Assert.True(expected.HasSameContentAs(actual));
@@ -47,11 +43,11 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task ClearRemovesSavedIndex()
         {
-            await _store.SaveAsync(SyncTestRootFactory.InstanceUri, _root, CreateIndex());
+            await _store.SaveAsync(SyncTestRootFactory.InstanceUri, _root, CreateIndex(), TestContext.Current.CancellationToken);
 
-            await _store.ClearAsync(SyncTestRootFactory.InstanceUri, _root);
+            await _store.ClearAsync(SyncTestRootFactory.InstanceUri, _root, TestContext.Current.CancellationToken);
 
-            Assert.Null(await _store.LoadAsync(SyncTestRootFactory.InstanceUri, _root));
+            Assert.Null(await _store.LoadAsync(SyncTestRootFactory.InstanceUri, _root, TestContext.Current.CancellationToken));
         }
 
         public void Dispose()

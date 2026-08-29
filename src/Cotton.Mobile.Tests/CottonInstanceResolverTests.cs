@@ -11,7 +11,7 @@ namespace Cotton.Mobile.Tests
             StubCottonInstanceProbe probe = new(_ => true);
             CottonInstanceResolver resolver = new(probe);
 
-            Uri? result = await resolver.ResolveAsync("   ");
+            Uri? result = await resolver.ResolveAsync("   ", TestContext.Current.CancellationToken);
 
             Assert.Null(result);
             Assert.Empty(probe.ProbedUris);
@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Tests
             StubCottonInstanceProbe probe = new(_ => false);
             CottonInstanceResolver resolver = new(probe);
 
-            Uri? result = await resolver.ResolveAsync(address);
+            Uri? result = await resolver.ResolveAsync(address, TestContext.Current.CancellationToken);
 
             Assert.Equal(expected, result?.AbsoluteUri);
             Assert.Empty(probe.ProbedUris);
@@ -40,7 +40,7 @@ namespace Cotton.Mobile.Tests
             StubCottonInstanceProbe probe = new(_ => true);
             CottonInstanceResolver resolver = new(probe);
 
-            Uri? result = await resolver.ResolveAsync(address);
+            Uri? result = await resolver.ResolveAsync(address, TestContext.Current.CancellationToken);
 
             Assert.Null(result);
             Assert.Empty(probe.ProbedUris);
@@ -52,7 +52,7 @@ namespace Cotton.Mobile.Tests
             StubCottonInstanceProbe probe = new(uri => uri.Scheme == Uri.UriSchemeHttps);
             CottonInstanceResolver resolver = new(probe);
 
-            Uri? result = await resolver.ResolveAsync("cloud.example.test:8443/base");
+            Uri? result = await resolver.ResolveAsync("cloud.example.test:8443/base", TestContext.Current.CancellationToken);
 
             Assert.Equal("https://cloud.example.test:8443/base", result?.AbsoluteUri);
             Uri probedUri = Assert.Single(probe.ProbedUris);
@@ -65,7 +65,7 @@ namespace Cotton.Mobile.Tests
             StubCottonInstanceProbe probe = new(uri => uri.Scheme == Uri.UriSchemeHttp);
             CottonInstanceResolver resolver = new(probe);
 
-            Uri? result = await resolver.ResolveAsync("cloud.example.test");
+            Uri? result = await resolver.ResolveAsync("cloud.example.test", TestContext.Current.CancellationToken);
 
             Assert.Equal("http://cloud.example.test/", result?.AbsoluteUri);
             Assert.Collection(
@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Tests
             StubCottonInstanceProbe probe = new(_ => false);
             CottonInstanceResolver resolver = new(probe);
 
-            Uri? result = await resolver.ResolveAsync("cloud.example.test");
+            Uri? result = await resolver.ResolveAsync("cloud.example.test", TestContext.Current.CancellationToken);
 
             Assert.Null(result);
             Assert.Equal(2, probe.ProbedUris.Count);

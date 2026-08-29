@@ -53,10 +53,10 @@ namespace Cotton.Mobile.Tests
         public async Task LoadMarksRootUnavailableWhenPersistedGrantWasRevoked()
         {
             CottonSyncRootSnapshot storedRoot = CreateRoot(CottonSyncRootPermissionStatus.Available);
-            await _rootStore.SaveAsync(InstanceUri, [storedRoot]);
+            await _rootStore.SaveAsync(InstanceUri, [storedRoot], TestContext.Current.CancellationToken);
             _permissionResolver.PermissionStatus = CottonSyncRootPermissionStatus.Revoked;
 
-            SyncRootCollectionSnapshot collection = await _manager.LoadAsync(InstanceUri, "account-1");
+            SyncRootCollectionSnapshot collection = await _manager.LoadAsync(InstanceUri, "account-1", TestContext.Current.CancellationToken);
 
             CottonSyncRootSnapshot resolvedRoot = Assert.Single(collection.Roots);
             Assert.Equal(CottonSyncRootPermissionStatus.Revoked, resolvedRoot.LocalRoot.PermissionStatus);
@@ -65,7 +65,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 CottonUploadOriginalRetention.DeleteAfterConfirmedUpload,
                 resolvedRoot.UploadOriginalRetention);
-            CottonSyncRootSnapshot persistedRoot = Assert.Single(await _rootStore.LoadAsync(InstanceUri));
+            CottonSyncRootSnapshot persistedRoot = Assert.Single(await _rootStore.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
             Assert.Equal(CottonSyncRootPermissionStatus.Available, persistedRoot.LocalRoot.PermissionStatus);
         }
 
@@ -73,10 +73,10 @@ namespace Cotton.Mobile.Tests
         public async Task LoadMarksRootReadyWhenPersistedGrantIsAvailableAgain()
         {
             CottonSyncRootSnapshot storedRoot = CreateRoot(CottonSyncRootPermissionStatus.Revoked);
-            await _rootStore.SaveAsync(InstanceUri, [storedRoot]);
+            await _rootStore.SaveAsync(InstanceUri, [storedRoot], TestContext.Current.CancellationToken);
             _permissionResolver.PermissionStatus = CottonSyncRootPermissionStatus.Available;
 
-            SyncRootCollectionSnapshot collection = await _manager.LoadAsync(InstanceUri, "account-1");
+            SyncRootCollectionSnapshot collection = await _manager.LoadAsync(InstanceUri, "account-1", TestContext.Current.CancellationToken);
 
             CottonSyncRootSnapshot resolvedRoot = Assert.Single(collection.Roots);
             Assert.Equal(CottonSyncRootPermissionStatus.Available, resolvedRoot.LocalRoot.PermissionStatus);
@@ -88,10 +88,10 @@ namespace Cotton.Mobile.Tests
         public async Task LoadReturnsRootsOnlyForRequestedAccount()
         {
             CottonSyncRootSnapshot storedRoot = CreateRoot(CottonSyncRootPermissionStatus.Available);
-            await _rootStore.SaveAsync(InstanceUri, [storedRoot]);
+            await _rootStore.SaveAsync(InstanceUri, [storedRoot], TestContext.Current.CancellationToken);
 
-            SyncRootCollectionSnapshot currentAccount = await _manager.LoadAsync(InstanceUri, "account-1");
-            SyncRootCollectionSnapshot otherAccount = await _manager.LoadAsync(InstanceUri, "account-2");
+            SyncRootCollectionSnapshot currentAccount = await _manager.LoadAsync(InstanceUri, "account-1", TestContext.Current.CancellationToken);
+            SyncRootCollectionSnapshot otherAccount = await _manager.LoadAsync(InstanceUri, "account-2", TestContext.Current.CancellationToken);
 
             Assert.Single(currentAccount.Roots);
             Assert.Empty(otherAccount.Roots);
@@ -103,12 +103,9 @@ namespace Cotton.Mobile.Tests
             Guid otherRootId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
             CottonSyncRootSnapshot currentRoot = CreateRoot(CottonSyncRootPermissionStatus.Available);
             CottonSyncRootSnapshot otherRoot = CreateRootForAccount(otherRootId, "account-2");
-            await _rootStore.SaveAsync(InstanceUri, [currentRoot, otherRoot]);
+            await _rootStore.SaveAsync(InstanceUri, [currentRoot, otherRoot], TestContext.Current.CancellationToken);
             DateTime completedAt = new(2026, 8, 14, 18, 0, 0, DateTimeKind.Utc);
-            await _automaticSyncStatusStore.UpdateAsync(
-                InstanceUri,
-                new HashSet<Guid> { currentRoot.Id, otherRoot.Id },
-                [
+            await _automaticSyncStatusStore.UpdateAsync(InstanceUri, new HashSet<Guid> { currentRoot.Id, otherRoot.Id }, [
                     CottonAutomaticSyncRootStatusSnapshot.Succeeded(
                         currentRoot.Id,
                         completedAt),
@@ -116,9 +113,9 @@ namespace Cotton.Mobile.Tests
                         otherRoot.Id,
                         completedAt,
                         CottonAutomaticSyncFailureKind.Unexpected),
-                ]);
+                ], TestContext.Current.CancellationToken);
 
-            SyncRootCollectionSnapshot collection = await _manager.LoadAsync(InstanceUri, "account-1");
+            SyncRootCollectionSnapshot collection = await _manager.LoadAsync(InstanceUri, "account-1", TestContext.Current.CancellationToken);
 
             Assert.Equal([currentRoot.Id], collection.AutomaticSyncStatuses.Keys);
         }
@@ -127,21 +124,18 @@ namespace Cotton.Mobile.Tests
         public async Task DeleteClearsUploadReceiptsForDeviceToCloudRoot()
         {
             CottonSyncRootSnapshot root = CreateRoot(CottonSyncRootPermissionStatus.Available);
-            await _rootStore.SaveAsync(InstanceUri, [root]);
-            await _uploadReceiptStore.SaveAsync(InstanceUri, root, CreatePendingReceipt());
-            await _contentRevisionStore.SaveAsync(
-                InstanceUri,
-                root,
-                new CottonContentRevisionIndexSnapshot(
+            await _rootStore.SaveAsync(InstanceUri, [root], TestContext.Current.CancellationToken);
+            await _uploadReceiptStore.SaveAsync(InstanceUri, root, CreatePendingReceipt(), TestContext.Current.CancellationToken);
+            await _contentRevisionStore.SaveAsync(InstanceUri, root, new CottonContentRevisionIndexSnapshot(
                     "version-1",
-                    [new CottonContentRevisionSnapshot("content://media/1", 1, TestContentHashes.First)]));
+                    [new CottonContentRevisionSnapshot("content://media/1", 1, TestContentHashes.First)]), TestContext.Current.CancellationToken);
 
-            bool removed = await _manager.DeleteAsync(InstanceUri, root);
+            bool removed = await _manager.DeleteAsync(InstanceUri, root, TestContext.Current.CancellationToken);
 
             Assert.True(removed);
-            Assert.Empty(await _rootStore.LoadAsync(InstanceUri));
-            Assert.Empty(await _uploadReceiptStore.LoadAsync(InstanceUri, root));
-            Assert.Null(await _contentRevisionStore.LoadAsync(InstanceUri, root));
+            Assert.Empty(await _rootStore.LoadAsync(InstanceUri, TestContext.Current.CancellationToken));
+            Assert.Empty(await _uploadReceiptStore.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
+            Assert.Null(await _contentRevisionStore.LoadAsync(InstanceUri, root, TestContext.Current.CancellationToken));
             Assert.Equal([root.Id], _uploadReceiptStore.ClearedRootIds);
         }
 

@@ -16,10 +16,10 @@ namespace Cotton.Mobile.Tests
             {
                 byte[] buffer = new byte[3];
 
-                int bytesRead = await stream.ReadAsync(buffer);
+                int bytesRead = await stream.ReadAsync(buffer, TestContext.Current.CancellationToken);
 
                 Assert.Equal(3, bytesRead);
-                Assert.Equal(3, await reported.Task.WaitAsync(TimeSpan.FromSeconds(1)));
+                Assert.Equal(3, await reported.Task.WaitAsync(TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
             }
 
             Assert.True(inner.CanRead);

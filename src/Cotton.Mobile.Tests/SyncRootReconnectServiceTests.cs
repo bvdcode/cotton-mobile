@@ -31,7 +31,7 @@ namespace Cotton.Mobile.Tests
                 root.LocalRoot.DisplayName,
                 CottonSyncRootPermissionStatus.Available);
 
-            CottonSyncRootSnapshot result = await _service.ReconnectAsync(root, replacement);
+            CottonSyncRootSnapshot result = await _service.ReconnectAsync(root, replacement, TestContext.Current.CancellationToken);
 
             Assert.Equal(root.Id, result.Id);
             Assert.Equal(root.UploadOriginalRetention, result.UploadOriginalRetention);
@@ -50,7 +50,7 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootPermissionStatus.Available,
                 "buckets:1,2");
 
-            CottonSyncRootSnapshot result = await _service.ReconnectAsync(root, replacement);
+            CottonSyncRootSnapshot result = await _service.ReconnectAsync(root, replacement, TestContext.Current.CancellationToken);
 
             Assert.True(result.CanRunSync);
             Assert.True(result.LocalRoot.UsesMediaStore);
@@ -69,7 +69,7 @@ namespace Cotton.Mobile.Tests
                 "Other",
                 CottonSyncRootPermissionStatus.Available);
 
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.ReconnectAsync(root, replacement));
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.ReconnectAsync(root, replacement, TestContext.Current.CancellationToken));
         }
 
         public void Dispose()

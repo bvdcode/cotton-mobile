@@ -23,12 +23,12 @@ namespace Cotton.Mobile.Tests
 
             if (refreshes)
             {
-                TokenPairDto result = await transport.RefreshAsync(InstanceUri, refreshToken);
+                TokenPairDto result = await transport.RefreshAsync(InstanceUri, refreshToken, TestContext.Current.CancellationToken);
                 Assert.Equal("rotated", result.RefreshToken);
             }
             else
             {
-                await transport.LogoutAsync(InstanceUri, refreshToken);
+                await transport.LogoutAsync(InstanceUri, refreshToken, TestContext.Current.CancellationToken);
             }
 
             HttpRequestMessage request = Assert.IsType<HttpRequestMessage>(handler.Request);
@@ -49,7 +49,7 @@ namespace Cotton.Mobile.Tests
                 "{\"accessToken\":\"access\",\"refreshToken\":\"rotated\"}");
             CottonRefreshTokenTransport transport = new(new HttpClient(handler));
 
-            await transport.RefreshAsync(InstanceUri, "refresh");
+            await transport.RefreshAsync(InstanceUri, "refresh", TestContext.Current.CancellationToken);
 
             Assert.Equal(
                 "/base/api/v1/auth/refresh",
@@ -79,10 +79,10 @@ namespace Cotton.Mobile.Tests
                 AccessToken = "access",
                 RefreshToken = "refresh",
             };
-            await accessTokenStore.SaveAsync(tokens);
+            await accessTokenStore.SaveAsync(tokens, TestContext.Current.CancellationToken);
 
-            TokenPairDto exposed = Assert.IsType<TokenPairDto>(await accessTokenStore.GetAsync());
-            TokenPairDto persisted = Assert.IsType<TokenPairDto>(await innerStore.GetAsync());
+            TokenPairDto exposed = Assert.IsType<TokenPairDto>(await accessTokenStore.GetAsync(TestContext.Current.CancellationToken));
+            TokenPairDto persisted = Assert.IsType<TokenPairDto>(await innerStore.GetAsync(TestContext.Current.CancellationToken));
             Assert.Equal("access", exposed.AccessToken);
             Assert.Empty(exposed.RefreshToken);
             Assert.Equal("refresh", persisted.RefreshToken);

@@ -13,9 +13,7 @@ namespace Cotton.Mobile.Tests
                 coordinator,
                 NullLogger<SyncExecutionWorkflow>.Instance);
 
-            string status = await workflow.RunRootAsync(
-                SyncTestRootFactory.InstanceUri,
-                SyncTestRootFactory.CreateDocumentTreeRoot());
+            string status = await workflow.RunRootAsync(SyncTestRootFactory.InstanceUri, SyncTestRootFactory.CreateDocumentTreeRoot(), TestContext.Current.CancellationToken);
 
             Assert.Equal(1, coordinator.RunRootCount);
             Assert.Equal("No folders are set to sync.", status);
@@ -34,9 +32,7 @@ namespace Cotton.Mobile.Tests
                 SyncTestRootFactory.CreateMediaStoreRoot(),
             ];
 
-            string status = await workflow.RunAllAsync(
-                SyncTestRootFactory.InstanceUri,
-                roots);
+            string status = await workflow.RunAllAsync(SyncTestRootFactory.InstanceUri, roots, TestContext.Current.CancellationToken);
 
             Assert.Equal(2, coordinator.RunRootCount);
             Assert.Equal("No folders are set to sync.", status);

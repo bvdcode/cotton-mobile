@@ -9,23 +9,20 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonSessionService : ICottonSessionService, IDisposable
+    public class CottonSessionService : ICottonSessionService
     {
         private readonly ICottonClientFactory _clientFactory;
         private readonly ICottonInstanceStore _instanceStore;
         private readonly ICottonTokenStore _tokenStore;
-        private readonly ICottonRefreshTokenTransport _refreshTokenTransport;
         private readonly ICottonPendingAppCodeSessionStore _pendingSessionStore;
         private readonly ICottonNotificationCursorStore _notificationCursorStore;
         private readonly ICottonAppCodeAuthorizationService _appCodeAuthorization;
         private readonly ILogger<CottonSessionService> _logger;
-        private readonly SemaphoreSlim _refreshGate = new(1, 1);
 
         public CottonSessionService(
             ICottonClientFactory clientFactory,
             ICottonInstanceStore instanceStore,
             ICottonTokenStore tokenStore,
-            ICottonRefreshTokenTransport refreshTokenTransport,
             ICottonPendingAppCodeSessionStore pendingSessionStore,
             ICottonNotificationCursorStore notificationCursorStore,
             ICottonAppCodeAuthorizationService appCodeAuthorization,
@@ -34,7 +31,6 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(clientFactory);
             ArgumentNullException.ThrowIfNull(instanceStore);
             ArgumentNullException.ThrowIfNull(tokenStore);
-            ArgumentNullException.ThrowIfNull(refreshTokenTransport);
             ArgumentNullException.ThrowIfNull(pendingSessionStore);
             ArgumentNullException.ThrowIfNull(notificationCursorStore);
             ArgumentNullException.ThrowIfNull(appCodeAuthorization);
@@ -43,7 +39,6 @@ namespace Cotton.Mobile.Services
             _clientFactory = clientFactory;
             _instanceStore = instanceStore;
             _tokenStore = tokenStore;
-            _refreshTokenTransport = refreshTokenTransport;
             _pendingSessionStore = pendingSessionStore;
             _notificationCursorStore = notificationCursorStore;
             _appCodeAuthorization = appCodeAuthorization;
@@ -83,12 +78,14 @@ namespace Cotton.Mobile.Services
                     .ConfigureAwait(false);
             }
 
+            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
             try
             {
                 CottonSessionDiagnosticLog.RefreshStarted(_logger);
-                await RefreshCurrentTokensAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+                await client.Auth
+                    .RefreshAsync(cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
                 CottonSessionDiagnosticLog.RefreshCompleted(_logger);
-                await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
                 UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
                 CottonSessionDiagnosticLog.ProfileValidated(_logger);
                 await _appCodeAuthorization
@@ -99,6 +96,7 @@ namespace Cotton.Mobile.Services
             catch (CottonApiException exception) when (IsAuthorizationFailure(exception))
             {
                 CottonSessionDiagnosticLog.RestoreRejected(_logger, (int)exception.StatusCode.GetValueOrDefault());
+                await ClearRejectedAuthenticationBestEffortAsync(cancellationToken).ConfigureAwait(false);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.SessionExpired, instanceUri);
             }
         }
@@ -127,7 +125,8 @@ namespace Cotton.Mobile.Services
 
             try
             {
-                await LogoutCurrentTokensAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+                await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
+                await client.Auth.LogoutAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -174,51 +173,25 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        public void Dispose()
-        {
-            _refreshGate.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
-        private async Task RefreshCurrentTokensAsync(
-            Uri instanceUri,
+        private async Task ClearRejectedAuthenticationBestEffortAsync(
             CancellationToken cancellationToken)
         {
-            await _refreshGate.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                TokenPairDto current = await _tokenStore.GetAsync(cancellationToken).ConfigureAwait(false)
-                    ?? throw new InvalidOperationException("Saved tokens disappeared during session refresh.");
-                TokenPairDto refreshed = await _refreshTokenTransport
-                    .RefreshAsync(instanceUri, current.RefreshToken, cancellationToken)
-                    .ConfigureAwait(false);
-                await _tokenStore.SaveAsync(refreshed, cancellationToken).ConfigureAwait(false);
-            }
-            finally
-            {
-                _refreshGate.Release();
-            }
-        }
-
-        private async Task LogoutCurrentTokensAsync(
-            Uri instanceUri,
-            CancellationToken cancellationToken)
-        {
-            await _refreshGate.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                TokenPairDto? current = await _tokenStore.GetAsync(cancellationToken).ConfigureAwait(false);
-                if (current is not null)
-                {
-                    await _refreshTokenTransport
-                        .LogoutAsync(instanceUri, current.RefreshToken, cancellationToken)
-                        .ConfigureAwait(false);
-                }
-            }
-            finally
-            {
-                _refreshGate.Release();
-            }
+            List<Exception> failures = [];
+            await TryClearLocalSessionAreaAsync(
+                _tokenStore.ClearAsync,
+                "rejected tokens",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+            await TryClearLocalSessionAreaAsync(
+                _pendingSessionStore.ClearAsync,
+                "rejected pending authorization",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+            await TryClearLocalSessionAreaAsync(
+                _notificationCursorStore.ClearAsync,
+                "rejected notification cursor",
+                failures,
+                cancellationToken).ConfigureAwait(false);
         }
 
         private async Task TryClearLocalSessionAreaAsync(

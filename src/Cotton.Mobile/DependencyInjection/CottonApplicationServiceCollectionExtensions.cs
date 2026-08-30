@@ -23,13 +23,6 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<IUserDialogService, UserDialogService>();
             services.AddSingleton<INetworkAccessService, NetworkAccessService>();
             services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
-            services.AddSingleton<CottonAccessTokenStore>();
-            services.AddSingleton(new HttpClient(new HttpClientHandler
-            {
-                AllowAutoRedirect = false,
-                UseCookies = false,
-            }));
-            services.AddSingleton<ICottonRefreshTokenTransport, CottonRefreshTokenTransport>();
             services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
             services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
             services.AddSingleton<ICottonInstanceProbe, CottonServerInfoProbe>();

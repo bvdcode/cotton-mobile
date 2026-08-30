@@ -19,12 +19,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Cotton.Mobile.Core\Cotton.Mobile.Core.csproj" />
-		<Compile Include="..\Cotton.Mobile\Services\CottonRefreshTokenTransport.cs"
-		         Link="Services\CottonRefreshTokenTransport.cs" />
-		<Compile Include="..\Cotton.Mobile\Services\CottonAccessTokenStore.cs"
-		         Link="Services\CottonAccessTokenStore.cs" />
-		<Compile Include="..\Cotton.Mobile\Services\ICottonRefreshTokenTransport.cs"
-		         Link="Services\ICottonRefreshTokenTransport.cs" />
 	</ItemGroup>
 
 </Project>

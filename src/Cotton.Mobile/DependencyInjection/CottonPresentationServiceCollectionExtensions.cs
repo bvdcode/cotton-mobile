@@ -19,6 +19,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<SyncSettingsExecutionHandler>();
             services.AddSingleton<SyncSettingsSetupHandler>();
             services.AddSingleton<SyncSettingsManagementHandler>();
+            services.AddSingleton<BackgroundSyncRestrictionViewModel>();
             services.AddSingleton<SyncSettingsViewModel>();
             services.AddSingleton<MainPageViewModel>();
             services.AddSingleton<MainPage>();

@@ -35,6 +35,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
             services.AddSingleton<ICottonNotificationBackgroundScheduler, AndroidNotificationBackgroundScheduler>();
             services.AddSingleton<ICottonAutomaticSyncBackgroundScheduler, AndroidAutomaticSyncBackgroundScheduler>();
+            services.AddSingleton<IBackgroundSyncRestrictionService, AndroidBackgroundSyncRestrictionService>();
             services.AddSingleton<AndroidAutomaticSyncExecutor>();
             return services;
         }

@@ -32,6 +32,7 @@ namespace Cotton.Mobile.ViewModels
             SyncSettingsSetupHandler setupHandler,
             SyncSettingsManagementHandler managementHandler,
             SyncSettingsStatusObserver statusObserver,
+            BackgroundSyncRestrictionViewModel backgroundRestriction,
             ILogger<SyncSettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(statusObserver);
@@ -41,6 +42,8 @@ namespace Cotton.Mobile.ViewModels
             _setupHandler = setupHandler ?? throw new ArgumentNullException(nameof(setupHandler));
             _managementHandler = managementHandler ?? throw new ArgumentNullException(nameof(managementHandler));
             _statusObserver = statusObserver;
+            BackgroundRestriction = backgroundRestriction
+                ?? throw new ArgumentNullException(nameof(backgroundRestriction));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _statusObserver.Attach(this);
             LoadCommand = CreateLoadCommand();
@@ -97,6 +100,8 @@ namespace Cotton.Mobile.ViewModels
         public IAsyncRelayCommand RunAllCommand { get; }
 
         public IAsyncRelayCommand<CottonSyncRootActionRequest> RootActionCommand { get; }
+
+        public BackgroundSyncRestrictionViewModel BackgroundRestriction { get; }
 
         public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = [];
 
@@ -169,6 +174,7 @@ namespace Cotton.Mobile.ViewModels
             Status = null;
             IsEmptyVisible = true;
             _canRunAll = false;
+            BackgroundRestriction.SetAutomaticSyncEnabled(isEnabled: false);
             OnPropertyChanged(nameof(IsRunAllVisible));
             RunAllCommand.NotifyCanExecuteChanged();
             AddRootCommand.NotifyCanExecuteChanged();
@@ -182,6 +188,7 @@ namespace Cotton.Mobile.ViewModels
                 collection.AutomaticSyncStatuses);
             Roots.ReplaceWith(state.Items);
             _statusObserver.RefreshProgress();
+            BackgroundRestriction.SetAutomaticSyncEnabled(state.CanRunAny);
 
             IsEmptyVisible = state.IsEmptyVisible;
             bool canRunAllChanged = _canRunAll != state.CanRunAny;

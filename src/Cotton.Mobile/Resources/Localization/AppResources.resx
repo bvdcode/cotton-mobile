@@ -27,6 +27,9 @@
   <data name="RunAllSyncFoldersDescription" xml:space="preserve"><value>Run all sync folders</value></data>
   <data name="OpenSyncDescription" xml:space="preserve"><value>Open sync</value></data>
   <data name="RefreshSyncFoldersDescription" xml:space="preserve"><value>Refresh sync folders</value></data>
+  <data name="BackgroundSyncRestrictedMessage" xml:space="preserve"><value>Android may delay background uploads.</value></data>
+  <data name="BackgroundSyncSettingsText" xml:space="preserve"><value>Review</value></data>
+  <data name="OpenBackgroundSyncSettingsDescription" xml:space="preserve"><value>Review Android background activity settings</value></data>
   <data name="SyncTitle" xml:space="preserve"><value>Sync</value></data>
   <data name="NoSyncFoldersTitle" xml:space="preserve"><value>No sync folders</value></data>
   <data name="NoSyncFoldersBody" xml:space="preserve"><value>Choose a cloud folder and a folder on this device.</value></data>

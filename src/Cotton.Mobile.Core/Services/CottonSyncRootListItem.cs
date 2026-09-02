@@ -31,6 +31,7 @@ namespace Cotton.Mobile.Services
 
             Id = root.Id;
             Direction = root.Direction;
+            UsesMediaStore = root.LocalRoot.UsesMediaStore;
             Title = root.CloudFolder.FolderName;
             DisplayPathText = CottonSyncRootPathText.Create(
                 root.CloudFolder.FolderName,
@@ -49,7 +50,6 @@ namespace Cotton.Mobile.Services
                 && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync || !CanRunNow);
             CanPauseSync = !isPaused;
             CanResumeSync = isPaused;
-            CanDeleteSync = true;
             IsDividerVisible = isDividerVisible;
             FailureDetailsAction = new CottonSyncRootActionRequest(
                 this,
@@ -69,6 +69,8 @@ namespace Cotton.Mobile.Services
         public Guid Id { get; }
 
         public CottonSyncDirection Direction { get; }
+
+        public bool UsesMediaStore { get; }
 
         public string Title { get; }
 
@@ -91,13 +93,28 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncRootActionRequest ResolvePendingUploadAction { get; }
 
-        public CottonSyncRootActionRequest? StatusAction => CanResolvePendingUpload
-            ? ResolvePendingUploadAction
-            : CanShowFailureDetails
-            ? FailureDetailsAction
-            : CanReconnect
-                ? PrimaryAction
-                : null;
+        public CottonSyncRootActionRequest? StatusAction
+        {
+            get
+            {
+                if (IsRunning)
+                {
+                    return null;
+                }
+
+                if (CanResolvePendingUpload)
+                {
+                    return ResolvePendingUploadAction;
+                }
+
+                if (CanShowFailureDetails)
+                {
+                    return FailureDetailsAction;
+                }
+
+                return CanReconnect ? PrimaryAction : null;
+            }
+        }
 
         public bool CanUseStatusAction => StatusAction is not null;
 
@@ -123,12 +140,18 @@ namespace Cotton.Mobile.Services
                 if (progress?.Stage == CottonSyncProgressStage.UploadingFile
                     && progress.Transfer?.TotalBytes is long totalBytes)
                 {
-                    if (totalBytes == 0)
+                    if (progress.TotalItemCount is not int uploadTotalItemCount
+                        || uploadTotalItemCount <= 0)
                     {
-                        return 1;
+                        return 0;
                     }
 
-                    return Math.Min(1, (double)progress.Transfer.TransferredBytes / totalBytes);
+                    double fileProgress = totalBytes == 0
+                        ? 1
+                        : Math.Min(1, (double)progress.Transfer.TransferredBytes / totalBytes);
+                    return Math.Min(
+                        1,
+                        (progress.CompletedItemCount + fileProgress) / uploadTotalItemCount);
                 }
 
                 if (progress?.TotalItemCount is not int totalItemCount || totalItemCount <= 0)
@@ -168,7 +191,7 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncRootActionRequest ResumeAction { get; }
 
-        public bool CanDeleteSync { get; }
+        public bool CanDeleteSync => !IsRunning;
 
         public string DeleteSyncActionText { get; } = CottonSyncRootManagementText.DeleteAction;
 
@@ -303,6 +326,10 @@ namespace Cotton.Mobile.Services
             OnPropertyChanged(nameof(IsProgressDeterminate));
             OnPropertyChanged(nameof(ProgressValue));
             OnPropertyChanged(nameof(IsAttentionVisible));
+            OnPropertyChanged(nameof(StatusAction));
+            OnPropertyChanged(nameof(CanUseStatusAction));
+            OnPropertyChanged(nameof(StatusActionText));
+            OnPropertyChanged(nameof(CanDeleteSync));
         }
     }
 }

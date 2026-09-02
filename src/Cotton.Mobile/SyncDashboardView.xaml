@@ -11,44 +11,70 @@
 
     <Grid RowDefinitions="Auto,*"
           Style="{StaticResource AppScreen}">
-        <Grid ColumnDefinitions="*,Auto,Auto,Auto"
+        <Grid ColumnDefinitions="*,Auto"
               Style="{StaticResource AppTopBar}">
-            <Label Text="{x:Static localization:AppResources.SyncTitle}"
+            <Label Text="{Binding TopBarTitle}"
                    Style="{StaticResource AppTopBarTitle}" />
 
-            <Button Grid.Column="1"
-                    Command="{Binding AddRootCommand}"
-                    SemanticProperties.Description="{x:Static localization:AppResources.AddSyncFolderDescription}"
-                    StyleClass="TextButton, TouchTarget">
-                <Button.ImageSource>
-                    <FontImageSource FontFamily="MaterialOutlined"
-                                     Glyph="{x:Static symbols:MaterialOutlined.Add}"
-                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                </Button.ImageSource>
-            </Button>
+            <HorizontalStackLayout Grid.Column="1"
+                                   Spacing="0"
+                                   HorizontalOptions="End">
+                <Button Command="{Binding AddRootCommand}"
+                        IsVisible="{Binding ArePrimaryActionsVisible}"
+                        WidthRequest="{StaticResource AppTouchTargetSize}"
+                        Padding="0"
+                        SemanticProperties.Description="{x:Static localization:AppResources.AddSyncFolderDescription}"
+                        StyleClass="TextButton, TouchTarget">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialOutlined"
+                                         Glyph="{x:Static symbols:MaterialOutlined.Add}"
+                                         Size="{StaticResource AppActionIconSize}"
+                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    </Button.ImageSource>
+                </Button>
 
-            <Button Grid.Column="2"
-                    Command="{Binding RunAllCommand}"
-                    IsVisible="{Binding IsRunAllVisible}"
-                    SemanticProperties.Description="{x:Static localization:AppResources.RunAllSyncFoldersDescription}"
-                    StyleClass="TextButton, TouchTarget">
-                <Button.ImageSource>
-                    <FontImageSource FontFamily="MaterialOutlined"
-                                     Glyph="{x:Static symbols:MaterialOutlined.Play_arrow}"
-                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                </Button.ImageSource>
-            </Button>
+                <Button Command="{Binding RunAllCommand}"
+                        IsVisible="{Binding IsRunAllVisible}"
+                        WidthRequest="{StaticResource AppTouchTargetSize}"
+                        Padding="0"
+                        SemanticProperties.Description="{x:Static localization:AppResources.RunAllSyncFoldersDescription}"
+                        StyleClass="TextButton, TouchTarget">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialOutlined"
+                                         Glyph="{x:Static symbols:MaterialOutlined.Play_arrow}"
+                                         Size="{StaticResource AppActionIconSize}"
+                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    </Button.ImageSource>
+                </Button>
 
-            <Button Grid.Column="3"
-                    Command="{Binding LoadCommand}"
-                    SemanticProperties.Description="{x:Static localization:AppResources.RefreshSyncFoldersDescription}"
-                    StyleClass="TextButton, TouchTarget">
-                <Button.ImageSource>
-                    <FontImageSource FontFamily="MaterialOutlined"
-                                     Glyph="{x:Static symbols:MaterialOutlined.Refresh}"
-                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                </Button.ImageSource>
-            </Button>
+                <Button Command="{Binding EnterEditModeCommand}"
+                        IsVisible="{Binding IsEditModeAvailable}"
+                        WidthRequest="{StaticResource AppTouchTargetSize}"
+                        Padding="0"
+                        SemanticProperties.Description="{x:Static localization:AppResources.EnterEditSyncsModeDescription}"
+                        StyleClass="TextButton, TouchTarget">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialOutlined"
+                                         Glyph="{x:Static symbols:MaterialOutlined.Edit}"
+                                         Size="{StaticResource AppEditActionIconSize}"
+                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    </Button.ImageSource>
+                </Button>
+
+                <Button Command="{Binding ExitEditModeCommand}"
+                        IsVisible="{Binding IsEditMode}"
+                        WidthRequest="{StaticResource AppTouchTargetSize}"
+                        Padding="0"
+                        SemanticProperties.Description="{x:Static localization:AppResources.ExitEditSyncsModeDescription}"
+                        StyleClass="TextButton, TouchTarget">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialOutlined"
+                                         Glyph="{x:Static symbols:MaterialOutlined.Close}"
+                                         Size="{StaticResource AppActionIconSize}"
+                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    </Button.ImageSource>
+                </Button>
+            </HorizontalStackLayout>
         </Grid>
 
         <Grid Grid.Row="1"
@@ -117,12 +143,11 @@
                         <Grid RowDefinitions="Auto,Auto">
                             <VerticalStackLayout Padding="4,10"
                                                  Spacing="8">
-                                <Grid ColumnSpacing="0"
+                                <Grid ColumnSpacing="12"
                                       IsClippedToBounds="True">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="{StaticResource AppTouchTargetSize}" />
                                         <ColumnDefinition Width="{StaticResource AppTouchTargetSize}" />
                                     </Grid.ColumnDefinitions>
                                     <Border Style="{StaticResource AppIconFrame}">
@@ -133,6 +158,12 @@
                                                                  Color="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}" />
                                             </Image.Source>
                                             <Image.Triggers>
+                                                <DataTrigger TargetType="Image"
+                                                             Binding="{Binding UsesMediaStore}"
+                                                             Value="True">
+                                                    <Setter Property="Source"
+                                                            Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                                                </DataTrigger>
                                                 <DataTrigger TargetType="Image"
                                                              Binding="{Binding IsAttentionVisible}"
                                                              Value="True">
@@ -146,7 +177,6 @@
                                     <Grid Grid.Column="1"
                                           RowDefinitions="Auto,Auto"
                                           RowSpacing="3"
-                                          Margin="4,0,0,0"
                                           IsClippedToBounds="True"
                                           VerticalOptions="Center">
                                         <Label Text="{Binding DisplayPathText}"
@@ -155,27 +185,14 @@
                                                LineBreakMode="TailTruncation"
                                                MaxLines="1" />
                                         <Grid Grid.Row="1"
-                                              ColumnDefinitions="Auto,*"
-                                              ColumnSpacing="0"
                                               IsClippedToBounds="True">
-                                            <ActivityIndicator IsRunning="{Binding IsRunning}"
-                                                               IsVisible="{Binding IsRunning}"
-                                                               WidthRequest="18"
-                                                               HeightRequest="18"
-                                                               Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                            <Label Grid.Column="1"
+                                            <Label
                                                    Text="{Binding StatusText}"
-                                                   Style="{StaticResource AppCaptionText}"
+                                                   Style="{StaticResource AppBodyText}"
                                                    LineBreakMode="TailTruncation"
                                                    MaxLines="1"
                                                    VerticalOptions="Center">
                                                 <Label.Triggers>
-                                                    <DataTrigger TargetType="Label"
-                                                                 Binding="{Binding IsRunning}"
-                                                                 Value="True">
-                                                        <Setter Property="Margin"
-                                                                Value="6,0,0,0" />
-                                                    </DataTrigger>
                                                     <DataTrigger TargetType="Label"
                                                                  Binding="{Binding CanUseStatusAction}"
                                                                  Value="True">
@@ -183,7 +200,7 @@
                                                     </DataTrigger>
                                                 </Label.Triggers>
                                             </Label>
-                                            <Button Grid.Column="1"
+                                            <Button
                                                     Text="{Binding StatusText}"
                                                     Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
                                                     CommandParameter="{Binding StatusAction}"
@@ -206,6 +223,7 @@
                                     <Button Grid.Column="2"
                                             Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
                                             CommandParameter="{Binding PauseResumeAction}"
+                                            IsVisible="{Binding BindingContext.ArePrimaryActionsVisible, Source={x:Reference SyncViewRoot}}"
                                             SemanticProperties.Description="{Binding PauseResumeActionText}"
                                             WidthRequest="{StaticResource AppTouchTargetSize}"
                                             Padding="0"
@@ -225,9 +243,11 @@
                                         </Button.Triggers>
                                     </Button>
 
-                                    <Button Grid.Column="3"
+                                    <Button Grid.Column="2"
                                             Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
                                             CommandParameter="{Binding DeleteAction}"
+                                            IsEnabled="{Binding CanDeleteSync}"
+                                            IsVisible="{Binding BindingContext.IsEditMode, Source={x:Reference SyncViewRoot}}"
                                             SemanticProperties.Description="{Binding DeleteSyncActionText}"
                                             WidthRequest="{StaticResource AppTouchTargetSize}"
                                             Padding="0"
@@ -242,6 +262,7 @@
 
                                 <ProgressBar Progress="{Binding ProgressValue}"
                                              IsVisible="{Binding IsProgressDeterminate}"
+                                             Margin="60,0"
                                              ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
 
                             </VerticalStackLayout>

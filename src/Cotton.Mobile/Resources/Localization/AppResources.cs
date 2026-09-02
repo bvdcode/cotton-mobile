@@ -33,7 +33,9 @@ namespace Cotton.Mobile.Resources.Localization
         public static string AddSyncFolderDescription => GetString(nameof(AddSyncFolderDescription));
         public static string RunAllSyncFoldersDescription => GetString(nameof(RunAllSyncFoldersDescription));
         public static string OpenSyncDescription => GetString(nameof(OpenSyncDescription));
-        public static string RefreshSyncFoldersDescription => GetString(nameof(RefreshSyncFoldersDescription));
+        public static string EditSyncsModeTitle => GetString(nameof(EditSyncsModeTitle));
+        public static string EnterEditSyncsModeDescription => GetString(nameof(EnterEditSyncsModeDescription));
+        public static string ExitEditSyncsModeDescription => GetString(nameof(ExitEditSyncsModeDescription));
         public static string BackgroundSyncRestrictedMessage => GetString(nameof(BackgroundSyncRestrictedMessage));
         public static string BackgroundSyncSettingsText => GetString(nameof(BackgroundSyncSettingsText));
         public static string OpenBackgroundSyncSettingsDescription => GetString(nameof(OpenBackgroundSyncSettingsDescription));

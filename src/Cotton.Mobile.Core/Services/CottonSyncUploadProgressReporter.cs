@@ -11,6 +11,8 @@ namespace Cotton.Mobile.Services
         private readonly Lock _gate = new();
         private readonly Guid _rootId;
         private readonly string _itemName;
+        private readonly int _uploadNumber;
+        private readonly int _uploadCount;
         private readonly int _completedItemCount;
         private readonly int _totalItemCount;
         private readonly long? _totalBytes;
@@ -24,6 +26,8 @@ namespace Cotton.Mobile.Services
         public CottonSyncUploadProgressReporter(
             Guid rootId,
             string itemName,
+            int uploadNumber,
+            int uploadCount,
             int completedItemCount,
             int totalItemCount,
             long? totalBytes,
@@ -36,6 +40,15 @@ namespace Cotton.Mobile.Services
             }
 
             ArgumentException.ThrowIfNullOrWhiteSpace(itemName);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(uploadNumber);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(uploadCount);
+            if (uploadNumber > uploadCount)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(uploadNumber),
+                    "Upload number cannot exceed the upload count.");
+            }
+
             ArgumentOutOfRangeException.ThrowIfNegative(completedItemCount);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(totalItemCount);
             if (completedItemCount >= totalItemCount)
@@ -55,6 +68,8 @@ namespace Cotton.Mobile.Services
 
             _rootId = rootId;
             _itemName = itemName.Trim();
+            _uploadNumber = uploadNumber;
+            _uploadCount = uploadCount;
             _completedItemCount = completedItemCount;
             _totalItemCount = totalItemCount;
             _totalBytes = totalBytes;
@@ -113,6 +128,8 @@ namespace Cotton.Mobile.Services
 
             CottonSyncTransferSnapshot transfer = new(
                 _itemName,
+                _uploadNumber,
+                _uploadCount,
                 transferredBytes,
                 _totalBytes,
                 bytesPerSecond);

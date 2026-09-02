@@ -7,6 +7,8 @@ namespace Cotton.Mobile.Services
     {
         public CottonSyncTransferSnapshot(
             string itemName,
+            int uploadNumber,
+            int uploadCount,
             long transferredBytes,
             long? totalBytes,
             double? bytesPerSecond)
@@ -14,6 +16,15 @@ namespace Cotton.Mobile.Services
             if (string.IsNullOrWhiteSpace(itemName))
             {
                 throw new ArgumentException("Sync transfer item name is required.", nameof(itemName));
+            }
+
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(uploadNumber);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(uploadCount);
+            if (uploadNumber > uploadCount)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(uploadNumber),
+                    "Upload number cannot exceed the upload count.");
             }
 
             ArgumentOutOfRangeException.ThrowIfNegative(transferredBytes);
@@ -30,12 +41,18 @@ namespace Cotton.Mobile.Services
             }
 
             ItemName = itemName.Trim();
+            UploadNumber = uploadNumber;
+            UploadCount = uploadCount;
             TransferredBytes = transferredBytes;
             TotalBytes = totalBytes;
             BytesPerSecond = bytesPerSecond;
         }
 
         public string ItemName { get; }
+
+        public int UploadNumber { get; }
+
+        public int UploadCount { get; }
 
         public long TransferredBytes { get; }
 

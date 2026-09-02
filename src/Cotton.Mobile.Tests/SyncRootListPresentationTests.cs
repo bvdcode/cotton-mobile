@@ -15,6 +15,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(item.CanRunNow);
             Assert.False(item.CanReconnect);
+            Assert.False(item.UsesMediaStore);
             Assert.Equal("Projects", item.DisplayPathText);
             Assert.Same(item, item.PrimaryAction.Item);
             Assert.Equal(CottonSyncRootAction.UsePrimaryAction, item.PrimaryAction.Action);
@@ -29,6 +30,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(item.CanRunNow);
             Assert.False(item.CanReconnect);
+            Assert.True(item.UsesMediaStore);
             Assert.Equal("Projects", item.DisplayPathText);
         }
 
@@ -155,17 +157,54 @@ namespace Cotton.Mobile.Tests
 
             item.ApplyProgress(CottonSyncProgressSnapshot.UploadingFile(
                 root.Id,
-                completedItemCount: 0,
-                totalItemCount: 1,
-                new CottonSyncTransferSnapshot("photo.jpg", 512, 1024, 256)));
+                completedItemCount: 1,
+                totalItemCount: 4,
+                new CottonSyncTransferSnapshot(
+                    "photo.jpg",
+                    uploadNumber: 2,
+                    uploadCount: 3,
+                    transferredBytes: 512,
+                    totalBytes: 1024,
+                    bytesPerSecond: 256)));
             Assert.True(item.IsProgressDeterminate);
-            Assert.Equal(0.5, item.ProgressValue);
+            Assert.Equal(0.375, item.ProgressValue);
+            Assert.StartsWith("Uploading 2 of 3", item.StatusText, StringComparison.Ordinal);
             Assert.Contains("photo.jpg", item.StatusText, StringComparison.Ordinal);
             Assert.Contains("/s", item.StatusText, StringComparison.Ordinal);
+            Assert.False(item.CanUseStatusAction);
+            Assert.False(item.CanDeleteSync);
 
             item.CompleteProgress();
             Assert.False(item.IsRunning);
             Assert.Equal("Ready", item.StatusText);
+        }
+
+        [Fact]
+        public void RunningRootReplacesPreviousFailureActionWithReadableProgress()
+        {
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
+            CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
+                root.Id,
+                new DateTime(2026, 9, 1, 12, 0, 0, DateTimeKind.Utc),
+                CottonAutomaticSyncFailureKind.NetworkUnavailable);
+            CottonSyncRootListItem item = new(root, automaticStatus: status);
+            Assert.True(item.CanUseStatusAction);
+
+            item.ApplyProgress(CottonSyncProgressSnapshot.UploadingFile(
+                root.Id,
+                completedItemCount: 0,
+                totalItemCount: 2,
+                new CottonSyncTransferSnapshot(
+                    "photo.jpg",
+                    uploadNumber: 1,
+                    uploadCount: 2,
+                    transferredBytes: 256,
+                    totalBytes: 1024,
+                    bytesPerSecond: null)));
+
+            Assert.False(item.CanUseStatusAction);
+            Assert.Null(item.StatusAction);
+            Assert.StartsWith("Uploading 1 of 2", item.StatusText, StringComparison.Ordinal);
         }
     }
 }

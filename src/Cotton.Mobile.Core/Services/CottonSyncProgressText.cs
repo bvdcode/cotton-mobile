@@ -46,6 +46,8 @@ namespace Cotton.Mobile.Services
             {
                 return CoreResources.Format(
                     CoreResources.UploadingFileWithTotalAndSpeedFormat,
+                    transfer.UploadNumber,
+                    transfer.UploadCount,
                     transfer.ItemName,
                     transferred,
                     FormatBytes(transfer.TotalBytes.Value),
@@ -56,6 +58,8 @@ namespace Cotton.Mobile.Services
             {
                 return CoreResources.Format(
                     CoreResources.UploadingFileWithTotalFormat,
+                    transfer.UploadNumber,
+                    transfer.UploadCount,
                     transfer.ItemName,
                     transferred,
                     FormatBytes(transfer.TotalBytes.Value));
@@ -65,6 +69,8 @@ namespace Cotton.Mobile.Services
             {
                 return CoreResources.Format(
                     CoreResources.UploadingFileWithSpeedFormat,
+                    transfer.UploadNumber,
+                    transfer.UploadCount,
                     transfer.ItemName,
                     transferred,
                     FormatBytes(transfer.BytesPerSecond.Value));
@@ -72,6 +78,8 @@ namespace Cotton.Mobile.Services
 
             return CoreResources.Format(
                 CoreResources.UploadingFileFormat,
+                transfer.UploadNumber,
+                transfer.UploadCount,
                 transfer.ItemName,
                 transferred);
         }

@@ -54,10 +54,10 @@
   <data name="CheckingCloudStatus" xml:space="preserve"><value>Checking cloud…</value></data>
   <data name="ApplyingChangesFormat" xml:space="preserve"><value>Syncing {0} of {1} changes…</value></data>
   <data name="FinishingSyncStatus" xml:space="preserve"><value>Finishing sync…</value></data>
-  <data name="UploadingFileFormat" xml:space="preserve"><value>Uploading {0} · {1}</value></data>
-  <data name="UploadingFileWithTotalFormat" xml:space="preserve"><value>Uploading {0} · {1} of {2}</value></data>
-  <data name="UploadingFileWithSpeedFormat" xml:space="preserve"><value>Uploading {0} · {1} · {2}/s</value></data>
-  <data name="UploadingFileWithTotalAndSpeedFormat" xml:space="preserve"><value>Uploading {0} · {1} of {2} · {3}/s</value></data>
+  <data name="UploadingFileFormat" xml:space="preserve"><value>Uploading {0} of {1} · {2} · {3}</value></data>
+  <data name="UploadingFileWithTotalFormat" xml:space="preserve"><value>Uploading {0} of {1} · {2} · {3} of {4}</value></data>
+  <data name="UploadingFileWithSpeedFormat" xml:space="preserve"><value>Uploading {0} of {1} · {2} · {3} · {4}/s</value></data>
+  <data name="UploadingFileWithTotalAndSpeedFormat" xml:space="preserve"><value>Uploading {0} of {1} · {2} · {3} of {4} · {5}/s</value></data>
   <data name="BytesFormat" xml:space="preserve"><value>{0:0} B</value></data>
   <data name="KilobytesFormat" xml:space="preserve"><value>{0:0.0} KB</value></data>
   <data name="MegabytesFormat" xml:space="preserve"><value>{0:0.0} MB</value></data>

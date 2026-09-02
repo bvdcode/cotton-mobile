@@ -75,6 +75,8 @@ namespace Cotton.Mobile.Services
                         CottonSyncUploadProgressReporter uploadProgress = new(
                             root.Id,
                             item.DisplayName,
+                            uploadNumber,
+                            plan.UploadCount,
                             completedChangeCount,
                             totalChangeCount,
                             uploadSizeBytes,

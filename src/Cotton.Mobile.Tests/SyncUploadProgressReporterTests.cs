@@ -13,11 +13,13 @@ namespace Cotton.Mobile.Tests
             CottonSyncUploadProgressReporter reporter = new(
                 rootId,
                 "photo.jpg",
+                uploadNumber: 2,
+                uploadCount: 3,
                 completedItemCount: 1,
                 totalItemCount: 3,
                 totalBytes: 1024,
-                hub,
-                TimeProvider.System);
+                progressHub: hub,
+                timeProvider: TimeProvider.System);
 
             reporter.Report(0);
             reporter.Report(1024);
@@ -27,6 +29,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, progress.CompletedItemCount);
             Assert.Equal(3, progress.TotalItemCount);
             Assert.Equal("photo.jpg", progress.Transfer?.ItemName);
+            Assert.Equal(2, progress.Transfer?.UploadNumber);
+            Assert.Equal(3, progress.Transfer?.UploadCount);
             Assert.Equal(1024, progress.Transfer?.TransferredBytes);
             Assert.Equal(1024, progress.Transfer?.TotalBytes);
         }

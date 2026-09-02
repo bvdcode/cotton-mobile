@@ -25,6 +25,7 @@ namespace Cotton.Mobile.ViewModels
         private string? _status;
         private long _statusRevision;
         private bool _isEmptyVisible = true;
+        private bool _isEditMode;
 
         public SyncSettingsViewModel(
             SyncSettingsLoadingHandler loadingHandler,
@@ -46,20 +47,11 @@ namespace Cotton.Mobile.ViewModels
                 ?? throw new ArgumentNullException(nameof(backgroundRestriction));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _statusObserver.Attach(this);
-            LoadCommand = CreateLoadCommand();
             AddRootCommand = CreateAddRootCommand();
             RunAllCommand = CreateRunAllCommand();
             RootActionCommand = CreateRootActionCommand();
-        }
-
-        private AsyncRelayCommand CreateLoadCommand()
-        {
-            return new AsyncRelayCommand(
-                cancellationToken => AsyncCommandExecution.RunAsync(
-                    token => _loadingHandler.LoadAsync(this, token),
-                    LogUnhandledCommandException,
-                    cancellationToken),
-                () => !IsBusy);
+            EnterEditModeCommand = new RelayCommand(EnterEditMode, CanEnterEditMode);
+            ExitEditModeCommand = new RelayCommand(ExitEditMode, CanExitEditMode);
         }
 
         private AsyncRelayCommand CreateAddRootCommand()
@@ -93,13 +85,15 @@ namespace Cotton.Mobile.ViewModels
                 request => !IsBusy && request is not null && CanExecuteRootAction(request));
         }
 
-        public IAsyncRelayCommand LoadCommand { get; }
-
         public IAsyncRelayCommand AddRootCommand { get; }
 
         public IAsyncRelayCommand RunAllCommand { get; }
 
         public IAsyncRelayCommand<CottonSyncRootActionRequest> RootActionCommand { get; }
+
+        public IRelayCommand EnterEditModeCommand { get; }
+
+        public IRelayCommand ExitEditModeCommand { get; }
 
         public BackgroundSyncRestrictionViewModel BackgroundRestriction { get; }
 
@@ -112,10 +106,11 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isBusy, value))
                 {
-                    LoadCommand.NotifyCanExecuteChanged();
                     AddRootCommand.NotifyCanExecuteChanged();
                     RunAllCommand.NotifyCanExecuteChanged();
                     RootActionCommand.NotifyCanExecuteChanged();
+                    EnterEditModeCommand.NotifyCanExecuteChanged();
+                    ExitEditModeCommand.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -138,13 +133,42 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isEmptyVisible, value))
                 {
                     OnPropertyChanged(nameof(IsListVisible));
+                    OnPropertyChanged(nameof(IsEditModeAvailable));
+                    EnterEditModeCommand.NotifyCanExecuteChanged();
                 }
             }
         }
 
         public bool IsListVisible => !IsEmptyVisible;
 
-        public bool IsRunAllVisible => _canRunAll;
+        public bool IsRunAllVisible => _canRunAll && !IsEditMode;
+
+        public bool ArePrimaryActionsVisible => !IsEditMode;
+
+        public bool IsEditModeAvailable => IsListVisible && !IsEditMode;
+
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            private set
+            {
+                if (!SetProperty(ref _isEditMode, value))
+                {
+                    return;
+                }
+
+                OnPropertyChanged(nameof(TopBarTitle));
+                OnPropertyChanged(nameof(ArePrimaryActionsVisible));
+                OnPropertyChanged(nameof(IsEditModeAvailable));
+                OnPropertyChanged(nameof(IsRunAllVisible));
+                EnterEditModeCommand.NotifyCanExecuteChanged();
+                ExitEditModeCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        public string TopBarTitle => IsEditMode
+            ? AppResources.EditSyncsModeTitle
+            : AppResources.SyncTitle;
 
         public void Configure(Uri instanceUri, string accountScopeKey)
         {
@@ -173,6 +197,7 @@ namespace Cotton.Mobile.ViewModels
             Roots.ReplaceWith([]);
             Status = null;
             IsEmptyVisible = true;
+            IsEditMode = false;
             _canRunAll = false;
             BackgroundRestriction.SetAutomaticSyncEnabled(isEnabled: false);
             OnPropertyChanged(nameof(IsRunAllVisible));
@@ -189,6 +214,10 @@ namespace Cotton.Mobile.ViewModels
             Roots.ReplaceWith(state.Items);
             _statusObserver.RefreshProgress();
             BackgroundRestriction.SetAutomaticSyncEnabled(state.CanRunAny);
+            if (!state.HasItems)
+            {
+                IsEditMode = false;
+            }
 
             IsEmptyVisible = state.IsEmptyVisible;
             bool canRunAllChanged = _canRunAll != state.CanRunAny;
@@ -209,6 +238,26 @@ namespace Cotton.Mobile.ViewModels
         private bool CanAddRoot()
         {
             return !IsBusy && _instanceUri is not null && !string.IsNullOrWhiteSpace(_accountScopeKey);
+        }
+
+        private void EnterEditMode()
+        {
+            IsEditMode = true;
+        }
+
+        private bool CanEnterEditMode()
+        {
+            return !IsBusy && IsListVisible && !IsEditMode;
+        }
+
+        private void ExitEditMode()
+        {
+            IsEditMode = false;
+        }
+
+        private bool CanExitEditMode()
+        {
+            return !IsBusy && IsEditMode;
         }
 
         private static bool CanExecuteRootAction(CottonSyncRootActionRequest request)

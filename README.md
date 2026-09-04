@@ -2,7 +2,11 @@
 
 Native Android mobile client for Cotton Cloud, built with .NET MAUI.
 
-Cotton Mobile connects Android devices to a Cotton Cloud instance for file browsing, uploads, sharing, offline access, transfer status, camera backup, notifications, storage controls, security settings, and diagnostics.
+Cotton Mobile backs up new files from selected Android folders and photo/video albums to a Cotton Cloud instance. It supports automatic uploads, upload progress, pause and resume, and optional removal of local originals after the cloud copy is confirmed.
+
+Folder sources are checked periodically and when the app opens. Media sources also trigger checks when Android reports new photos or videos. Background timing depends on Android scheduling, network availability, and battery restrictions; immediate upload is not guaranteed. Use Run all in the app to request a check now.
+
+The current app provides upload-only backup. It does not replace changed cloud files, download files, or provide two-way synchronization.
 
 ## Project Links
 

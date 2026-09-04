@@ -44,6 +44,7 @@ namespace Cotton.Mobile.Platforms.Android
                 new ActivityResultContracts.StartActivityForResult(),
                 new AndroidActivityResultCallback(HandleDocumentTreeResult));
             base.OnCreate(savedInstanceState);
+            SupportFragmentManager.RegisterFragmentLifecycleCallbacks(new AndroidSystemBarAppearance(), recursive: true);
 
             if (OperatingSystem.IsAndroidVersionAtLeast(31))
             {
@@ -84,6 +85,10 @@ namespace Cotton.Mobile.Platforms.Android
         {
             base.OnConfigurationChanged(newConfig);
             ApplySystemBars();
+            foreach (AndroidX.Fragment.App.Fragment fragment in SupportFragmentManager.Fragments)
+            {
+                AndroidSystemBarAppearance.RefreshDialog(fragment);
+            }
         }
 
         internal void RefreshSystemBars()
@@ -162,7 +167,6 @@ namespace Cotton.Mobile.Platforms.Android
             global::Android.Graphics.Color systemBarColor = Resources.GetColor(
                 Resource.Color.cotton_system_bar_background,
                 Theme);
-            global::Android.Views.View decorView = Window.DecorView;
             WindowCompat.SetDecorFitsSystemWindows(Window, true);
             Window.ClearFlags(WindowManagerFlags.TranslucentStatus | WindowManagerFlags.TranslucentNavigation);
             Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
@@ -177,13 +181,7 @@ namespace Cotton.Mobile.Platforms.Android
                 }
             }
 
-            bool useLightIcons = (configuration.UiMode & UiMode.NightMask) != UiMode.NightYes;
-            WindowInsetsControllerCompat? insetsController = WindowCompat.GetInsetsController(Window, decorView);
-            if (insetsController is not null)
-            {
-                insetsController.AppearanceLightStatusBars = useLightIcons;
-                insetsController.AppearanceLightNavigationBars = useLightIcons;
-            }
+            AndroidSystemBarAppearance.ApplyIconColors(Window, configuration);
         }
     }
 }

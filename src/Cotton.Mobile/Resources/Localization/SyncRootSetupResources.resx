@@ -62,7 +62,7 @@
     <value>Choose upload source</value>
   </data>
   <data name="AppBarTitle" xml:space="preserve">
-    <value>Upload source</value>
+    <value>Upload</value>
   </data>
   <data name="ContinueDescription" xml:space="preserve">
     <value>Continue sync setup</value>
@@ -71,19 +71,19 @@
     <value>What should Cotton upload?</value>
   </data>
   <data name="SupportingText" xml:space="preserve">
-    <value>Uploads run automatically when Android allows background work.</value>
+    <value>Choose where Cotton finds new files. Open the app or tap Run all to check now.</value>
   </data>
   <data name="FolderTitle" xml:space="preserve">
     <value>Selected folder</value>
   </data>
   <data name="FolderSupportingText" xml:space="preserve">
-    <value>Scan a folder periodically and upload each file once.</value>
+    <value>Upload new files from a folder. Background checks run periodically.</value>
   </data>
   <data name="MediaTitle" xml:space="preserve">
     <value>Media folders</value>
   </data>
   <data name="MediaSupportingText" xml:space="preserve">
-    <value>Choose the camera or other media folders. Only those folders upload automatically.</value>
+    <value>Faster photo and video backup: new media triggers a check. Android may delay background uploads.</value>
   </data>
   <data name="MediaAlbumPageTitle" xml:space="preserve">
     <value>Choose media folders</value>

@@ -33,9 +33,8 @@ namespace Cotton.Mobile.Tests
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
-                coordinator,
-                _statusStore,
-                _timeProvider,
+                new SyncExecutionWorkflow(coordinator, _rootStore, _statusStore, _timeProvider,
+                    NullLogger<SyncExecutionWorkflow>.Instance),
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
@@ -52,9 +51,8 @@ namespace Cotton.Mobile.Tests
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
-                coordinator,
-                _statusStore,
-                _timeProvider,
+                new SyncExecutionWorkflow(coordinator, _rootStore, _statusStore, _timeProvider,
+                    NullLogger<SyncExecutionWorkflow>.Instance),
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
@@ -78,9 +76,8 @@ namespace Cotton.Mobile.Tests
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
-                coordinator,
-                _statusStore,
-                _timeProvider,
+                new SyncExecutionWorkflow(coordinator, _rootStore, _statusStore, _timeProvider,
+                    NullLogger<SyncExecutionWorkflow>.Instance),
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
@@ -105,9 +102,8 @@ namespace Cotton.Mobile.Tests
             };
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
-                coordinator,
-                _statusStore,
-                _timeProvider,
+                new SyncExecutionWorkflow(coordinator, _rootStore, _statusStore, _timeProvider,
+                    NullLogger<SyncExecutionWorkflow>.Instance),
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
@@ -132,9 +128,8 @@ namespace Cotton.Mobile.Tests
             RecordingDeviceToCloudSyncCoordinator coordinator = new();
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
-                coordinator,
-                _statusStore,
-                _timeProvider,
+                new SyncExecutionWorkflow(coordinator, _rootStore, _statusStore, _timeProvider,
+                    NullLogger<SyncExecutionWorkflow>.Instance),
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunRootsAsync(SyncTestRootFactory.SessionScope, [selectedRoot.Id], TestContext.Current.CancellationToken);
@@ -157,9 +152,8 @@ namespace Cotton.Mobile.Tests
             };
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
-                coordinator,
-                _statusStore,
-                _timeProvider,
+                new SyncExecutionWorkflow(coordinator, _rootStore, _statusStore, _timeProvider,
+                    NullLogger<SyncExecutionWorkflow>.Instance),
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
@@ -182,9 +176,8 @@ namespace Cotton.Mobile.Tests
             };
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
-                coordinator,
-                _statusStore,
-                _timeProvider,
+                new SyncExecutionWorkflow(coordinator, _rootStore, _statusStore, _timeProvider,
+                    NullLogger<SyncExecutionWorkflow>.Instance),
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);

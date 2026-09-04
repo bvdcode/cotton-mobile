@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Resources.Localization
 {
     public static class CoreResources
     {
+        public static string UploadFolderFailedSingular => GetString(nameof(UploadFolderFailedSingular));
+        public static string UploadFolderFailedPlural => GetString(nameof(UploadFolderFailedPlural));
         private static readonly ResourceManager ResourceManagerInstance = new(typeof(CoreResources));
 
         public static string AuthorizationInstruction => GetString(nameof(AuthorizationInstruction));

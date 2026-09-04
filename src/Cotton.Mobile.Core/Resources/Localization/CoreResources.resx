@@ -63,7 +63,9 @@
   <data name="MegabytesFormat" xml:space="preserve"><value>{0:0.0} MB</value></data>
   <data name="GigabytesFormat" xml:space="preserve"><value>{0:0.0} GB</value></data>
   <data name="LastSyncSucceededFormat" xml:space="preserve"><value>Last synced {0:g}.</value></data>
-  <data name="LastSyncFailedFormat" xml:space="preserve"><value>Last sync failed {0:g}. Retry is automatic.</value></data>
+  <data name="LastSyncFailedFormat" xml:space="preserve"><value>Last upload failed {0:g}.</value></data>
+  <data name="UploadFolderFailedSingular" xml:space="preserve"><value>folder failed</value></data>
+  <data name="UploadFolderFailedPlural" xml:space="preserve"><value>folders failed</value></data>
   <data name="SyncFailureAuthenticationRequired" xml:space="preserve"><value>Your account session expired. Sign in again, then retry.</value></data>
   <data name="SyncFailureNetworkUnavailable" xml:space="preserve"><value>Cotton Cloud could not be reached. Check the connection and retry.</value></data>
   <data name="SyncFailureLocalAccessUnavailable" xml:space="preserve"><value>Android no longer allows access to this source. Reconnect it, then retry.</value></data>

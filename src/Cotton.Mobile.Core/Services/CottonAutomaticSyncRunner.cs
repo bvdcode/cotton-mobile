@@ -7,19 +7,13 @@ namespace Cotton.Mobile.Services
 {
     public class CottonAutomaticSyncRunner(
         ICottonSyncRootStore rootStore,
-        ICottonDeviceToCloudSyncCoordinator coordinator,
-        ICottonAutomaticSyncStatusStore statusStore,
-        TimeProvider timeProvider,
+        SyncExecutionWorkflow workflow,
         ILogger<CottonAutomaticSyncRunner> logger) : ICottonAutomaticSyncRunner
     {
         private readonly ICottonSyncRootStore _rootStore =
             rootStore ?? throw new ArgumentNullException(nameof(rootStore));
-        private readonly ICottonDeviceToCloudSyncCoordinator _coordinator =
-            coordinator ?? throw new ArgumentNullException(nameof(coordinator));
-        private readonly ICottonAutomaticSyncStatusStore _statusStore =
-            statusStore ?? throw new ArgumentNullException(nameof(statusStore));
-        private readonly TimeProvider _timeProvider =
-            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+        private readonly SyncExecutionWorkflow _workflow =
+            workflow ?? throw new ArgumentNullException(nameof(workflow));
         private readonly ILogger<CottonAutomaticSyncRunner> _logger =
             logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -75,38 +69,28 @@ namespace Cotton.Mobile.Services
                 root.AccountScopeKey,
                 sessionScope.AccountScopeKey,
                 StringComparison.Ordinal))];
-            IReadOnlySet<Guid> activeRootIds = roots.Select(root => root.Id).ToHashSet();
             CottonSyncRootSnapshot[] selectedRoots = [.. accountRoots.Where(shouldRun)];
             CottonSyncDiagnosticLog.AutomaticRootsSelected(_logger, selectedRoots.Length, accountRoots.Length);
             List<Guid> succeededRootIds = [];
             List<CottonAutomaticSyncFailure> failures = [];
-            List<CottonAutomaticSyncRootStatusSnapshot> updatedStatuses = [];
             foreach (CottonSyncRootSnapshot root in selectedRoots)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    CottonDeviceToCloudSyncRunSummary summary = await _coordinator
-                        .RunRootAsync(sessionScope.InstanceUri, root, cancellationToken)
+                    CottonDeviceToCloudSyncRunSummary summary = await _workflow
+                        .RunWithStatusAsync(sessionScope.InstanceUri, root, cancellationToken)
                         .ConfigureAwait(false);
-                    DateTime completedAt = _timeProvider.GetUtcNow().UtcDateTime;
                     if (summary.HasBlockedItems)
                     {
                         CottonAutomaticSyncFailure failure = new(
                             root.Id,
                             CottonAutomaticSyncFailureKind.ActionRequired);
                         failures.Add(failure);
-                        updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Failed(
-                            root.Id,
-                            completedAt,
-                            failure.Kind));
                     }
-                    else
+                    else if (summary.CompletedRootCount > 0)
                     {
                         succeededRootIds.Add(root.Id);
-                        updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Succeeded(
-                            root.Id,
-                            completedAt));
                     }
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -115,21 +99,13 @@ namespace Cotton.Mobile.Services
                 }
                 catch (Exception exception)
                 {
-                    CottonAutomaticSyncLog.RootFailed(_logger, root.Id, exception);
                     CottonAutomaticSyncFailure failure = new(
                         root.Id,
                         CottonAutomaticSyncFailureClassifier.Classify(exception));
                     failures.Add(failure);
-                    updatedStatuses.Add(CottonAutomaticSyncRootStatusSnapshot.Failed(
-                        root.Id,
-                        _timeProvider.GetUtcNow().UtcDateTime,
-                        failure.Kind));
                 }
             }
 
-            await _statusStore
-                .UpdateAsync(sessionScope.InstanceUri, activeRootIds, updatedStatuses, cancellationToken)
-                .ConfigureAwait(false);
             CottonSyncDiagnosticLog.AutomaticCompleted(
                 _logger,
                 succeededRootIds.Count,

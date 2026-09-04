@@ -15,10 +15,11 @@ namespace Cotton.Mobile.Services
         public static string FailedStatus { get; } =
             CottonDeviceToCloudSyncStatusText.FailedStatus;
 
-        public static string CreateCompletedStatus(CottonDeviceToCloudSyncRunSummary summary)
+        public static string CreateCompletedStatus(CottonDeviceToCloudSyncRunSummary summary, int failedRootCount = 0)
         {
             ArgumentNullException.ThrowIfNull(summary);
-            if (summary.RootCount == 0)
+            ArgumentOutOfRangeException.ThrowIfNegative(failedRootCount);
+            if (summary.RootCount == 0 && failedRootCount == 0)
             {
                 return CoreResources.NoSyncFolders;
             }
@@ -28,6 +29,7 @@ namespace Cotton.Mobile.Services
             AddCount(parts, summary.CreatedFolderCount, CoreResources.FolderCreatedSingular, CoreResources.FolderCreatedPlural);
             AddCount(parts, summary.BlockedItemCount, CoreResources.BlockedLabel);
             AddRootCount(parts, summary.SkippedRootCount);
+            AddCount(parts, failedRootCount, CoreResources.UploadFolderFailedSingular, CoreResources.UploadFolderFailedPlural);
 
             if (parts.Count == 0)
             {

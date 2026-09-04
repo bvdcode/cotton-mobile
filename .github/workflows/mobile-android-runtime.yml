@@ -58,7 +58,8 @@ jobs:
             -f net10.0-android \
             -c Debug \
             --no-restore \
-            -p:EmbedAssembliesIntoApk=true
+            -p:EmbedAssembliesIntoApk=true \
+            -p:CottonUiTests=true
 
       - name: Allow Android emulator acceleration
         run: |
@@ -70,7 +71,16 @@ jobs:
         timeout-minutes: 20
         env:
           COTTON_ANDROID_RUNTIME_API: ${{ matrix.api }}
+          COTTON_ANDROID_UPLOAD_UI_OUTPUT: artifacts/upload-ui
         run: |
           scripts/mobile/test-android-runtime.sh \
             src/Cotton.Mobile/bin/Debug/net10.0-android/dev.cottoncloud.app.debug-Signed.apk \
             store/google-play/default-listing/graphics/icon.png
+
+      - name: Upload UI test results
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: cotton-mobile-upload-ui-api-${{ matrix.api }}
+          path: artifacts/upload-ui
+          retention-days: 14

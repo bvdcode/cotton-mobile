@@ -60,6 +60,10 @@
 		<PackageReference Include="UraniumUI.Material" Version="3.0.0" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(CottonUiTests)' == 'true' and '$(Configuration)' == 'Debug'">
+		<Compile Include="..\..\scripts\mobile\ui-tests\AndroidUploadUiScenarioReceiver.cs" />
+	</ItemGroup>
+
 	<Target
 		Name="ValidateComputedAndroidReleaseVersion"
 		BeforeTargets="Build"

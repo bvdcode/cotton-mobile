@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+"""Exercise upload feedback and source selection on an Android emulator."""
+
+import argparse
+import json
+import logging
+import re
+import subprocess
+import time
+import uuid
+import xml.etree.ElementTree as ET
+from dataclasses import dataclass
+from pathlib import Path
+
+PACKAGE = "dev.cottoncloud.app.debug"
+RECEIVER = f"{PACKAGE}/dev.cottoncloud.app.debug.UploadUiScenarioReceiver"
+LOG_TAG = "CottonUploadUiTests"
+TIMEOUT_SECONDS = 40
+SCENARIOS = ("running", "source-folder", "source-media")
+OFFLINE_MESSAGES = {
+    "offline-add": "Connect to the internet to add a sync folder.",
+    "offline-run": "Offline. Sync needs internet.",
+}
+
+
+@dataclass(frozen=True)
+class Viewport:
+    """An emulator display configuration used for layout verification."""
+
+    name: str
+    width: int
+    height: int
+    density: int
+    font_scale: float = 1.0
+
+
+VIEWPORTS = (
+    Viewport("phone", 720, 1440, 320),
+    Viewport("small", 720, 1280, 360),
+    Viewport("tablet", 1200, 1800, 240),
+    Viewport("landscape", 1920, 1080, 240),
+    Viewport("large-text", 720, 1440, 320, 1.5),
+)
+
+
+class Emulator:
+    """Run commands against one explicitly selected emulator."""
+
+    def __init__(self, serial: str, adb: str) -> None:
+        if not re.fullmatch(r"emulator-\d+", serial):
+            raise ValueError("Upload UI checks must target an emulator serial.")
+        self._command = [adb, "-s", serial]
+
+    def run(self, *arguments: str) -> bytes:
+        """Run one ADB command with a bounded execution time."""
+        result = subprocess.run(
+            [*self._command, *arguments],
+            check=True,
+            capture_output=True,
+            timeout=TIMEOUT_SECONDS,
+        )
+        return result.stdout
+
+    def text(self, *arguments: str) -> str:
+        """Return decoded output for a text ADB command."""
+        return self.run(*arguments).decode("utf-8", errors="replace").strip()
+
+    def hierarchy(self) -> ET.Element:
+        """Read the current accessibility hierarchy."""
+        self.run("shell", "uiautomator", "dump", "/sdcard/cotton-upload-ui.xml")
+        return ET.fromstring(
+            self.run("exec-out", "cat", "/sdcard/cotton-upload-ui.xml")
+        )
+
+    def configure(self, viewport: Viewport, theme: str) -> None:
+        """Apply a viewport and color scheme."""
+        self.run("shell", "wm", "size", f"{viewport.width}x{viewport.height}")
+        self.run("shell", "wm", "density", str(viewport.density))
+        self.run(
+            "shell", "settings", "put", "system", "font_scale", str(viewport.font_scale)
+        )
+        self.run("shell", "cmd", "uimode", "night", theme)
+
+    def scenario(self, name: str) -> None:
+        """Display an opt-in debug scenario and await its assertions."""
+        request_id = uuid.uuid4().hex
+        self.run(
+            "shell",
+            "am",
+            "broadcast",
+            "-n",
+            RECEIVER,
+            "--es",
+            "scenario",
+            name,
+            "--es",
+            "request-id",
+            request_id,
+        )
+        deadline = time.monotonic() + TIMEOUT_SECONDS
+        while time.monotonic() < deadline:
+            output = self.text("logcat", "-d", "-s", f"{LOG_TAG}:I", "*:S")
+            if f"{request_id}:failed:" in output:
+                raise RuntimeError(output)
+            if f"{request_id}:passed:{name}" in output:
+                return
+            time.sleep(0.25)
+        raise TimeoutError(f"UI scenario did not complete: {name}")
+
+
+def capture(emulator: Emulator, directory: Path, name: str) -> ET.Element:
+    """Save a screenshot and matching accessibility hierarchy."""
+    hierarchy = emulator.hierarchy()
+    ET.ElementTree(hierarchy).write(directory / f"{name}.xml", encoding="utf-8")
+    (directory / f"{name}.png").write_bytes(emulator.run("exec-out", "screencap", "-p"))
+    if not any(node.get("package") == PACKAGE for node in hierarchy.iter("node")):
+        raise AssertionError(f"Upload application is no longer visible: {name}")
+    return hierarchy
+
+
+def assert_message(hierarchy: ET.Element, expected: str) -> None:
+    """Require the complete action feedback to appear in the UI."""
+    texts = [node.get("text", "") for node in hierarchy.iter("node")]
+    if expected not in texts:
+        raise AssertionError(
+            f"Action feedback is missing: {expected}; visible text: {texts}"
+        )
+
+
+def capture_source_end(
+    emulator: Emulator, directory: Path, name: str, viewport: Viewport
+) -> None:
+    """Verify source options remain reachable when they extend below the screen."""
+    previous = b""
+    for _ in range(6):
+        serialized = ET.tostring(emulator.hierarchy())
+        if serialized == previous:
+            break
+        previous = serialized
+        emulator.run(
+            "shell",
+            "input",
+            "swipe",
+            str(viewport.width // 2),
+            str(viewport.height * 4 // 5),
+            str(viewport.width // 2),
+            str(viewport.height // 3),
+            "150",
+        )
+    hierarchy = capture(emulator, directory, f"{name}-end")
+    if name.endswith("source-folder"):
+        assert_message(hierarchy, "Delete originals after upload")
+        switches = [
+            node
+            for node in hierarchy.iter("node")
+            if node.get("class") == "android.widget.Switch"
+        ]
+        if len(switches) != 1 or switches[0].get("checked") != "false":
+            raise AssertionError("Deleting originals must be off by default.")
+
+
+def wait_for_sign_in(emulator: Emulator) -> None:
+    """Wait for normal startup to finish before setting a scenario."""
+    deadline = time.monotonic() + TIMEOUT_SECONDS
+    texts: list[str] = []
+    while time.monotonic() < deadline:
+        hierarchy = emulator.hierarchy()
+        texts = [node.get("text", "") for node in hierarchy.iter("node")]
+        if "Connect" in texts:
+            return
+        time.sleep(0.5)
+    raise TimeoutError(f"Application did not reach sign-in. Visible text: {texts}")
+
+
+def run_checks(
+    emulator: Emulator, directory: Path, full: bool, dashboard_only: bool
+) -> None:
+    """Check actual command feedback and capture affected pages."""
+    directory.mkdir(parents=True, exist_ok=True)
+    emulator.run("shell", "svc", "wifi", "disable")
+    emulator.run("shell", "svc", "data", "disable")
+    emulator.run("shell", "am", "force-stop", PACKAGE)
+    activity = emulator.text(
+        "shell", "cmd", "package", "resolve-activity", "--brief", PACKAGE
+    ).splitlines()[-1]
+    if not activity.startswith(f"{PACKAGE}/"):
+        raise RuntimeError(f"Upload test application is not installed: {activity}")
+    emulator.run("shell", "am", "start", "-W", "-n", activity)
+    wait_for_sign_in(emulator)
+    completed: list[str] = []
+    viewports = VIEWPORTS if full else VIEWPORTS[:1]
+    display_scenarios = ("running",) if dashboard_only else SCENARIOS
+    for viewport in viewports:
+        for theme in ("no", "yes"):
+            theme_name = "light" if theme == "no" else "dark"
+            emulator.configure(viewport, theme)
+            scenarios = (
+                (*OFFLINE_MESSAGES, *display_scenarios)
+                if viewport.name == "phone"
+                else display_scenarios
+            )
+            for scenario in scenarios:
+                emulator.scenario(scenario)
+                name = f"{viewport.name}-{theme_name}-{scenario}"
+                hierarchy = capture(emulator, directory, name)
+                if scenario in OFFLINE_MESSAGES:
+                    assert_message(hierarchy, OFFLINE_MESSAGES[scenario])
+                if scenario == "running":
+                    pause_buttons = [
+                        node
+                        for node in hierarchy.iter("node")
+                        if node.get("content-desc") == "Pause"
+                    ]
+                    if (
+                        len(pause_buttons) != 1
+                        or pause_buttons[0].get("enabled") != "true"
+                    ):
+                        raise AssertionError(
+                            "Pause button is unavailable during upload."
+                        )
+                    assert_message(hierarchy, "Syncing 4 of 10 changes…")
+                if scenario.startswith("source-"):
+                    capture_source_end(emulator, directory, name, viewport)
+                completed.append(name)
+                logging.info("Passed %s", name)
+    (directory / "results.json").write_text(
+        json.dumps({"passed": completed}, indent=2) + "\n", encoding="utf-8"
+    )
+
+
+def main() -> None:
+    """Parse emulator options and restore its configuration after testing."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--serial", required=True)
+    parser.add_argument("--adb", default="adb")
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--full", action="store_true")
+    parser.add_argument("--dashboard-only", action="store_true")
+    arguments = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    emulator = Emulator(arguments.serial, arguments.adb)
+    try:
+        run_checks(emulator, arguments.output, arguments.full, arguments.dashboard_only)
+    finally:
+        emulator.run("shell", "am", "force-stop", PACKAGE)
+        emulator.run("shell", "wm", "size", "reset")
+        emulator.run("shell", "wm", "density", "reset")
+        emulator.run("shell", "settings", "put", "system", "font_scale", "1.0")
+        emulator.run("shell", "cmd", "uimode", "night", "auto")
+        emulator.run("shell", "svc", "wifi", "enable")
+        emulator.run("shell", "svc", "data", "enable")
+
+
+if __name__ == "__main__":
+    main()

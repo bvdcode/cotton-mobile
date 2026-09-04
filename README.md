@@ -38,3 +38,15 @@ dotnet restore Cotton.Mobile.slnx
 dotnet test --project src/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
 dotnet build src/Cotton.Mobile/Cotton.Mobile.csproj -f net10.0-android -c Debug
 ```
+
+### Upload UI verification
+
+The emulator checks exercise offline commands, pause availability during uploads, source selection, scrolling, and the default setting for keeping originals. They use display fixtures without a server account. Authenticated uploads and server-copy integrity require a separate integration test.
+
+```shell
+dotnet build src/Cotton.Mobile/Cotton.Mobile.csproj -f net10.0-android -c Debug -p:CottonUiTests=true -p:OutputPath=bin/UploadUiTests/
+adb -s emulator-5554 install -r src/Cotton.Mobile/bin/UploadUiTests/dev.cottoncloud.app.debug-Signed.apk
+python scripts/mobile/test-android-upload-ui.py --serial emulator-5554 --output .qa/upload-ui --full
+```
+
+Use a fresh Android emulator. The runner temporarily changes its network, display, font scale, and theme settings. `--full` covers phone, narrow phone, tablet, landscape, and enlarged text in both themes. `--dashboard-only` limits a repeat check to upload feedback and controls. UI test scenarios are excluded from normal Debug and Release builds.

@@ -136,6 +136,12 @@ wait_for_boot
 "$adb_bin" install -r "$apk_path" >/dev/null
 "$adb_bin" shell pm clear "$package_name" >/dev/null
 "$adb_bin" shell am set-standby-bucket "$package_name" active
+if [[ -n "${COTTON_ANDROID_UPLOAD_UI_OUTPUT:-}" ]]; then
+  python3 "$(dirname "$0")/test-android-upload-ui.py" \
+    --adb "$adb_bin" \
+    --serial "$("$adb_bin" get-serialno | tr -d '\r')" \
+    --output "$COTTON_ANDROID_UPLOAD_UI_OUTPUT"
+fi
 deep_link_output="$(
   "$adb_bin" shell pm resolve-activity --brief \
     -a android.intent.action.VIEW \

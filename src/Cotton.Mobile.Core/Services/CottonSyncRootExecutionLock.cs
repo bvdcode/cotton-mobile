@@ -31,20 +31,45 @@ namespace Cotton.Mobile.Services
             string stableKey = root.StableKey;
             CottonSyncRootExecutionLockEntry entry = Rent(stableKey);
             bool lockTaken = false;
+            CancellationTokenSource? executionCancellation = null;
             try
             {
                 await entry.WaitAsync(cancellationToken).ConfigureAwait(false);
                 lockTaken = true;
-                return await operation(cancellationToken).ConfigureAwait(false);
+                executionCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                lock (_gate)
+                {
+                    entry.ActiveCancellation = executionCancellation;
+                }
+
+                return await operation(executionCancellation.Token).ConfigureAwait(false);
             }
             finally
             {
                 if (lockTaken)
                 {
+                    lock (_gate)
+                    {
+                        entry.ActiveCancellation = null;
+                    }
+
+                    executionCancellation?.Dispose();
                     entry.Release();
                 }
 
                 Return(stableKey, entry);
+            }
+        }
+
+        public Task CancelAsync(CottonSyncRootSnapshot root)
+        {
+            ArgumentNullException.ThrowIfNull(root);
+            lock (_gate)
+            {
+                return _entries.TryGetValue(root.StableKey, out CottonSyncRootExecutionLockEntry? entry)
+                    && entry.ActiveCancellation is not null
+                    ? entry.ActiveCancellation.CancelAsync()
+                    : Task.CompletedTask;
             }
         }
 

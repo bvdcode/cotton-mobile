@@ -7,6 +7,21 @@ namespace Cotton.Mobile.Tests
     public class AppViewStyleContractTests
     {
         private const string ViewDirectory = "src/Cotton.Mobile";
+
+        [Fact]
+        public void SyncOperationFeedbackIsVisibleOutsideTheRootList()
+        {
+            XDocument document = XDocument.Parse(
+                RepositoryPath.ReadText($"{ViewDirectory}/SyncDashboardView.xaml"));
+            XElement status = document.Descendants().Single(element =>
+                GetAttribute(element, "AutomationId")?.Value == "SyncStatus");
+
+            Assert.Equal("{Binding Status}", GetAttribute(status, "Text")?.Value);
+            Assert.Equal("{Binding IsStatusVisible}", GetAttribute(status, "IsVisible")?.Value);
+            Assert.DoesNotContain(status.Ancestors(), element =>
+                element.Name.LocalName is "DataTemplate" or "CollectionView");
+        }
+
         [Fact]
         public void EveryFontImageSourceDeclaresAnExplicitTint()
         {

@@ -9,6 +9,8 @@ namespace Cotton.Mobile.Services
 
         public int ReferenceCount { get; private set; }
 
+        public CancellationTokenSource? ActiveCancellation { get; set; }
+
         public void AddReference()
         {
             ReferenceCount++;

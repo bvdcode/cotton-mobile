@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Cotton.Mobile.Tests
 {
-    public class DeviceToCloudSyncCoordinatorTests : IDisposable
+    public partial class DeviceToCloudSyncCoordinatorTests : IDisposable
     {
         private readonly string _directory;
         private readonly FileSystemCottonSyncRootStore _rootStore;
@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Tests
         private readonly DeviceToCloudCoordinatorRemoteFolderContentSource _remoteFolderContentSource;
         private readonly DeviceToCloudCoordinatorFileOperator _fileOperator;
         private readonly CottonSyncProgressHub _progressHub;
+        private readonly CottonSyncRootExecutionLock _executionLock = new();
         private readonly CottonDeviceToCloudSyncCoordinator _coordinator;
 
         public DeviceToCloudSyncCoordinatorTests()
@@ -47,7 +48,7 @@ namespace Cotton.Mobile.Tests
                 _localTreeReader,
                 new CottonRecursiveRemoteContentLoader(_remoteFolderContentSource),
                 executor,
-                new CottonSyncRootExecutionLock(),
+                _executionLock,
                 _progressHub,
                 NullLogger<CottonDeviceToCloudSyncCoordinator>.Instance);
         }

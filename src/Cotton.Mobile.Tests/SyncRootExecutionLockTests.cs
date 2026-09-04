@@ -6,6 +6,34 @@ namespace Cotton.Mobile.Tests
     public class SyncRootExecutionLockTests
     {
         [Fact]
+        public async Task CancelStopsOnlyTheActiveRunAndDoesNotPoisonFutureRuns()
+        {
+            CottonSyncRootExecutionLock executionLock = new();
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
+            TaskCompletionSource started = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource waiting = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            Task<int> active = executionLock.ExecuteAsync(root, async token =>
+            {
+                started.SetResult();
+                await waiting.Task.WaitAsync(token);
+                return 1;
+            }, TestContext.Current.CancellationToken);
+            await started.Task.WaitAsync(TestContext.Current.CancellationToken);
+            Task<int> next = executionLock.ExecuteAsync(root, token =>
+            {
+                token.ThrowIfCancellationRequested();
+                return Task.FromResult(2);
+            }, TestContext.Current.CancellationToken);
+
+            await executionLock.CancelAsync(root);
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => active);
+            Assert.Equal(2, await next);
+            Assert.Equal(0, executionLock.ActiveEntryCount);
+            await executionLock.CancelAsync(root);
+        }
+
+        [Fact]
         public async Task OperationsForTheSameRootDoNotOverlap()
         {
             CottonSyncRootExecutionLock executionLock = new();

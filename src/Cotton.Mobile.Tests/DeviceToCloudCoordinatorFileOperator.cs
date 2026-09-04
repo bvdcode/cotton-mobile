@@ -10,12 +10,18 @@ namespace Cotton.Mobile.Tests
 
         public List<CottonDeviceToCloudSyncPlanItem> UploadedItems { get; } = [];
 
+        public List<Guid> UploadOperationIds { get; } = [];
+
+        public TaskCompletionSource UploadStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public Task? UploadGate { get; set; }
+
         public void SetUploadResult(string relativePath, Guid fileId, string eTag)
         {
             _uploadResults[relativePath] = (fileId, eTag);
         }
 
-        public Task<CottonFileBrowserEntry> UploadNewFileAsync(
+        public async Task<CottonFileBrowserEntry> UploadNewFileAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
@@ -25,6 +31,14 @@ namespace Cotton.Mobile.Tests
         {
             Guid operationId = item.UploadOperationId
                 ?? throw new InvalidOperationException("Upload operation id was not assigned.");
+            UploadOperationIds.Add(operationId);
+            UploadStarted.TrySetResult();
+            if (UploadGate is not null)
+            {
+                await UploadGate.WaitAsync(cancellationToken);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
             (Guid fileId, string eTag) = _uploadResults[item.RelativePath];
             Dictionary<string, string> metadata = new(StringComparer.Ordinal)
             {
@@ -32,7 +46,7 @@ namespace Cotton.Mobile.Tests
             };
             UploadedItems.Add(item);
             progress?.Report(item.SizeBytes ?? 0);
-            return Task.FromResult(CreateFile(fileId, item.DisplayName, eTag, metadata));
+            return CreateFile(fileId, item.DisplayName, eTag, metadata);
         }
 
         public Task<CottonFileBrowserEntry> CreateFolderAsync(

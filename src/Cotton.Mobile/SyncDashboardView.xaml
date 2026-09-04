@@ -78,7 +78,7 @@
         </Grid>
 
         <Grid Grid.Row="1"
-              RowDefinitions="Auto,*"
+              RowDefinitions="Auto,Auto,*"
               Padding="{StaticResource AppPagePadding}"
               MaximumWidthRequest="{StaticResource AppContentMaximumWidth}"
               HorizontalOptions="Fill">
@@ -109,7 +109,14 @@
                 </Grid>
             </Border>
 
-            <VerticalStackLayout Grid.Row="1"
+            <Label Grid.Row="1"
+                   AutomationId="SyncStatus"
+                   Text="{Binding Status}"
+                   IsVisible="{Binding IsStatusVisible}"
+                   Margin="0,0,0,8"
+                   Style="{StaticResource AppBodyText}" />
+
+            <VerticalStackLayout Grid.Row="2"
                                  Spacing="16"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center"
@@ -130,7 +137,7 @@
                         StyleClass="FilledButton, TouchTarget" />
             </VerticalStackLayout>
 
-            <CollectionView Grid.Row="1"
+            <CollectionView Grid.Row="2"
                             IsVisible="{Binding IsListVisible}"
                             ItemsSource="{Binding Roots}"
                             ItemSizingStrategy="MeasureAllItems">
@@ -234,6 +241,12 @@
                                                              Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
                                         </Button.ImageSource>
                                         <Button.Triggers>
+                                            <DataTrigger TargetType="Button"
+                                                         Binding="{Binding IsPaused}"
+                                                         Value="False">
+                                                <Setter Property="Command"
+                                                        Value="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}" />
+                                            </DataTrigger>
                                             <DataTrigger TargetType="Button"
                                                          Binding="{Binding PauseResumeAction.Action}"
                                                          Value="{x:Static services:CottonSyncRootAction.Resume}">

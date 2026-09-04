@@ -199,7 +199,6 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            state.IsBusy = true;
             try
             {
                 SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state, cancellationToken);
@@ -212,6 +211,11 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 await _rootManager.SetPausedAsync(instanceUri, root, isPaused, cancellationToken);
+                if (isPaused)
+                {
+                    await _executionLock.CancelAsync(root);
+                }
+
                 state.ShowRoots(await _rootProvider.LoadAsync(state, cancellationToken));
                 state.Status = isPaused
                     ? CottonSyncRootManagementText.CreatePausedStatus(root.CloudFolder.FolderName)
@@ -228,10 +232,6 @@ namespace Cotton.Mobile.ViewModels
                 state.Status = isPaused
                     ? CottonSyncRootManagementText.PauseFailedStatus
                     : CottonSyncRootManagementText.ResumeFailedStatus;
-            }
-            finally
-            {
-                state.IsBusy = false;
             }
         }
     }

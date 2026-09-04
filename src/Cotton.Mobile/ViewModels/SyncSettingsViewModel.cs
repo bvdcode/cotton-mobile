@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class SyncSettingsViewModel : ObservableObject, ISyncSettingsViewState
+    public partial class SyncSettingsViewModel : ObservableObject, ISyncSettingsViewState
     {
         private readonly SyncSettingsLoadingHandler _loadingHandler;
         private readonly SyncSettingsExecutionHandler _executionHandler;
@@ -50,39 +50,9 @@ namespace Cotton.Mobile.ViewModels
             AddRootCommand = CreateAddRootCommand();
             RunAllCommand = CreateRunAllCommand();
             RootActionCommand = CreateRootActionCommand();
+            PauseRootCommand = CreatePauseRootCommand();
             EnterEditModeCommand = new RelayCommand(EnterEditMode, CanEnterEditMode);
             ExitEditModeCommand = new RelayCommand(ExitEditMode, CanExitEditMode);
-        }
-
-        private AsyncRelayCommand CreateAddRootCommand()
-        {
-            return new AsyncRelayCommand(
-                cancellationToken => AsyncCommandExecution.RunAsync(
-                    token => _setupHandler.AddRootAsync(this, token),
-                    LogUnhandledCommandException,
-                    cancellationToken),
-                CanAddRoot);
-        }
-
-        private AsyncRelayCommand CreateRunAllCommand()
-        {
-            return new AsyncRelayCommand(
-                cancellationToken => AsyncCommandExecution.RunAsync(
-                    token => _executionHandler.RunAllAsync(this, token),
-                    LogUnhandledCommandException,
-                    cancellationToken),
-                CanRunAll);
-        }
-
-        private AsyncRelayCommand<CottonSyncRootActionRequest> CreateRootActionCommand()
-        {
-            return new AsyncRelayCommand<CottonSyncRootActionRequest>(
-                (request, cancellationToken) => AsyncCommandExecution.RunAsync(
-                    request,
-                    ExecuteRootActionAsync,
-                    LogUnhandledCommandException,
-                    cancellationToken),
-                request => !IsBusy && request is not null && CanExecuteRootAction(request));
         }
 
         public IAsyncRelayCommand AddRootCommand { get; }
@@ -90,6 +60,8 @@ namespace Cotton.Mobile.ViewModels
         public IAsyncRelayCommand RunAllCommand { get; }
 
         public IAsyncRelayCommand<CottonSyncRootActionRequest> RootActionCommand { get; }
+
+        public IAsyncRelayCommand<CottonSyncRootActionRequest> PauseRootCommand { get; }
 
         public IRelayCommand EnterEditModeCommand { get; }
 
@@ -109,6 +81,7 @@ namespace Cotton.Mobile.ViewModels
                     AddRootCommand.NotifyCanExecuteChanged();
                     RunAllCommand.NotifyCanExecuteChanged();
                     RootActionCommand.NotifyCanExecuteChanged();
+                    PauseRootCommand.NotifyCanExecuteChanged();
                     EnterEditModeCommand.NotifyCanExecuteChanged();
                     ExitEditModeCommand.NotifyCanExecuteChanged();
                 }
@@ -121,9 +94,14 @@ namespace Cotton.Mobile.ViewModels
             private set
             {
                 _ = Interlocked.Increment(ref _statusRevision);
-                SetProperty(ref _status, value);
+                if (SetProperty(ref _status, value))
+                {
+                    OnPropertyChanged(nameof(IsStatusVisible));
+                }
             }
         }
+
+        public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
 
         public bool IsEmptyVisible
         {
@@ -194,7 +172,7 @@ namespace Cotton.Mobile.ViewModels
         {
             _instanceUri = null;
             _accountScopeKey = null;
-            Roots.ReplaceWith([]);
+            ReplaceRoots([]);
             Status = null;
             IsEmptyVisible = true;
             IsEditMode = false;
@@ -211,7 +189,7 @@ namespace Cotton.Mobile.ViewModels
                 collection.Roots,
                 collection.PausedRootIds,
                 collection.AutomaticSyncStatuses);
-            Roots.ReplaceWith(state.Items);
+            ReplaceRoots(state.Items);
             _statusObserver.RefreshProgress();
             BackgroundRestriction.SetAutomaticSyncEnabled(state.CanRunAny);
             if (!state.HasItems)
@@ -230,102 +208,18 @@ namespace Cotton.Mobile.ViewModels
             RunAllCommand.NotifyCanExecuteChanged();
         }
 
-        private bool CanRunAll()
+        private void ReplaceRoots(IEnumerable<CottonSyncRootListItem> items)
         {
-            return !IsBusy && _canRunAll;
-        }
-
-        private bool CanAddRoot()
-        {
-            return !IsBusy && _instanceUri is not null && !string.IsNullOrWhiteSpace(_accountScopeKey);
-        }
-
-        private void EnterEditMode()
-        {
-            IsEditMode = true;
-        }
-
-        private bool CanEnterEditMode()
-        {
-            return !IsBusy && IsListVisible && !IsEditMode;
-        }
-
-        private void ExitEditMode()
-        {
-            IsEditMode = false;
-        }
-
-        private bool CanExitEditMode()
-        {
-            return !IsBusy && IsEditMode;
-        }
-
-        private static bool CanExecuteRootAction(CottonSyncRootActionRequest request)
-        {
-            return request.Action switch
+            foreach (CottonSyncRootListItem item in Roots)
             {
-                CottonSyncRootAction.ShowFailureDetails => request.Item.CanShowFailureDetails,
-                CottonSyncRootAction.ResolvePendingUpload => request.Item.CanResolvePendingUpload,
-                CottonSyncRootAction.UsePrimaryAction => request.Item.CanUsePrimaryAction,
-                CottonSyncRootAction.Pause => request.Item.CanPauseSync,
-                CottonSyncRootAction.Resume => request.Item.CanResumeSync,
-                CottonSyncRootAction.Delete => request.Item.CanDeleteSync,
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(request),
-                    request.Action,
-                    "Sync-root action is not supported."),
-            };
-        }
-
-        private async Task ExecuteRootActionAsync(
-            CottonSyncRootActionRequest request,
-            CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(request);
-            CottonSyncRootListItem item = request.Item;
-            switch (request.Action)
-            {
-                case CottonSyncRootAction.ShowFailureDetails:
-                    await _managementHandler.ShowFailureDetailsAsync(item);
-                    break;
-
-                case CottonSyncRootAction.ResolvePendingUpload:
-                    if (await _managementHandler.ResolvePendingUploadAsync(this, item, cancellationToken))
-                    {
-                        await _executionHandler.ExecutePrimaryActionAsync(this, item, cancellationToken);
-                    }
-
-                    break;
-
-                case CottonSyncRootAction.UsePrimaryAction when item.CanReconnect:
-                    await _setupHandler.ReconnectRootAsync(this, item, cancellationToken);
-                    break;
-
-                case CottonSyncRootAction.UsePrimaryAction:
-                    await _executionHandler.ExecutePrimaryActionAsync(this, item, cancellationToken);
-                    break;
-
-                case CottonSyncRootAction.Pause:
-                    await _managementHandler.SetRootPausedAsync(this, item, isPaused: true, cancellationToken);
-                    break;
-
-                case CottonSyncRootAction.Resume:
-                    await _managementHandler.SetRootPausedAsync(this, item, isPaused: false, cancellationToken);
-                    break;
-
-                case CottonSyncRootAction.Delete:
-                    await _managementHandler.DeleteRootAsync(this, item, cancellationToken);
-                    break;
-
-                default:
-                    throw new InvalidOperationException("Sync-root action is not supported.");
+                item.PropertyChanged -= OnRootPropertyChanged;
             }
-        }
 
-        private void LogUnhandledCommandException(Exception exception)
-        {
-            CottonLog.Error(_logger, "Unhandled Cotton mobile sync settings command failure.", exception);
-            Status = AppResources.SyncSettingsUpdateFailed;
+            Roots.ReplaceWith(items);
+            foreach (CottonSyncRootListItem item in Roots)
+            {
+                item.PropertyChanged += OnRootPropertyChanged;
+            }
         }
 
         Uri? ISyncSettingsViewState.InstanceUri => _instanceUri;

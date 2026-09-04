@@ -57,14 +57,12 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonSyncRootSnapshot> roots =
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            IReadOnlySet<Guid> pausedRootIds =
-                await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             List<CottonDeviceToCloudSyncRootRunResult> results = new(roots.Count);
 
             foreach (CottonSyncRootSnapshot root in roots)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                results.Add(await RunRootCoreAsync(instanceUri, root, pausedRootIds, cancellationToken)
+                results.Add(await RunRootCoreAsync(instanceUri, root, cancellationToken)
                     .ConfigureAwait(false));
             }
 
@@ -83,10 +81,8 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Sync root belongs to a different instance.", nameof(root));
             }
 
-            IReadOnlySet<Guid> pausedRootIds =
-                await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             CottonDeviceToCloudSyncRootRunResult result =
-                await RunRootCoreAsync(instanceUri, root, pausedRootIds, cancellationToken)
+                await RunRootCoreAsync(instanceUri, root, cancellationToken)
                     .ConfigureAwait(false);
             return new CottonDeviceToCloudSyncRunSummary([result]);
         }
@@ -94,18 +90,8 @@ namespace Cotton.Mobile.Services
         private async Task<CottonDeviceToCloudSyncRootRunResult> RunRootCoreAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
-            IReadOnlySet<Guid> pausedRootIds,
             CancellationToken cancellationToken)
         {
-            if (pausedRootIds.Contains(root.Id))
-            {
-                CottonSyncDiagnosticLog.RootSkipped(
-                    _logger,
-                    root.Id,
-                    CottonDeviceToCloudSyncRootRunStatus.SkippedPaused);
-                return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);
-            }
-
             if (CottonDeviceToCloudSyncRootCapability.HasUnsupportedLocalRoot(root))
             {
                 CottonSyncDiagnosticLog.RootSkipped(
@@ -128,9 +114,34 @@ namespace Cotton.Mobile.Services
 
             return await _executionLock.ExecuteAsync(
                     root,
-                    token => ExecuteRootAsync(instanceUri, root, token),
+                    async token =>
+                    {
+                        try
+                        {
+                            if (await IsPausedAsync(instanceUri, root.Id, token).ConfigureAwait(false))
+                            {
+                                return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);
+                            }
+
+                            return await ExecuteRootAsync(instanceUri, root, token).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException) when (token.IsCancellationRequested
+                            && !cancellationToken.IsCancellationRequested)
+                        {
+                            CottonSyncDiagnosticLog.RootSkipped(
+                                _logger, root.Id, CottonDeviceToCloudSyncRootRunStatus.SkippedPaused);
+                            return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);
+                        }
+                    },
                     cancellationToken)
-                .ConfigureAwait(false);
+                    .ConfigureAwait(false);
+        }
+
+        private async Task<bool> IsPausedAsync(Uri instanceUri, Guid rootId, CancellationToken cancellationToken)
+        {
+            IReadOnlySet<Guid> pausedRootIds = await _pauseStore
+                .LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            return pausedRootIds.Contains(rootId);
         }
 
         private async Task<CottonDeviceToCloudSyncRootRunResult> ExecuteRootAsync(

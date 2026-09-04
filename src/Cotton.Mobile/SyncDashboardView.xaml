@@ -196,8 +196,7 @@
                                             <Label
                                                    Text="{Binding StatusText}"
                                                    Style="{StaticResource AppBodyText}"
-                                                   LineBreakMode="TailTruncation"
-                                                   MaxLines="1"
+                                                   LineBreakMode="WordWrap"
                                                    VerticalOptions="Center">
                                                 <Label.Triggers>
                                                     <DataTrigger TargetType="Label"

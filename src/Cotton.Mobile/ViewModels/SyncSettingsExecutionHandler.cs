@@ -75,8 +75,7 @@ namespace Cotton.Mobile.ViewModels
                         collection.PausedRootIds);
                 state.Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
                 state.Status = await _workflow
-                    .RunAllAsync(instanceUri, runnableRoots, cancellationToken)
-                    .ConfigureAwait(false);
+                    .RunAllAsync(instanceUri, runnableRoots, cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -142,8 +141,7 @@ namespace Cotton.Mobile.ViewModels
 
                 state.Status = CottonSyncRootRunRouting.CreateStartingStatus(root);
                 state.Status = await _workflow
-                    .RunRootAsync(instanceUri, root, cancellationToken)
-                    .ConfigureAwait(false);
+                    .RunRootAsync(instanceUri, root, cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {

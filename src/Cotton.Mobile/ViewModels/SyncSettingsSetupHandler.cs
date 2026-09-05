@@ -106,8 +106,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 SyncRootSetupResult? result = await _rootSetupCoordinator
-                    .ResumePendingAsync(instanceUri, accountScopeKey, cancellationToken)
-                    .ConfigureAwait(false);
+                    .ResumePendingAsync(instanceUri, accountScopeKey, cancellationToken);
                 if (result is null || result.Status == SyncRootSetupStatus.Cancelled)
                 {
                     return;

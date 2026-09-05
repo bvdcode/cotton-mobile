@@ -44,6 +44,32 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Excluded message", record, StringComparison.Ordinal);
         }
 
+        [Theory]
+        [InlineData("Cotton.Mobile.ViewModels.SyncSettingsViewModel")]
+        [InlineData("Cotton.Mobile.ViewModels.SyncSettingsExecutionHandler")]
+        [InlineData("Cotton.Mobile.ViewModels.SyncSettingsSetupHandler")]
+        [InlineData("Cotton.Mobile.ViewModels.SyncSettingsLoadingHandler")]
+        [InlineData("Cotton.Mobile.ViewModels.SyncSettingsManagementHandler")]
+        public void LoggerPersistsUploadScreenFailures(string category)
+        {
+            using FileSystemCottonDiagnosticJournal journal = new(_directory, TimeProvider.System);
+            using CottonDiagnosticLoggerProvider provider = new(journal);
+            ILogger logger = provider.CreateLogger(category);
+            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(
+                ThrowDiagnosticException);
+            logger.Log(
+                LogLevel.Warning,
+                new EventId(1),
+                "Upload screen command failed.",
+                exception,
+                static (message, _) => message);
+
+            string record = Assert.Single(journal.ReadAll());
+            Assert.Contains(category, record, StringComparison.Ordinal);
+            Assert.Contains(nameof(ThrowDiagnosticException), record, StringComparison.Ordinal);
+            Assert.False(logger.IsEnabled(LogLevel.Information));
+        }
+
         public void Dispose()
         {
             if (Directory.Exists(_directory))

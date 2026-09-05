@@ -145,6 +145,7 @@ namespace Cotton.Mobile.Services
                     case CottonDeviceToCloudSyncActionKind.BlockedLocalItemName:
                     case CottonDeviceToCloudSyncActionKind.BlockedLocalSource:
                     case CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged:
+                    case CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged:
                         blockedCount++;
                         break;
 

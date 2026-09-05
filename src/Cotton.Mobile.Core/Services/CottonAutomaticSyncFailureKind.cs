@@ -16,5 +16,6 @@ namespace Cotton.Mobile.Services
         LocalReadFailed,
         ActionRequired,
         Unexpected,
+        UploadedFileChanged,
     }
 }

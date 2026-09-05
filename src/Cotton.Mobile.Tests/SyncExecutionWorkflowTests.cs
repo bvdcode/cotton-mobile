@@ -93,18 +93,27 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonAutomaticSyncOutcome.Succeeded, statuses[second.Id].Outcome);
         }
 
-        [Fact]
-        public async Task ManualBlockedUploadRequiresAction()
+        [Theory]
+        [InlineData(CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged, CottonAutomaticSyncFailureKind.ActionRequired, true)]
+        [InlineData(CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged, CottonAutomaticSyncFailureKind.UploadedFileChanged, false)]
+        public async Task ManualBlockedUploadRequiresCorrectAction(
+            CottonDeviceToCloudSyncActionKind action,
+            CottonAutomaticSyncFailureKind failureKind,
+            bool canResolvePending)
         {
             CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
             await SaveRootsAsync(root);
             _coordinator.BlockedRootId = root.Id;
+            _coordinator.BlockedAction = action;
 
             await _workflow.RunRootAsync(SyncTestRootFactory.InstanceUri, root, TestContext.Current.CancellationToken);
 
             CottonAutomaticSyncRootStatusSnapshot status = (await LoadStatusesAsync())[root.Id];
             Assert.Equal(CottonAutomaticSyncOutcome.Failed, status.Outcome);
-            Assert.Equal(CottonAutomaticSyncFailureKind.ActionRequired, status.FailureKind);
+            Assert.Equal(failureKind, status.FailureKind);
+            CottonSyncRootListItem displayedRoot = new(root, automaticStatus: status);
+            Assert.Equal(canResolvePending, displayedRoot.CanResolvePendingUpload);
+            Assert.True(displayedRoot.CanShowFailureDetails);
         }
 
         [Fact]

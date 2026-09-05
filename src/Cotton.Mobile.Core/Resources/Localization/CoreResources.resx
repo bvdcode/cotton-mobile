@@ -75,6 +75,7 @@
   <data name="SyncFailureServerRejectedRequest" xml:space="preserve"><value>Cotton Cloud could not complete the request. Retry, then contact support if it repeats.</value></data>
   <data name="SyncFailureLocalReadFailed" xml:space="preserve"><value>A local file could not be read. Check that it still exists and Android can access it.</value></data>
   <data name="SyncFailureActionRequired" xml:space="preserve"><value>One or more files need your review before sync can continue.</value></data>
+  <data name="SyncFailureUploadedFileChanged" xml:space="preserve"><value>A previously uploaded file changed or was renamed. Cotton uploads new files only. The cloud copy and local original are kept. To back up edited content, save it as a new file.</value></data>
   <data name="SyncFailureUnexpected" xml:space="preserve"><value>An unexpected sync error occurred. Retry, then contact support if it repeats.</value></data>
   <data name="SyncRootReady" xml:space="preserve"><value>Sync root ready</value></data>
   <data name="ChooseLocalFolder" xml:space="preserve"><value>Choose local folder</value></data>

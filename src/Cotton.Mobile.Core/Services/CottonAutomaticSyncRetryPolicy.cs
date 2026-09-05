@@ -18,6 +18,7 @@ namespace Cotton.Mobile.Services
                 CottonAutomaticSyncFailureKind.SourceChanged => false,
                 CottonAutomaticSyncFailureKind.ServerRejectedRequest => false,
                 CottonAutomaticSyncFailureKind.ActionRequired => false,
+                CottonAutomaticSyncFailureKind.UploadedFileChanged => false,
                 CottonAutomaticSyncFailureKind.Unexpected => false,
                 CottonAutomaticSyncFailureKind.None => false,
                 _ => throw new ArgumentOutOfRangeException(

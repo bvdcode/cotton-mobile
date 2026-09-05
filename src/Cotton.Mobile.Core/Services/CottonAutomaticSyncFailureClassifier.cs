@@ -8,6 +8,23 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonAutomaticSyncFailureClassifier
     {
+        public static CottonAutomaticSyncFailureKind ClassifyBlocked(CottonDeviceToCloudSyncRunSummary summary)
+        {
+            ArgumentNullException.ThrowIfNull(summary);
+            if (!summary.HasBlockedItems)
+            {
+                throw new ArgumentException("The run has no blocked items.", nameof(summary));
+            }
+
+            if (summary.RootResults.Any(result => result.Plan?.Items.Any(
+                item => item.Action == CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged) == true))
+            {
+                return CottonAutomaticSyncFailureKind.UploadedFileChanged;
+            }
+
+            return CottonAutomaticSyncFailureKind.ActionRequired;
+        }
+
         public static CottonAutomaticSyncFailureKind Classify(Exception exception)
         {
             ArgumentNullException.ThrowIfNull(exception);

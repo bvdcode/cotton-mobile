@@ -47,6 +47,13 @@ namespace Cotton.Mobile.Services
             if (!receipt.MatchesLocalVersion(localFile)
                 || !string.Equals(receipt.RelativePath, localFile.RelativePath, StringComparison.Ordinal))
             {
+                if (receipt.IsUploaded && receipt.ContentHash is not null)
+                {
+                    return CottonDeviceToCloudSyncPlanItemFactory.CreateReceipt(
+                        CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged,
+                        receipt);
+                }
+
                 return CottonDeviceToCloudSyncPlanItemFactory.CreateReceipt(
                     CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged,
                     receipt);

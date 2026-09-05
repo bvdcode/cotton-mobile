@@ -47,6 +47,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonAutomaticSyncFailureKind.SourceChanged, false)]
         [InlineData(CottonAutomaticSyncFailureKind.ServerRejectedRequest, false)]
         [InlineData(CottonAutomaticSyncFailureKind.ActionRequired, false)]
+        [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged, false)]
         [InlineData(CottonAutomaticSyncFailureKind.Unexpected, false)]
         public void RetryPolicyDistinguishesTransientFailures(
             CottonAutomaticSyncFailureKind failureKind,

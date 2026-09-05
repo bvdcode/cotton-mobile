@@ -85,7 +85,7 @@ namespace Cotton.Mobile.Services
                     {
                         CottonAutomaticSyncFailure failure = new(
                             root.Id,
-                            CottonAutomaticSyncFailureKind.ActionRequired);
+                            CottonAutomaticSyncFailureClassifier.ClassifyBlocked(summary));
                         failures.Add(failure);
                     }
                     else if (summary.CompletedRootCount > 0)

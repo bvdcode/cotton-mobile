@@ -15,6 +15,9 @@ namespace Cotton.Mobile.Tests
 
         public Guid? BlockedRootId { get; set; }
 
+        public CottonDeviceToCloudSyncActionKind BlockedAction { get; set; } =
+            CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged;
+
         public Guid? PausedRootId { get; set; }
 
         public Exception FailureException { get; set; } = new IOException("Simulated sync root failure.");
@@ -51,7 +54,7 @@ namespace Cotton.Mobile.Tests
             if (root.Id == BlockedRootId)
             {
                 CottonDeviceToCloudSyncPlanItem blockedItem = new(
-                    CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged,
+                    BlockedAction,
                     CottonFileBrowserEntryType.File,
                     "blocked.txt",
                     "blocked.txt",

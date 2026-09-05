@@ -81,6 +81,7 @@ namespace Cotton.Mobile.Resources.Localization
         public static string SyncFailureServerRejectedRequest => GetString(nameof(SyncFailureServerRejectedRequest));
         public static string SyncFailureLocalReadFailed => GetString(nameof(SyncFailureLocalReadFailed));
         public static string SyncFailureActionRequired => GetString(nameof(SyncFailureActionRequired));
+        public static string SyncFailureUploadedFileChanged => GetString(nameof(SyncFailureUploadedFileChanged));
         public static string SyncFailureUnexpected => GetString(nameof(SyncFailureUnexpected));
         public static string SyncRootReady => GetString(nameof(SyncRootReady));
         public static string ChooseLocalFolder => GetString(nameof(ChooseLocalFolder));

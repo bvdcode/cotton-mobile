@@ -6,11 +6,14 @@ namespace Cotton.Mobile.Tests
 {
     public partial class DeviceToCloudSyncCoordinatorTests
     {
-        [Fact]
-        public async Task PausingAnUploadPreservesItsReceiptAndResumesTheSameOperation()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task PausingAnUploadPreservesItsReceiptAndResumesTheSameOperation(bool transportThrowsIOException)
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             await PreparePausedUploadAsync(root);
+            _fileOperator.ReportCancellationAsIOException = transportThrowsIOException;
             Task<CottonDeviceToCloudSyncRunSummary> running = _coordinator.RunRootAsync(
                 InstanceUri, root, TestContext.Current.CancellationToken);
             await _fileOperator.UploadStarted.Task.WaitAsync(TestContext.Current.CancellationToken);
@@ -62,11 +65,14 @@ namespace Cotton.Mobile.Tests
             Assert.Empty(_localTreeReader.ReadRootIds);
         }
 
-        [Fact]
-        public async Task ExternalCancellationIsNotReportedAsPause()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task ExternalCancellationIsNotReportedAsPause(bool transportThrowsIOException)
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             await PreparePausedUploadAsync(root);
+            _fileOperator.ReportCancellationAsIOException = transportThrowsIOException;
             using CancellationTokenSource cancellation = CancellationTokenSource.CreateLinkedTokenSource(
                 TestContext.Current.CancellationToken);
             Task<CottonDeviceToCloudSyncRunSummary> running = _coordinator.RunRootAsync(
@@ -77,6 +83,21 @@ namespace Cotton.Mobile.Tests
 
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => running);
             Assert.Empty(_progressHub.GetCurrent());
+        }
+
+        [Fact]
+        public async Task AnIOExceptionWithoutCancellationIsNotReportedAsPause()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            await PreparePausedUploadAsync(root);
+            _fileOperator.UploadGate = Task.FromException(new IOException("Connection interrupted."));
+
+            await Assert.ThrowsAsync<IOException>(() => _coordinator.RunRootAsync(
+                InstanceUri, root, TestContext.Current.CancellationToken));
+
+            Assert.Empty(_progressHub.GetCurrent());
+            Assert.True(Assert.Single(await _uploadReceiptStore.LoadAsync(
+                InstanceUri, root, TestContext.Current.CancellationToken)).IsPending);
         }
 
         private async Task PreparePausedUploadAsync(CottonSyncRootSnapshot root)

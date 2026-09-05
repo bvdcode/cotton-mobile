@@ -93,6 +93,9 @@ namespace Cotton.Mobile.Services
         [LoggerMessage(EventId = 2131, Level = LogLevel.Information, Message = "Sync root {RootId} upload {UploadNumber} completed.")]
         public static partial void UploadCompleted(ILogger logger, Guid rootId, int uploadNumber);
 
+        [LoggerMessage(EventId = 2133, Level = LogLevel.Debug, Message = "Sync root {RootId} execution was cancelled.")]
+        public static partial void RootCancelled(ILogger logger, Guid rootId, Exception exception);
+
         [LoggerMessage(EventId = 2132, Level = LogLevel.Information, Message = "Sync root {RootId} execution completed: {UploadedCount} uploaded, {ConfirmedCount} confirmed, {FolderCount} folders, {DeletedCount} local deletes, {SkippedCount} skipped, {BlockedCount} blocked.")]
         public static partial void ExecutionCompleted(
             ILogger logger,

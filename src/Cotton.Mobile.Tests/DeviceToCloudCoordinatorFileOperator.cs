@@ -16,6 +16,8 @@ namespace Cotton.Mobile.Tests
 
         public Task? UploadGate { get; set; }
 
+        public bool ReportCancellationAsIOException { get; set; }
+
         public void SetUploadResult(string relativePath, Guid fileId, string eTag)
         {
             _uploadResults[relativePath] = (fileId, eTag);
@@ -35,7 +37,14 @@ namespace Cotton.Mobile.Tests
             UploadStarted.TrySetResult();
             if (UploadGate is not null)
             {
-                await UploadGate.WaitAsync(cancellationToken);
+                try
+                {
+                    await UploadGate.WaitAsync(cancellationToken);
+                }
+                catch (OperationCanceledException exception) when (ReportCancellationAsIOException)
+                {
+                    throw new IOException("Socket closed.", exception);
+                }
             }
 
             cancellationToken.ThrowIfCancellationRequested();

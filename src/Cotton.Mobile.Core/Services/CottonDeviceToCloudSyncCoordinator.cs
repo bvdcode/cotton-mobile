@@ -125,9 +125,16 @@ namespace Cotton.Mobile.Services
 
                             return await ExecuteRootAsync(instanceUri, root, token).ConfigureAwait(false);
                         }
-                        catch (OperationCanceledException) when (token.IsCancellationRequested
-                            && !cancellationToken.IsCancellationRequested)
+                        catch (Exception exception) when (token.IsCancellationRequested
+                            && exception is OperationCanceledException or IOException)
                         {
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                CottonSyncDiagnosticLog.RootCancelled(_logger, root.Id, exception);
+                                throw new OperationCanceledException(
+                                    "Sync-root execution was cancelled.", exception, cancellationToken);
+                            }
+
                             CottonSyncDiagnosticLog.RootSkipped(
                                 _logger, root.Id, CottonDeviceToCloudSyncRootRunStatus.SkippedPaused);
                             return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);

@@ -39,6 +39,18 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void PausedSingleRootReportsPauseInsteadOfCompletion()
+        {
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
+            CottonDeviceToCloudSyncRunSummary summary = new(
+                [CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root)]);
+
+            Assert.Equal(
+                $"Paused syncing {root.CloudFolder.FolderName}.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(summary));
+        }
+
+        [Fact]
         public void SingleRootSummaryUsesUploadStatus()
         {
             CottonDeviceToCloudSyncRunSummary summary = new([]);

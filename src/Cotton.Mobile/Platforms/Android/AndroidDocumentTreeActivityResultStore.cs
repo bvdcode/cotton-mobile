@@ -42,6 +42,14 @@ namespace Cotton.Mobile.Platforms.Android
             _preferences.Set(ActiveProcessIdKey, Environment.ProcessId);
         }
 
+        public void RestoreActiveRequest()
+        {
+            if (TryReadRequestId(ActiveRequestIdKey, out _))
+            {
+                _preferences.Set(ActiveProcessIdKey, Environment.ProcessId);
+            }
+        }
+
         public Guid? SaveResult(Result resultCode, Intent? data)
         {
             if (!TryReadRequestId(ActiveRequestIdKey, out Guid requestId))

@@ -32,6 +32,7 @@ namespace Cotton.Mobile.Platforms.Android
     public class MainActivity : MauiAppCompatActivity
     {
         private const int DocumentTreeBridgeAttemptCount = 20;
+        private const string ActivityResultStateKey = "Cotton.Mobile.ActivityResultState";
         private static readonly TimeSpan DocumentTreeBridgeAttemptDelay = TimeSpan.FromMilliseconds(100);
 
         private ActivityResultLauncher? _documentTreeLauncher;
@@ -43,6 +44,15 @@ namespace Cotton.Mobile.Platforms.Android
             _documentTreeLauncher = RegisterForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new AndroidActivityResultCallback(HandleDocumentTreeResult));
+            Bundle? activityResultState = savedInstanceState?.GetBundle(ActivityResultStateKey);
+            if (activityResultState is not null)
+            {
+                ActivityResultRegistry.OnRestoreInstanceState(activityResultState);
+                IServiceProvider services = IPlatformApplication.Current?.Services
+                    ?? throw new InvalidOperationException("Application services are unavailable during activity restoration.");
+                services.GetRequiredService<AndroidDocumentTreeActivityResultStore>().RestoreActiveRequest();
+            }
+
             base.OnCreate(savedInstanceState);
             SupportFragmentManager.RegisterFragmentLifecycleCallbacks(new AndroidSystemBarAppearance(), recursive: true);
 
@@ -52,6 +62,14 @@ namespace Cotton.Mobile.Platforms.Android
             }
 
             ApplySystemBars();
+        }
+
+        protected override void OnSaveInstanceState(Bundle outState)
+        {
+            base.OnSaveInstanceState(outState);
+            Bundle activityResultState = new();
+            ActivityResultRegistry.OnSaveInstanceState(activityResultState);
+            outState.PutBundle(ActivityResultStateKey, activityResultState);
         }
 
         protected override void OnResume()

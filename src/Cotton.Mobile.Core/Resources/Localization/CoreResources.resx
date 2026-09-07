@@ -72,6 +72,7 @@
   <data name="SyncFailureSourceChanged" xml:space="preserve"><value>A file changed while Cotton was reading or uploading it. The next run will retry its current version.</value></data>
   <data name="SyncFailureTimedOut" xml:space="preserve"><value>The server did not respond in time. The next run will retry.</value></data>
   <data name="SyncFailureServerUnavailable" xml:space="preserve"><value>Cotton Cloud is temporarily unavailable. The next run will retry.</value></data>
+  <data name="SyncFailureInsufficientStorage" xml:space="preserve"><value>Cotton Cloud does not have enough storage for this upload. Free cloud space or contact the server administrator, then tap Run all to retry.</value></data>
   <data name="SyncFailureServerRejectedRequest" xml:space="preserve"><value>Cotton Cloud could not complete the request. Retry, then contact support if it repeats.</value></data>
   <data name="SyncFailureRemoteContentUnavailable" xml:space="preserve"><value>A cloud folder or file is no longer available. Check the destination and your access in Cotton Cloud. If the destination folder was deleted, restore it or remove this sync setup and add it again with another cloud folder. Removing a sync setup keeps your local files.</value></data>
   <data name="SyncFailureLocalReadFailed" xml:space="preserve"><value>A local file could not be read. Check that it still exists and Android can access it.</value></data>

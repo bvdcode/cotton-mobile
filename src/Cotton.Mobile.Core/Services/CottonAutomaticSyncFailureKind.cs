@@ -18,5 +18,6 @@ namespace Cotton.Mobile.Services
         Unexpected,
         UploadedFileChanged,
         RemoteContentUnavailable,
+        InsufficientStorage,
     }
 }

@@ -69,6 +69,11 @@ namespace Cotton.Mobile.Services
 
         private static CottonAutomaticSyncFailureKind ClassifyApiStatus(HttpStatusCode statusCode)
         {
+            if (statusCode == HttpStatusCode.InsufficientStorage)
+            {
+                return CottonAutomaticSyncFailureKind.InsufficientStorage;
+            }
+
             if (statusCode == HttpStatusCode.NotFound)
             {
                 return CottonAutomaticSyncFailureKind.RemoteContentUnavailable;

@@ -69,6 +69,9 @@ jobs:
       - name: Test mobile core
         run: dotnet test --project "$TEST_PROJECT_PATH" --no-restore --configuration Release --verbosity normal
 
+      - name: Build authenticated Android upload check
+        run: dotnet build scripts/mobile/upload-check/UploadCheck.csproj --configuration Release
+
   google-play-store-listing-dry-run:
     name: Validate Google Play Store Listing
     runs-on: ubuntu-latest

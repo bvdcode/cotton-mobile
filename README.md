@@ -50,3 +50,29 @@ python scripts/mobile/test-android-upload-ui.py --serial emulator-5554 --output 
 ```
 
 Use a fresh Android emulator. The runner temporarily changes its network, display, font scale, and theme settings. `--full` covers phone, narrow phone, tablet, landscape, and enlarged text in both themes. `--dashboard-only` limits a repeat check to upload feedback and controls. UI test scenarios are excluded from normal Debug and Release builds.
+
+### Authenticated upload verification
+
+The upload check exercises the installed Android application against a test account. It uploads 17 generated files including a 64 MiB file, stops the process during that transfer, verifies automatic recovery, downloads and checks every cloud copy, and runs again to confirm that file IDs remain unchanged. It also checks that Android originals remain intact. Each run uses a unique subfolder and removes that subfolder from Android and the cloud when finished.
+
+First, sign in on an isolated emulator and configure a **Selected folder** source under `/sdcard/Documents/<local root>`, connected to a dedicated cloud folder. Keep removal of originals disabled. Save the test account credentials in a local JSON file containing `username` and `password`.
+
+Create a configuration file with the matching source and cloud folder:
+
+```json
+{
+  "server": "https://<server profile>",
+  "accountFile": "<account credentials file>",
+  "serial": "emulator-5554",
+  "package": "dev.cottoncloud.app",
+  "androidSourceDirectory": "/sdcard/Documents/UploadChecks",
+  "cloudFolderId": "<cloud folder id>",
+  "outputDirectory": ".qa/upload-checks"
+}
+```
+
+```shell
+dotnet run --project scripts/mobile/upload-check/UploadCheck.csproj --configuration Release -- <configuration.json>
+```
+
+The command requires `adb` on PATH and an already configured, unpaused source. It accepts emulator serials only. Local results include the source files, diagnostic logs, and `result.json`. CI builds this command; authenticated execution requires the configured emulator and test account.

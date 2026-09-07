@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(HttpStatusCode.Unauthorized, CottonAutomaticSyncFailureKind.AuthenticationRequired)]
         [InlineData(HttpStatusCode.Forbidden, CottonAutomaticSyncFailureKind.AuthenticationRequired)]
+        [InlineData(HttpStatusCode.NotFound, CottonAutomaticSyncFailureKind.RemoteContentUnavailable)]
         [InlineData(HttpStatusCode.GatewayTimeout, CottonAutomaticSyncFailureKind.TimedOut)]
         [InlineData(HttpStatusCode.TooManyRequests, CottonAutomaticSyncFailureKind.ServerUnavailable)]
         [InlineData(HttpStatusCode.ServiceUnavailable, CottonAutomaticSyncFailureKind.ServerUnavailable)]
@@ -48,6 +49,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonAutomaticSyncFailureKind.ServerRejectedRequest, false)]
         [InlineData(CottonAutomaticSyncFailureKind.ActionRequired, false)]
         [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged, false)]
+        [InlineData(CottonAutomaticSyncFailureKind.RemoteContentUnavailable, false)]
         [InlineData(CottonAutomaticSyncFailureKind.Unexpected, false)]
         public void RetryPolicyDistinguishesTransientFailures(
             CottonAutomaticSyncFailureKind failureKind,

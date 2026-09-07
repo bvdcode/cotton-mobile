@@ -31,6 +31,8 @@ namespace Cotton.Mobile.Services
                     CoreResources.SyncFailureActionRequired,
                 CottonAutomaticSyncFailureKind.UploadedFileChanged =>
                     CoreResources.SyncFailureUploadedFileChanged,
+                CottonAutomaticSyncFailureKind.RemoteContentUnavailable =>
+                    CoreResources.SyncFailureRemoteContentUnavailable,
                 CottonAutomaticSyncFailureKind.Unexpected =>
                     CoreResources.SyncFailureUnexpected,
                 CottonAutomaticSyncFailureKind.None => throw new ArgumentOutOfRangeException(

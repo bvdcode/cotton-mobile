@@ -69,6 +69,11 @@ namespace Cotton.Mobile.Services
 
         private static CottonAutomaticSyncFailureKind ClassifyApiStatus(HttpStatusCode statusCode)
         {
+            if (statusCode == HttpStatusCode.NotFound)
+            {
+                return CottonAutomaticSyncFailureKind.RemoteContentUnavailable;
+            }
+
             if (statusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
             {
                 return CottonAutomaticSyncFailureKind.AuthenticationRequired;

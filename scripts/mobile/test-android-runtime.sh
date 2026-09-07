@@ -133,6 +133,9 @@ emulator_pid="$!"
 
 wait_for_device
 wait_for_boot
+"$adb_bin" root >/dev/null
+wait_for_device
+wait_for_boot
 "$adb_bin" install -r "$apk_path" >/dev/null
 "$adb_bin" shell pm clear "$package_name" >/dev/null
 "$adb_bin" shell am set-standby-bucket "$package_name" active

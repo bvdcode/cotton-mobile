@@ -16,7 +16,25 @@ PACKAGE = "dev.cottoncloud.app.debug"
 RECEIVER = f"{PACKAGE}/dev.cottoncloud.app.debug.UploadUiScenarioReceiver"
 LOG_TAG = "CottonUploadUiTests"
 TIMEOUT_SECONDS = 40
-SCENARIOS = ("running", "source-folder", "source-media")
+SCENARIOS = (
+    "running",
+    "source-folder",
+    "source-media",
+    "storage-full",
+    "destination-missing",
+)
+FAILURE_MESSAGES = {
+    "storage-full": (
+        "Cotton Cloud does not have enough storage for this upload. Free cloud space "
+        "or contact the server administrator, then tap Run all to retry."
+    ),
+    "destination-missing": (
+        "A cloud folder or file is no longer available. Check the destination and "
+        "your access in Cotton Cloud. If the destination folder was deleted, restore "
+        "it or remove this sync setup and add it again with another cloud folder. "
+        "Removing a sync setup keeps your local files."
+    ),
+}
 OFFLINE_MESSAGES = {
     "offline-add": "Connect to the internet to add a sync folder.",
     "offline-run": "Offline. Sync needs internet.",
@@ -67,9 +85,18 @@ class Emulator:
 
     def hierarchy(self) -> ET.Element:
         """Read the current accessibility hierarchy."""
-        self.run("shell", "uiautomator", "dump", "/sdcard/cotton-upload-ui.xml")
-        return ET.fromstring(
-            self.run("exec-out", "cat", "/sdcard/cotton-upload-ui.xml")
+        deadline = time.monotonic() + TIMEOUT_SECONDS
+        while time.monotonic() < deadline:
+            result = self.run(
+                "shell", "uiautomator", "dump", "/sdcard/cotton-upload-ui.xml"
+            )
+            if b"dumped to:" in result:
+                content = self.run("exec-out", "cat", "/sdcard/cotton-upload-ui.xml")
+                if content.lstrip().startswith(b"<?xml"):
+                    return ET.fromstring(content)
+            time.sleep(0.5)
+        raise TimeoutError(
+            "Android did not provide the current accessibility hierarchy."
         )
 
     def configure(self, viewport: Viewport, theme: str) -> None:
@@ -125,6 +152,33 @@ def assert_message(hierarchy: ET.Element, expected: str) -> None:
         raise AssertionError(
             f"Action feedback is missing: {expected}; visible text: {texts}"
         )
+
+
+def capture_failure(
+    emulator: Emulator, directory: Path, name: str, scenario: str, hierarchy: ET.Element
+) -> None:
+    """Open the actual failure action and verify its complete explanation."""
+    buttons = [
+        node
+        for node in hierarchy.iter("node")
+        if node.get("text", "").startswith("Last upload failed")
+        and node.get("enabled") == "true"
+    ]
+    if len(buttons) != 1:
+        raise AssertionError("The failed upload details action is missing.")
+    left, top, right, bottom = map(int, re.findall(r"\d+", buttons[0].attrib["bounds"]))
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+    dialog = capture(emulator, directory, f"{name}-details")
+    assert_message(dialog, FAILURE_MESSAGES[scenario])
+    close = [node for node in dialog.iter("node") if node.get("text") == "Close"]
+    if len(close) != 1 or close[0].get("enabled") != "true":
+        raise AssertionError("The failure dialog cannot be closed.")
+    left, top, right, bottom = map(int, re.findall(r"\d+", close[0].attrib["bounds"]))
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
 
 
 def capture_source_end(
@@ -221,6 +275,8 @@ def run_checks(
                     assert_message(hierarchy, "Syncing 4 of 10 changes…")
                 if scenario.startswith("source-"):
                     capture_source_end(emulator, directory, name, viewport)
+                if scenario in FAILURE_MESSAGES:
+                    capture_failure(emulator, directory, name, scenario, hierarchy)
                 completed.append(name)
                 logging.info("Passed %s", name)
     (directory / "results.json").write_text(

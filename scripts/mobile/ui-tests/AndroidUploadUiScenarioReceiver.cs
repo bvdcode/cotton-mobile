@@ -97,6 +97,12 @@ namespace Cotton.Mobile.Platforms.Android
                 case "source-media":
                     await ShowSourceAsync(navigation, scenario);
                     break;
+                case "storage-full":
+                    ShowRoot(state, CottonAutomaticSyncFailureKind.InsufficientStorage);
+                    break;
+                case "destination-missing":
+                    ShowRoot(state, CottonAutomaticSyncFailureKind.RemoteContentUnavailable);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(scenario), scenario, "UI scenario is not supported.");
             }
@@ -120,7 +126,9 @@ namespace Cotton.Mobile.Platforms.Android
             await navigation.PushModalAsync(new SyncRootSetupOptionsPage(source), animated: false);
         }
 
-        private static void ShowRoot(ISyncSettingsViewState state)
+        private static void ShowRoot(
+            ISyncSettingsViewState state,
+            CottonAutomaticSyncFailureKind? failureKind = null)
         {
             CottonSyncRootSnapshot root = new(RootId, InstanceUri, AccountScope,
                 new CottonUploadDestinationSnapshot(FolderId, "Camera backups",
@@ -128,8 +136,14 @@ namespace Cotton.Mobile.Platforms.Android
                 new CottonSyncLocalRootSnapshot(CottonSyncRootStorageKind.MediaStore,
                     "content://media/external/file", "Camera", CottonSyncRootPermissionStatus.Available, "buckets:1"),
                 CottonSyncDirection.DeviceToCloud, CottonUploadOriginalRetention.KeepOriginals);
-            state.ShowRoots(new SyncRootCollectionSnapshot([root], new HashSet<Guid>(),
-                new Dictionary<Guid, CottonAutomaticSyncRootStatusSnapshot>()));
+            Dictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses = [];
+            if (failureKind.HasValue)
+            {
+                statuses.Add(RootId, CottonAutomaticSyncRootStatusSnapshot.Failed(
+                    RootId, DateTime.UtcNow, failureKind.Value));
+            }
+
+            state.ShowRoots(new SyncRootCollectionSnapshot([root], new HashSet<Guid>(), statuses));
         }
 
         private static void EnsureOffline(IServiceProvider services)

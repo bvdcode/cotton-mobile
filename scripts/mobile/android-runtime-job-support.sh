@@ -59,6 +59,24 @@ wait_for_media_sync_start() {
   exit 1
 }
 
+wait_for_media_sync_completion() {
+  local attempt
+  local output
+  for attempt in {1..60}; do
+    output="$("$adb_bin" logcat -d -s "$media_sync_log_tag:I" '*:S' | tr -d '\r')"
+    if [[ "$output" == *"completed"* ]]; then
+      return
+    fi
+
+    sleep 1
+  done
+
+  printf 'MediaStore sync job did not complete when requested.\n' >&2
+  read_media_sync_job >&2
+  "$adb_bin" logcat -d -s "$media_sync_log_tag:I" '*:S' >&2
+  exit 1
+}
+
 read_media_sync_job() {
   "$adb_bin" shell dumpsys jobscheduler \
     | tr -d '\r' \

@@ -165,6 +165,7 @@ wait_for_media_sync_job "after process death"
 create_media_fixture
 run_media_sync_job
 wait_for_media_sync_start
+wait_for_media_sync_completion
 
 denied_output="$(run_diagnostic scan-media denied)"
 denied_access="$(read_metric "$denied_output" access)"

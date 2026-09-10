@@ -83,6 +83,7 @@ namespace Cotton.Mobile.Platforms.Android
 #if DEBUG
                         _ = Log.Info(LogTag, "rescheduled");
 #endif
+                        CompleteIfRunning(parameters, cancellation, wantsReschedule: false);
                         break;
 
                     case AndroidAutomaticSyncExecutionResult.NoSession:
@@ -122,11 +123,18 @@ namespace Cotton.Mobile.Platforms.Android
             lock (_executionGate)
             {
                 isRunning = ReferenceEquals(_executionCancellation, cancellation);
+                if (isRunning)
+                {
+                    _executionCancellation = null;
+                }
             }
 
             if (isRunning)
             {
                 JobFinished(parameters, wantsReschedule);
+#if DEBUG
+                _ = Log.Info(LogTag, "completed");
+#endif
             }
         }
 

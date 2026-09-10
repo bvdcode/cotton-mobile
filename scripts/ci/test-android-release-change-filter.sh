@@ -76,9 +76,21 @@ runtime_support_head="$(commit_all "runtime support")"
 output="$("$detect_script" "$release_runtime_test_head" "$runtime_support_head")"
 assert_contains "$output" "Android release required: true"
 
+printf '#!/usr/bin/env python3\n' > scripts/mobile/test-android-upload-ui.py
+upload_ui_test_head="$(commit_all "upload UI test")"
+output="$("$detect_script" "$runtime_support_head" "$upload_ui_test_head")"
+assert_contains "$output" "Android release required: true"
+
+mkdir -p scripts/mobile/ui-tests
+printf 'namespace Cotton.Mobile { public class UploadUiScenario { } }\n' \
+  > scripts/mobile/ui-tests/AndroidUploadUiScenario.cs
+upload_ui_scenario_head="$(commit_all "upload UI scenario")"
+output="$("$detect_script" "$upload_ui_test_head" "$upload_ui_scenario_head")"
+assert_contains "$output" "Android release required: true"
+
 printf '#!/usr/bin/env bash\n' > scripts/mobile/detect-android-release-changes.sh
 detector_head="$(commit_all "detector")"
-output="$("$detect_script" "$runtime_support_head" "$detector_head")"
+output="$("$detect_script" "$upload_ui_scenario_head" "$detector_head")"
 assert_contains "$output" "Android release required: true"
 
 printf '#!/usr/bin/env bash\n' > scripts/mobile/resolve-android-release-policy.sh

@@ -41,11 +41,13 @@ run_compute() {
   local version_code_base="$3"
   local published_floor="$4"
   local display_version="${5:-}"
+  local display_version_run_offset="${6:-1}"
 
   GITHUB_RUN_NUMBER="$run_number" \
     GITHUB_RUN_ATTEMPT="$run_attempt" \
     ANDROID_VERSION_CODE_BASE="$version_code_base" \
     ANDROID_VERSION_CODE_PUBLISHED_FLOOR="$published_floor" \
+    ANDROID_DISPLAY_VERSION_RUN_OFFSET="$display_version_run_offset" \
     "$compute_script" "$display_version"
 }
 
@@ -69,8 +71,8 @@ assert_contains "$output" "Android versionCode: 1003003"
 
 commit_change "next release"
 output="$(run_compute 3 1 1001000 1000449)"
-assert_contains "$output" "Android display version: 1.0.1"
-assert_contains "$output" "Google Play release name: Cotton Mobile 1.0.1"
+assert_contains "$output" "Android display version: 1.0.2"
+assert_contains "$output" "Google Play release name: Cotton Mobile 1.0.2"
 
 git tag v1.0.3
 commit_change "after skipped patch"
@@ -81,6 +83,12 @@ assert_contains "$output" "Android display version tag: v1.0.4"
 output="$(run_compute 5 1 1001000 1000449 2.3.4)"
 assert_contains "$output" "Android display version: 2.3.4"
 assert_contains "$output" "Google Play release name: Cotton Mobile 2.3.4"
+
+output="$(run_compute 531 1 1001000 1000449 '' 497)"
+assert_contains "$output" "Android display version: 1.0.34"
+
+output="$(run_compute 532 1 1001000 1000449 '' 497)"
+assert_contains "$output" "Android display version: 1.0.35"
 
 if output="$(run_compute 1 1 1001000 1002001 2>&1)"; then
   fail "Expected published-floor validation to fail."

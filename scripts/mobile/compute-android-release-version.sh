@@ -59,6 +59,8 @@ max_release_patch_for_tags() {
 
 resolve_display_version() {
   local base_version="$1"
+  local run_number="$2"
+  local run_offset="$3"
 
   if [[ ! "$base_version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
     printf 'Android display version must be a SemVer MAJOR.MINOR.PATCH value: %s\n' "$base_version" >&2
@@ -82,14 +84,20 @@ resolve_display_version() {
   fi
 
   local latest_patch
+  local minimum_patch
   latest_patch="$(max_release_patch_for_tags "$major" "$minor" "$base_patch" --list)"
   if [[ -z "$latest_patch" ]]; then
-    latest_patch="$base_patch"
+    minimum_patch="$base_patch"
   else
-    latest_patch=$((latest_patch + 1))
+    minimum_patch=$((latest_patch + 1))
   fi
 
-  printf '%s.%s.%s' "$major" "$minor" "$latest_patch"
+  local run_patch=$((run_number - run_offset))
+  if (( run_patch < minimum_patch )); then
+    run_patch="$minimum_patch"
+  fi
+
+  printf '%s.%s.%s' "$major" "$minor" "$run_patch"
 }
 
 require_numeric_env() {
@@ -108,9 +116,13 @@ run_number="$(require_numeric_env GITHUB_RUN_NUMBER)"
 run_attempt="$(require_numeric_env GITHUB_RUN_ATTEMPT)"
 version_code_base="$(require_numeric_env ANDROID_VERSION_CODE_BASE)"
 published_floor="$(require_numeric_env ANDROID_VERSION_CODE_PUBLISHED_FLOOR)"
+display_version_run_offset="$(require_numeric_env ANDROID_DISPLAY_VERSION_RUN_OFFSET)"
 
 if [[ -z "$display_version" ]]; then
-  display_version="$(resolve_display_version "$(read_next_version "$GITVERSION_CONFIG_PATH")")"
+  display_version="$(resolve_display_version \
+    "$(read_next_version "$GITVERSION_CONFIG_PATH")" \
+    "$run_number" \
+    "$display_version_run_offset")"
 fi
 
 if [[ ! "$display_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then

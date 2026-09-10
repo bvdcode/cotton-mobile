@@ -23,6 +23,8 @@ SCENARIOS = (
     "storage-full",
     "destination-missing",
     "review-required",
+    "cloud-path-conflict",
+    "pending-upload-changed",
 )
 FAILURE_MESSAGES = {
     "storage-full": (
@@ -40,7 +42,23 @@ FAILURE_MESSAGES = {
         "only. The cloud copy and local original are kept. To back up edited content, "
         "save it as a new file."
     ),
+    "cloud-path-conflict": (
+        "A different file or folder already uses this path in Cotton Cloud. Review "
+        "the destination before retrying."
+    ),
 }
+FAILURE_STATUS_PREFIXES = {
+    "storage-full": "Last upload failed",
+    "destination-missing": "Last upload failed",
+    "review-required": "Uploaded file changed",
+    "cloud-path-conflict": "Cloud path conflict",
+    "pending-upload-changed": "Pending upload changed",
+}
+PENDING_UPLOAD_MESSAGE = (
+    "Cotton will abandon incomplete upload attempts and retry the current local files. "
+    "If an earlier request finishes later, Cotton will preserve the local file and "
+    "report a cloud conflict."
+)
 OFFLINE_MESSAGES = {
     "offline-add": "Connect to the internet to add a sync folder.",
     "offline-run": "Offline. Sync needs internet.",
@@ -190,10 +208,8 @@ def assert_dashboard_layout(hierarchy: ET.Element, scenario: str) -> None:
                 "The running upload progress indicator does not span the card."
             )
 
-    if scenario in FAILURE_MESSAGES:
-        status_prefix = (
-            "Needs review" if scenario == "review-required" else "Last upload failed"
-        )
+    if scenario in FAILURE_STATUS_PREFIXES:
+        status_prefix = FAILURE_STATUS_PREFIXES[scenario]
         statuses = [
             node for node in nodes if node.get("text", "").startswith(status_prefix)
         ]
@@ -216,9 +232,7 @@ def capture_failure(
     emulator: Emulator, directory: Path, name: str, scenario: str, hierarchy: ET.Element
 ) -> None:
     """Open the status action and verify its complete explanation."""
-    status_prefix = (
-        "Needs review" if scenario == "review-required" else "Last upload failed"
-    )
+    status_prefix = FAILURE_STATUS_PREFIXES[scenario]
     actions = [
         node
         for node in hierarchy.iter("node")
@@ -237,7 +251,42 @@ def capture_failure(
     close = [node for node in dialog.iter("node") if node.get("text") == "Close"]
     if len(close) != 1 or close[0].get("enabled") != "true":
         raise AssertionError("The failure dialog cannot be closed.")
-    left, top, right, bottom = map(int, re.findall(r"\d+", close[0].attrib["bounds"]))
+    left, top, right, bottom = bounds(close[0])
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+
+
+def capture_pending_upload(
+    emulator: Emulator, directory: Path, name: str, hierarchy: ET.Element
+) -> None:
+    """Verify that only a changed pending upload offers the recovery action."""
+    actions = [
+        node
+        for node in hierarchy.iter("node")
+        if node.get("text", "").startswith(
+            FAILURE_STATUS_PREFIXES["pending-upload-changed"]
+        )
+        and node.get("enabled") == "true"
+    ]
+    if len(actions) != 1:
+        raise AssertionError("The pending upload recovery action is missing.")
+    left, top, right, bottom = bounds(actions[0])
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+    dialog = capture(emulator, directory, f"{name}-recovery")
+    assert_message(dialog, "Resolve pending upload for Camera backups?")
+    assert_message(dialog, PENDING_UPLOAD_MESSAGE)
+    cancel = [node for node in dialog.iter("node") if node.get("text") == "Cancel"]
+    resolve = [
+        node
+        for node in dialog.iter("node")
+        if node.get("text") == "Resolve pending upload"
+    ]
+    if len(cancel) != 1 or len(resolve) != 1:
+        raise AssertionError("The pending upload recovery confirmation is incomplete.")
+    left, top, right, bottom = bounds(cancel[0])
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
@@ -340,6 +389,8 @@ def run_checks(
                     capture_source_end(emulator, directory, name, viewport)
                 if scenario in FAILURE_MESSAGES:
                     capture_failure(emulator, directory, name, scenario, hierarchy)
+                if scenario == "pending-upload-changed":
+                    capture_pending_upload(emulator, directory, name, hierarchy)
                 completed.append(name)
                 logging.info("Passed %s", name)
     (directory / "results.json").write_text(

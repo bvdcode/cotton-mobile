@@ -30,14 +30,20 @@ namespace Cotton.Mobile.Services
         {
             return failureKind switch
             {
-                CottonAutomaticSyncFailureKind.ActionRequired or
-                CottonAutomaticSyncFailureKind.UploadedFileChanged or
-                CottonAutomaticSyncFailureKind.PendingUploadChanged or
-                CottonAutomaticSyncFailureKind.RemotePathConflict or
-                CottonAutomaticSyncFailureKind.RemoteRevisionChanged or
-                CottonAutomaticSyncFailureKind.InvalidLocalItemName or
-                CottonAutomaticSyncFailureKind.LocalSourceUnavailable =>
+                CottonAutomaticSyncFailureKind.ActionRequired =>
                     CoreResources.Format(CoreResources.LastSyncNeedsReviewFormat, completedAt),
+                CottonAutomaticSyncFailureKind.UploadedFileChanged =>
+                    CoreResources.Format(CoreResources.LastSyncUploadedFileChangedFormat, completedAt),
+                CottonAutomaticSyncFailureKind.PendingUploadChanged =>
+                    CoreResources.Format(CoreResources.LastSyncPendingUploadChangedFormat, completedAt),
+                CottonAutomaticSyncFailureKind.RemotePathConflict =>
+                    CoreResources.Format(CoreResources.LastSyncRemotePathConflictFormat, completedAt),
+                CottonAutomaticSyncFailureKind.RemoteRevisionChanged =>
+                    CoreResources.Format(CoreResources.LastSyncRemoteRevisionChangedFormat, completedAt),
+                CottonAutomaticSyncFailureKind.InvalidLocalItemName =>
+                    CoreResources.Format(CoreResources.LastSyncInvalidLocalItemNameFormat, completedAt),
+                CottonAutomaticSyncFailureKind.LocalSourceUnavailable =>
+                    CoreResources.Format(CoreResources.LastSyncLocalSourceUnavailableFormat, completedAt),
                 CottonAutomaticSyncFailureKind.AuthenticationRequired or
                 CottonAutomaticSyncFailureKind.NetworkUnavailable or
                 CottonAutomaticSyncFailureKind.LocalAccessUnavailable or

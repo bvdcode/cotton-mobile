@@ -22,14 +22,16 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData(CottonAutomaticSyncFailureKind.ActionRequired)]
-        [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged)]
-        [InlineData(CottonAutomaticSyncFailureKind.PendingUploadChanged)]
-        [InlineData(CottonAutomaticSyncFailureKind.RemotePathConflict)]
-        [InlineData(CottonAutomaticSyncFailureKind.RemoteRevisionChanged)]
-        [InlineData(CottonAutomaticSyncFailureKind.InvalidLocalItemName)]
-        [InlineData(CottonAutomaticSyncFailureKind.LocalSourceUnavailable)]
-        public void ReviewableConflictDoesNotClaimUploadFailed(CottonAutomaticSyncFailureKind failureKind)
+        [InlineData(CottonAutomaticSyncFailureKind.ActionRequired, "Needs review")]
+        [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged, "Uploaded file changed")]
+        [InlineData(CottonAutomaticSyncFailureKind.PendingUploadChanged, "Pending upload changed")]
+        [InlineData(CottonAutomaticSyncFailureKind.RemotePathConflict, "Cloud path conflict")]
+        [InlineData(CottonAutomaticSyncFailureKind.RemoteRevisionChanged, "Cloud file changed")]
+        [InlineData(CottonAutomaticSyncFailureKind.InvalidLocalItemName, "Invalid local name")]
+        [InlineData(CottonAutomaticSyncFailureKind.LocalSourceUnavailable, "Local source unavailable")]
+        public void ReviewableConflictNamesItsCause(
+            CottonAutomaticSyncFailureKind failureKind,
+            string expectedStatus)
         {
             CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
                 Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
@@ -38,7 +40,7 @@ namespace Cotton.Mobile.Tests
 
             string text = CottonAutomaticSyncStatusText.Create(status);
 
-            Assert.Contains("review", text, StringComparison.OrdinalIgnoreCase);
+            Assert.StartsWith(expectedStatus, text, StringComparison.Ordinal);
             Assert.DoesNotContain("failed", text, StringComparison.OrdinalIgnoreCase);
         }
 

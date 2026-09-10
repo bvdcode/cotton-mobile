@@ -106,6 +106,12 @@ namespace Cotton.Mobile.Platforms.Android
                 case "review-required":
                     ShowRoot(state, CottonAutomaticSyncFailureKind.UploadedFileChanged);
                     break;
+                case "cloud-path-conflict":
+                    ShowRoot(state, CottonAutomaticSyncFailureKind.RemotePathConflict);
+                    break;
+                case "pending-upload-changed":
+                    ShowRoot(state, CottonAutomaticSyncFailureKind.PendingUploadChanged);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(scenario), scenario, "UI scenario is not supported.");
             }

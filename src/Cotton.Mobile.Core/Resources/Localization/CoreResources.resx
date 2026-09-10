@@ -65,6 +65,12 @@
   <data name="LastSyncSucceededFormat" xml:space="preserve"><value>Last synced {0:g}.</value></data>
   <data name="LastSyncFailedFormat" xml:space="preserve"><value>Last upload failed {0:g}.</value></data>
   <data name="LastSyncNeedsReviewFormat" xml:space="preserve"><value>Needs review · {0:g}.</value></data>
+  <data name="LastSyncUploadedFileChangedFormat" xml:space="preserve"><value>Uploaded file changed · {0:g}.</value></data>
+  <data name="LastSyncPendingUploadChangedFormat" xml:space="preserve"><value>Pending upload changed · {0:g}.</value></data>
+  <data name="LastSyncRemotePathConflictFormat" xml:space="preserve"><value>Cloud path conflict · {0:g}.</value></data>
+  <data name="LastSyncRemoteRevisionChangedFormat" xml:space="preserve"><value>Cloud file changed · {0:g}.</value></data>
+  <data name="LastSyncInvalidLocalItemNameFormat" xml:space="preserve"><value>Invalid local name · {0:g}.</value></data>
+  <data name="LastSyncLocalSourceUnavailableFormat" xml:space="preserve"><value>Local source unavailable · {0:g}.</value></data>
   <data name="UploadFolderFailedSingular" xml:space="preserve"><value>folder failed</value></data>
   <data name="UploadFolderFailedPlural" xml:space="preserve"><value>folders failed</value></data>
   <data name="SyncFailureAuthenticationRequired" xml:space="preserve"><value>Your account session expired. Sign in again, then retry.</value></data>

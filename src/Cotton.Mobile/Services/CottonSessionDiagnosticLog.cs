@@ -16,12 +16,6 @@ namespace Cotton.Mobile.Services
         [LoggerMessage(EventId = 2003, Level = LogLevel.Information, Message = "Session restore found no token pair.")]
         public static partial void TokenPairMissing(ILogger logger);
 
-        [LoggerMessage(EventId = 2004, Level = LogLevel.Information, Message = "Session token refresh started.")]
-        public static partial void RefreshStarted(ILogger logger);
-
-        [LoggerMessage(EventId = 2005, Level = LogLevel.Information, Message = "Session token refresh completed.")]
-        public static partial void RefreshCompleted(ILogger logger);
-
         [LoggerMessage(EventId = 2006, Level = LogLevel.Information, Message = "Session profile validation completed.")]
         public static partial void ProfileValidated(ILogger logger);
 

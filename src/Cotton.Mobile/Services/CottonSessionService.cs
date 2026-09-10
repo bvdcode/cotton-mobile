@@ -12,6 +12,7 @@ namespace Cotton.Mobile.Services
     public class CottonSessionService : ICottonSessionService
     {
         private readonly ICottonClientFactory _clientFactory;
+        private readonly ICottonSessionValidator _sessionValidator;
         private readonly ICottonInstanceStore _instanceStore;
         private readonly ICottonTokenStore _tokenStore;
         private readonly ICottonPendingAppCodeSessionStore _pendingSessionStore;
@@ -21,6 +22,7 @@ namespace Cotton.Mobile.Services
 
         public CottonSessionService(
             ICottonClientFactory clientFactory,
+            ICottonSessionValidator sessionValidator,
             ICottonInstanceStore instanceStore,
             ICottonTokenStore tokenStore,
             ICottonPendingAppCodeSessionStore pendingSessionStore,
@@ -29,6 +31,7 @@ namespace Cotton.Mobile.Services
             ILogger<CottonSessionService> logger)
         {
             ArgumentNullException.ThrowIfNull(clientFactory);
+            ArgumentNullException.ThrowIfNull(sessionValidator);
             ArgumentNullException.ThrowIfNull(instanceStore);
             ArgumentNullException.ThrowIfNull(tokenStore);
             ArgumentNullException.ThrowIfNull(pendingSessionStore);
@@ -37,6 +40,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(logger);
 
             _clientFactory = clientFactory;
+            _sessionValidator = sessionValidator;
             _instanceStore = instanceStore;
             _tokenStore = tokenStore;
             _pendingSessionStore = pendingSessionStore;
@@ -78,15 +82,11 @@ namespace Cotton.Mobile.Services
                     .ConfigureAwait(false);
             }
 
-            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
             try
             {
-                CottonSessionDiagnosticLog.RefreshStarted(_logger);
-                await client.Auth
-                    .RefreshAsync(cancellationToken: cancellationToken)
+                UserDto user = await _sessionValidator
+                    .ValidateAsync(instanceUri, cancellationToken)
                     .ConfigureAwait(false);
-                CottonSessionDiagnosticLog.RefreshCompleted(_logger);
-                UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
                 CottonSessionDiagnosticLog.ProfileValidated(_logger);
                 await _appCodeAuthorization
                     .ClearPendingBestEffortAsync("session restore")

@@ -31,6 +31,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<ICottonNotificationCursorStore, PreferencesCottonNotificationCursorStore>();
             services.AddSingleton<ICottonNotificationBatchProvider, CottonSdkNotificationBatchProvider>();
             services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
+            services.AddSingleton<ICottonSessionValidator, CottonSessionValidator>();
             services.AddSingleton<ICottonAppCodeAuthorizationService, CottonAppCodeAuthorizationService>();
             services.AddSingleton<ICottonSessionService, CottonSessionService>();
             services.AddSingleton<CottonNotificationDeliveryPlanner>();

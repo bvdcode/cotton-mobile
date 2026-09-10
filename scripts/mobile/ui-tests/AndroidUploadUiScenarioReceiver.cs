@@ -103,6 +103,9 @@ namespace Cotton.Mobile.Platforms.Android
                 case "destination-missing":
                     ShowRoot(state, CottonAutomaticSyncFailureKind.RemoteContentUnavailable);
                     break;
+                case "review-required":
+                    ShowRoot(state, CottonAutomaticSyncFailureKind.UploadedFileChanged);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(scenario), scenario, "UI scenario is not supported.");
             }

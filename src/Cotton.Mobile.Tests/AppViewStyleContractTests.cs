@@ -47,24 +47,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void SyncStatusActionUsesAnAccessibleButton()
+        public void SyncStatusActionUsesTheSameAccessibleTextLayoutAsProgress()
         {
             XDocument document = XDocument.Parse(
                 RepositoryPath.ReadText($"{ViewDirectory}/SyncDashboardView.xaml"));
-            XElement button = document.Descendants().Single(element =>
-                element.Name.LocalName == "Button"
-                && GetAttribute(element, "CommandParameter")?.Value.Contains("StatusAction", StringComparison.Ordinal)
-                    == true);
-
-            Assert.Contains("TouchTarget", GetAttribute(button, "StyleClass")?.Value, StringComparison.Ordinal);
-            Assert.Contains(
-                "StatusActionText",
-                GetAttributeContaining(button, "Description")?.Value,
-                StringComparison.Ordinal);
-            Assert.DoesNotContain(document.Descendants(), element =>
+            XElement gesture = document.Descendants().Single(element =>
                 element.Name.LocalName == "TapGestureRecognizer"
                 && GetAttribute(element, "CommandParameter")?.Value.Contains("StatusAction", StringComparison.Ordinal)
                     == true);
+            XElement container = gesture.Ancestors().First(element => element.Name.LocalName == "Grid");
+            XElement status = container.Descendants().Single(element =>
+                element.Name.LocalName == "Label"
+                && GetAttribute(element, "Text")?.Value.Contains("StatusText", StringComparison.Ordinal) == true);
+
+            Assert.Equal("{StaticResource AppTouchTargetSize}", GetAttribute(container, "MinimumHeightRequest")?.Value);
+            Assert.Contains(
+                "StatusActionText",
+                GetAttributeContaining(container, "Description")?.Value,
+                StringComparison.Ordinal);
+            Assert.Equal("Label", status.Name.LocalName);
+            Assert.DoesNotContain(container.Descendants(), element => element.Name.LocalName == "Button");
         }
 
         private static XAttribute? GetAttribute(XElement element, string localName)

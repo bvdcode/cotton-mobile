@@ -185,45 +185,41 @@
                                           RowDefinitions="Auto,Auto"
                                           RowSpacing="3"
                                           IsClippedToBounds="True"
+                                          InputTransparent="True"
+                                          MinimumHeightRequest="{StaticResource AppTouchTargetSize}"
+                                          SemanticProperties.Description="{Binding StatusActionText}"
                                           VerticalOptions="Center">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                CommandParameter="{Binding StatusAction}" />
+                                        </Grid.GestureRecognizers>
+                                        <Grid.Triggers>
+                                            <DataTrigger TargetType="Grid"
+                                                         Binding="{Binding CanUseStatusAction}"
+                                                         Value="True">
+                                                <Setter Property="InputTransparent" Value="False" />
+                                            </DataTrigger>
+                                        </Grid.Triggers>
                                         <Label Text="{Binding DisplayPathText}"
                                                FontAttributes="Bold"
                                                Style="{StaticResource AppBodyText}"
                                                LineBreakMode="TailTruncation"
                                                MaxLines="1" />
-                                        <Grid Grid.Row="1"
-                                              IsClippedToBounds="True">
-                                            <Label
-                                                   Text="{Binding StatusText}"
-                                                   Style="{StaticResource AppBodyText}"
-                                                   LineBreakMode="WordWrap"
-                                                   VerticalOptions="Center">
-                                                <Label.Triggers>
-                                                    <DataTrigger TargetType="Label"
-                                                                 Binding="{Binding CanUseStatusAction}"
-                                                                 Value="True">
-                                                        <Setter Property="IsVisible" Value="False" />
-                                                    </DataTrigger>
-                                                </Label.Triggers>
-                                            </Label>
-                                            <Button
-                                                    Text="{Binding StatusText}"
-                                                    Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
-                                                    CommandParameter="{Binding StatusAction}"
-                                                    SemanticProperties.Description="{Binding StatusActionText}"
-                                                    HorizontalOptions="Start"
-                                                    Padding="0"
-                                                    IsVisible="False"
-                                                    StyleClass="TextButton, TouchTarget">
-                                                <Button.Triggers>
-                                                    <DataTrigger TargetType="Button"
-                                                                 Binding="{Binding CanUseStatusAction}"
-                                                                 Value="True">
-                                                        <Setter Property="IsVisible" Value="True" />
-                                                    </DataTrigger>
-                                                </Button.Triggers>
-                                            </Button>
-                                        </Grid>
+                                        <Label Grid.Row="1"
+                                               Text="{Binding StatusText}"
+                                               Style="{StaticResource AppBodyText}"
+                                               LineBreakMode="WordWrap"
+                                               VerticalOptions="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                             Binding="{Binding CanUseStatusAction}"
+                                                             Value="True">
+                                                    <Setter Property="TextColor"
+                                                            Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
                                     </Grid>
 
                                     <Button Grid.Column="2"
@@ -274,7 +270,7 @@
 
                                 <ProgressBar Progress="{Binding ProgressValue}"
                                              IsVisible="{Binding IsProgressDeterminate}"
-                                             Margin="60,0"
+                                             Margin="8,0"
                                              ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
 
                             </VerticalStackLayout>

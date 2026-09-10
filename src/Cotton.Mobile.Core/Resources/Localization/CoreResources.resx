@@ -25,7 +25,7 @@
   <data name="PauseAction" xml:space="preserve"><value>Pause</value></data>
   <data name="ResumeAction" xml:space="preserve"><value>Resume</value></data>
   <data name="CancelAction" xml:space="preserve"><value>Cancel</value></data>
-  <data name="FailureDetailsTitleFormat" xml:space="preserve"><value>Why {0} failed</value></data>
+  <data name="FailureDetailsTitleFormat" xml:space="preserve"><value>Sync details for {0}</value></data>
   <data name="CloseAction" xml:space="preserve"><value>Close</value></data>
   <data name="DeleteSyncMessage" xml:space="preserve"><value>This deletes the sync setup. Files on this device and in Cotton Cloud are not deleted.</value></data>
   <data name="PausedStatus" xml:space="preserve"><value>Paused</value></data>
@@ -64,6 +64,7 @@
   <data name="GigabytesFormat" xml:space="preserve"><value>{0:0.0} GB</value></data>
   <data name="LastSyncSucceededFormat" xml:space="preserve"><value>Last synced {0:g}.</value></data>
   <data name="LastSyncFailedFormat" xml:space="preserve"><value>Last upload failed {0:g}.</value></data>
+  <data name="LastSyncNeedsReviewFormat" xml:space="preserve"><value>Needs review · {0:g}.</value></data>
   <data name="UploadFolderFailedSingular" xml:space="preserve"><value>folder failed</value></data>
   <data name="UploadFolderFailedPlural" xml:space="preserve"><value>folders failed</value></data>
   <data name="SyncFailureAuthenticationRequired" xml:space="preserve"><value>Your account session expired. Sign in again, then retry.</value></data>
@@ -84,7 +85,7 @@
   <data name="ChooseMediaFolders" xml:space="preserve"><value>Choose media folders</value></data>
   <data name="ReconnectLocalFolder" xml:space="preserve"><value>Reconnect local folder</value></data>
   <data name="ReconnectMediaFolders" xml:space="preserve"><value>Reconnect media folders</value></data>
-  <data name="ShowFailureDetails" xml:space="preserve"><value>Show failure details</value></data>
+  <data name="ShowFailureDetails" xml:space="preserve"><value>Show sync details</value></data>
   <data name="ResolvePendingUpload" xml:space="preserve"><value>Resolve pending upload</value></data>
   <data name="ResolvePendingUploadTitleFormat" xml:space="preserve"><value>Resolve pending upload for {0}?</value></data>
   <data name="ResolvePendingUploadMessage" xml:space="preserve"><value>Cotton will abandon incomplete upload attempts and retry the current local files. If an earlier request finishes later, Cotton will preserve the local file and report a cloud conflict.</value></data>

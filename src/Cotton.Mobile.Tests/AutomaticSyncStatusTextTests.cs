@@ -21,6 +21,22 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("failed", text, StringComparison.OrdinalIgnoreCase);
         }
 
+        [Theory]
+        [InlineData(CottonAutomaticSyncFailureKind.ActionRequired)]
+        [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged)]
+        public void ReviewableConflictDoesNotClaimUploadFailed(CottonAutomaticSyncFailureKind failureKind)
+        {
+            CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
+                Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                AttemptTime,
+                failureKind);
+
+            string text = CottonAutomaticSyncStatusText.Create(status);
+
+            Assert.Contains("review", text, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("failed", text, StringComparison.OrdinalIgnoreCase);
+        }
+
         [Fact]
         public void SuccessfulStatusDoesNotContainFailure()
         {

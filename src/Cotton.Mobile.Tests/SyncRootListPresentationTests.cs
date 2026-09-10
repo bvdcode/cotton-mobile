@@ -121,7 +121,7 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.CanShowFailureDetails);
             Assert.True(item.IsAttentionVisible);
             Assert.Contains("connection", item.FailureDetails, StringComparison.OrdinalIgnoreCase);
-            Assert.Equal("Show failure details", item.StatusActionText);
+            Assert.Equal("Show sync details", item.StatusActionText);
         }
 
         [Fact]

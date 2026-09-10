@@ -22,6 +22,7 @@ SCENARIOS = (
     "source-media",
     "storage-full",
     "destination-missing",
+    "review-required",
 )
 FAILURE_MESSAGES = {
     "storage-full": (
@@ -33,6 +34,11 @@ FAILURE_MESSAGES = {
         "your access in Cotton Cloud. If the destination folder was deleted, restore "
         "it or remove this sync setup and add it again with another cloud folder. "
         "Removing a sync setup keeps your local files."
+    ),
+    "review-required": (
+        "A previously uploaded file changed or was renamed. Cotton uploads new files "
+        "only. The cloud copy and local original are kept. To back up edited content, "
+        "save it as a new file."
     ),
 }
 OFFLINE_MESSAGES = {
@@ -154,23 +160,79 @@ def assert_message(hierarchy: ET.Element, expected: str) -> None:
         )
 
 
+def bounds(node: ET.Element) -> tuple[int, int, int, int]:
+    """Parse one accessibility node's screen bounds."""
+    values = list(map(int, re.findall(r"\d+", node.attrib["bounds"])))
+    if len(values) != 4:
+        raise AssertionError(
+            f"Unexpected accessibility bounds: {node.attrib['bounds']}"
+        )
+    return values[0], values[1], values[2], values[3]
+
+
+def assert_dashboard_layout(hierarchy: ET.Element, scenario: str) -> None:
+    """Require stable text geometry and a card-width progress indicator."""
+    nodes = list(hierarchy.iter("node"))
+    if scenario == "running":
+        progress = [
+            node for node in nodes if node.get("class") == "android.widget.ProgressBar"
+        ]
+        if len(progress) != 1:
+            raise AssertionError("The running upload progress indicator is missing.")
+        parents = {child: parent for parent in hierarchy.iter() for child in parent}
+        container = parents[progress[0]]
+        while container.get("class") != "androidx.recyclerview.widget.RecyclerView":
+            container = parents[container]
+        progress_left, _, progress_right, _ = bounds(progress[0])
+        container_left, _, container_right, _ = bounds(container)
+        if progress_right - progress_left < (container_right - container_left) * 0.8:
+            raise AssertionError(
+                "The running upload progress indicator does not span the card."
+            )
+
+    if scenario in FAILURE_MESSAGES:
+        status_prefix = (
+            "Needs review" if scenario == "review-required" else "Last upload failed"
+        )
+        statuses = [
+            node for node in nodes if node.get("text", "").startswith(status_prefix)
+        ]
+        titles = [
+            node for node in nodes if node.get("text", "").startswith("Camera backups")
+        ]
+        if len(statuses) != 1 or len(titles) != 1:
+            raise AssertionError("The upload card title or status is missing.")
+        if statuses[0].get("class") != "android.widget.TextView":
+            raise AssertionError(
+                "The upload status uses a control with different text geometry."
+            )
+        title_left, _, _, title_bottom = bounds(titles[0])
+        status_left, status_top, _, _ = bounds(statuses[0])
+        if title_left != status_left or status_top < title_bottom:
+            raise AssertionError("The upload card title and status are misaligned.")
+
+
 def capture_failure(
     emulator: Emulator, directory: Path, name: str, scenario: str, hierarchy: ET.Element
 ) -> None:
-    """Open the actual failure action and verify its complete explanation."""
-    buttons = [
+    """Open the status action and verify its complete explanation."""
+    status_prefix = (
+        "Needs review" if scenario == "review-required" else "Last upload failed"
+    )
+    actions = [
         node
         for node in hierarchy.iter("node")
-        if node.get("text", "").startswith("Last upload failed")
+        if node.get("text", "").startswith(status_prefix)
         and node.get("enabled") == "true"
     ]
-    if len(buttons) != 1:
-        raise AssertionError("The failed upload details action is missing.")
-    left, top, right, bottom = map(int, re.findall(r"\d+", buttons[0].attrib["bounds"]))
+    if len(actions) != 1:
+        raise AssertionError("The upload status details action is missing.")
+    left, top, right, bottom = map(int, re.findall(r"\d+", actions[0].attrib["bounds"]))
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
     dialog = capture(emulator, directory, f"{name}-details")
+    assert_message(dialog, "Sync details for Camera backups")
     assert_message(dialog, FAILURE_MESSAGES[scenario])
     close = [node for node in dialog.iter("node") if node.get("text") == "Close"]
     if len(close) != 1 or close[0].get("enabled") != "true":
@@ -259,6 +321,7 @@ def run_checks(
                 hierarchy = capture(emulator, directory, name)
                 if scenario in OFFLINE_MESSAGES:
                     assert_message(hierarchy, OFFLINE_MESSAGES[scenario])
+                assert_dashboard_layout(hierarchy, scenario)
                 if scenario == "running":
                     pause_buttons = [
                         node

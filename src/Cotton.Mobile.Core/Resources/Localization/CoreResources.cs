@@ -72,6 +72,7 @@ namespace Cotton.Mobile.Resources.Localization
         public static string GigabytesFormat => GetString(nameof(GigabytesFormat));
         public static string LastSyncSucceededFormat => GetString(nameof(LastSyncSucceededFormat));
         public static string LastSyncFailedFormat => GetString(nameof(LastSyncFailedFormat));
+        public static string LastSyncNeedsReviewFormat => GetString(nameof(LastSyncNeedsReviewFormat));
         public static string SyncFailureAuthenticationRequired => GetString(nameof(SyncFailureAuthenticationRequired));
         public static string SyncFailureNetworkUnavailable => GetString(nameof(SyncFailureNetworkUnavailable));
         public static string SyncFailureLocalAccessUnavailable => GetString(nameof(SyncFailureLocalAccessUnavailable));

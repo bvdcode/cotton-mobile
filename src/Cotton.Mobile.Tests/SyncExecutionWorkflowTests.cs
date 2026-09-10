@@ -94,7 +94,11 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData(CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged, CottonAutomaticSyncFailureKind.ActionRequired, true)]
+        [InlineData(CottonDeviceToCloudSyncActionKind.RemotePathConflict, CottonAutomaticSyncFailureKind.RemotePathConflict, false)]
+        [InlineData(CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision, CottonAutomaticSyncFailureKind.RemoteRevisionChanged, false)]
+        [InlineData(CottonDeviceToCloudSyncActionKind.BlockedLocalItemName, CottonAutomaticSyncFailureKind.InvalidLocalItemName, false)]
+        [InlineData(CottonDeviceToCloudSyncActionKind.BlockedLocalSource, CottonAutomaticSyncFailureKind.LocalSourceUnavailable, false)]
+        [InlineData(CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged, CottonAutomaticSyncFailureKind.PendingUploadChanged, true)]
         [InlineData(CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged, CottonAutomaticSyncFailureKind.UploadedFileChanged, false)]
         public async Task ManualBlockedUploadRequiresCorrectAction(
             CottonDeviceToCloudSyncActionKind action,

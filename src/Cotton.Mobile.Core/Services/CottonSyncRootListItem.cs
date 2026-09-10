@@ -89,7 +89,7 @@ namespace Cotton.Mobile.Services
         public CottonSyncRootActionRequest FailureDetailsAction { get; }
 
         public bool CanResolvePendingUpload =>
-            _failureKind == CottonAutomaticSyncFailureKind.ActionRequired && !IsRunning;
+            _failureKind == CottonAutomaticSyncFailureKind.PendingUploadChanged && !IsRunning;
 
         public CottonSyncRootActionRequest ResolvePendingUploadAction { get; }
 

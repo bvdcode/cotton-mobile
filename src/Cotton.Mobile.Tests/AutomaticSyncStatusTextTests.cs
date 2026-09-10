@@ -24,6 +24,11 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(CottonAutomaticSyncFailureKind.ActionRequired)]
         [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged)]
+        [InlineData(CottonAutomaticSyncFailureKind.PendingUploadChanged)]
+        [InlineData(CottonAutomaticSyncFailureKind.RemotePathConflict)]
+        [InlineData(CottonAutomaticSyncFailureKind.RemoteRevisionChanged)]
+        [InlineData(CottonAutomaticSyncFailureKind.InvalidLocalItemName)]
+        [InlineData(CottonAutomaticSyncFailureKind.LocalSourceUnavailable)]
         public void ReviewableConflictDoesNotClaimUploadFailed(CottonAutomaticSyncFailureKind failureKind)
         {
             CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(

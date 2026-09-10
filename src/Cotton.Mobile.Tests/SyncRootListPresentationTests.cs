@@ -125,18 +125,39 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void ActionRequiredRootOffersPendingUploadRecovery()
+        public void ChangedPendingUploadOffersPendingUploadRecovery()
         {
             CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
                 root.Id,
                 new DateTime(2026, 8, 16, 12, 0, 0, DateTimeKind.Utc),
-                CottonAutomaticSyncFailureKind.ActionRequired);
+                CottonAutomaticSyncFailureKind.PendingUploadChanged);
             CottonSyncRootListItem item = new(root, automaticStatus: status);
 
             Assert.True(item.CanResolvePendingUpload);
             Assert.Equal(CottonSyncRootAction.ResolvePendingUpload, item.StatusAction?.Action);
             Assert.Equal("Resolve pending upload", item.StatusActionText);
+        }
+
+        [Theory]
+        [InlineData(CottonAutomaticSyncFailureKind.ActionRequired)]
+        [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged)]
+        [InlineData(CottonAutomaticSyncFailureKind.RemotePathConflict)]
+        [InlineData(CottonAutomaticSyncFailureKind.RemoteRevisionChanged)]
+        [InlineData(CottonAutomaticSyncFailureKind.InvalidLocalItemName)]
+        [InlineData(CottonAutomaticSyncFailureKind.LocalSourceUnavailable)]
+        public void OtherReviewableFailuresOnlyOfferDetails(CottonAutomaticSyncFailureKind failureKind)
+        {
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
+            CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
+                root.Id,
+                new DateTime(2026, 8, 16, 12, 0, 0, DateTimeKind.Utc),
+                failureKind);
+            CottonSyncRootListItem item = new(root, automaticStatus: status);
+
+            Assert.False(item.CanResolvePendingUpload);
+            Assert.Equal(CottonSyncRootAction.ShowFailureDetails, item.StatusAction?.Action);
+            Assert.Equal("Show sync details", item.StatusActionText);
         }
 
         [Fact]

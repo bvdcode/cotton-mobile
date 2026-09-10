@@ -31,7 +31,12 @@ namespace Cotton.Mobile.Services
             return failureKind switch
             {
                 CottonAutomaticSyncFailureKind.ActionRequired or
-                CottonAutomaticSyncFailureKind.UploadedFileChanged =>
+                CottonAutomaticSyncFailureKind.UploadedFileChanged or
+                CottonAutomaticSyncFailureKind.PendingUploadChanged or
+                CottonAutomaticSyncFailureKind.RemotePathConflict or
+                CottonAutomaticSyncFailureKind.RemoteRevisionChanged or
+                CottonAutomaticSyncFailureKind.InvalidLocalItemName or
+                CottonAutomaticSyncFailureKind.LocalSourceUnavailable =>
                     CoreResources.Format(CoreResources.LastSyncNeedsReviewFormat, completedAt),
                 CottonAutomaticSyncFailureKind.AuthenticationRequired or
                 CottonAutomaticSyncFailureKind.NetworkUnavailable or

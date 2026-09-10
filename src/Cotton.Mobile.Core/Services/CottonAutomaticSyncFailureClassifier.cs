@@ -16,13 +16,52 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("The run has no blocked items.", nameof(summary));
             }
 
-            if (summary.RootResults.Any(result => result.Plan?.Items.Any(
-                item => item.Action == CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged) == true))
+            CottonDeviceToCloudSyncPlanSnapshot[] plans =
+                [.. summary.RootResults.Select(result => result.Plan).OfType<CottonDeviceToCloudSyncPlanSnapshot>()];
+            CottonDeviceToCloudSyncPlanItem[] blockedItems =
+                [.. plans.SelectMany(plan => plan.Items).Where(item => item.IsBlocked)];
+            bool hasUnclassifiedBlocker = summary.RootResults.Any(result =>
+                result.ExecutionResult is not null
+                && result.ExecutionResult.BlockedCount > (result.Plan?.BlockedCount ?? 0));
+            if (hasUnclassifiedBlocker || blockedItems.Length == 0)
             {
-                return CottonAutomaticSyncFailureKind.UploadedFileChanged;
+                return CottonAutomaticSyncFailureKind.ActionRequired;
             }
 
-            return CottonAutomaticSyncFailureKind.ActionRequired;
+            CottonDeviceToCloudSyncActionKind[] actions = [.. blockedItems.Select(item => item.Action).Distinct()];
+            if (actions.Length != 1)
+            {
+                return CottonAutomaticSyncFailureKind.ActionRequired;
+            }
+
+            return actions[0] switch
+            {
+                CottonDeviceToCloudSyncActionKind.RemotePathConflict =>
+                    CottonAutomaticSyncFailureKind.RemotePathConflict,
+                CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision =>
+                    CottonAutomaticSyncFailureKind.RemoteRevisionChanged,
+                CottonDeviceToCloudSyncActionKind.BlockedLocalItemName =>
+                    CottonAutomaticSyncFailureKind.InvalidLocalItemName,
+                CottonDeviceToCloudSyncActionKind.BlockedLocalSource =>
+                    CottonAutomaticSyncFailureKind.LocalSourceUnavailable,
+                CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged =>
+                    CottonAutomaticSyncFailureKind.PendingUploadChanged,
+                CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged =>
+                    CottonAutomaticSyncFailureKind.UploadedFileChanged,
+                CottonDeviceToCloudSyncActionKind.CreateRemoteFolder or
+                CottonDeviceToCloudSyncActionKind.UploadNewFile or
+                CottonDeviceToCloudSyncActionKind.ConfirmPendingUpload or
+                CottonDeviceToCloudSyncActionKind.DeleteUploadedLocalFile or
+                CottonDeviceToCloudSyncActionKind.KeepExistingFile or
+                CottonDeviceToCloudSyncActionKind.KeepExistingFolder => throw new ArgumentOutOfRangeException(
+                    nameof(summary),
+                    actions[0],
+                    "A non-blocking action cannot classify a blocked sync."),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(summary),
+                    actions[0],
+                    "Device-to-cloud sync action is not supported."),
+            };
         }
 
         public static CottonAutomaticSyncFailureKind Classify(Exception exception)

@@ -185,12 +185,12 @@ namespace Cotton.Mobile.Tests
             Assert.Empty(result.SucceededRootIds);
             CottonAutomaticSyncFailure failure = Assert.Single(result.Failures);
             Assert.Equal(root.Id, failure.RootId);
-            Assert.Equal(CottonAutomaticSyncFailureKind.ActionRequired, failure.Kind);
+            Assert.Equal(CottonAutomaticSyncFailureKind.PendingUploadChanged, failure.Kind);
             Assert.Empty(result.RetryableRootIds);
             IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
                 await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri, TestContext.Current.CancellationToken);
             Assert.Equal(CottonAutomaticSyncOutcome.Failed, statuses[root.Id].Outcome);
-            Assert.Equal(CottonAutomaticSyncFailureKind.ActionRequired, statuses[root.Id].FailureKind);
+            Assert.Equal(CottonAutomaticSyncFailureKind.PendingUploadChanged, statuses[root.Id].FailureKind);
         }
 
         public void Dispose()

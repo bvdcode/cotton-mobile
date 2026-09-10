@@ -35,6 +35,16 @@ namespace Cotton.Mobile.Services
                     CoreResources.SyncFailureRemoteContentUnavailable,
                 CottonAutomaticSyncFailureKind.InsufficientStorage =>
                     CoreResources.SyncFailureInsufficientStorage,
+                CottonAutomaticSyncFailureKind.PendingUploadChanged =>
+                    CoreResources.SyncFailurePendingUploadChanged,
+                CottonAutomaticSyncFailureKind.RemotePathConflict =>
+                    CoreResources.SyncFailureRemotePathConflict,
+                CottonAutomaticSyncFailureKind.RemoteRevisionChanged =>
+                    CoreResources.SyncFailureRemoteRevisionChanged,
+                CottonAutomaticSyncFailureKind.InvalidLocalItemName =>
+                    CoreResources.SyncFailureInvalidLocalItemName,
+                CottonAutomaticSyncFailureKind.LocalSourceUnavailable =>
+                    CoreResources.SyncFailureLocalSourceUnavailable,
                 CottonAutomaticSyncFailureKind.Unexpected =>
                     CoreResources.SyncFailureUnexpected,
                 CottonAutomaticSyncFailureKind.None => throw new ArgumentOutOfRangeException(

@@ -21,6 +21,11 @@ namespace Cotton.Mobile.Services
                 CottonAutomaticSyncFailureKind.UploadedFileChanged => false,
                 CottonAutomaticSyncFailureKind.RemoteContentUnavailable => false,
                 CottonAutomaticSyncFailureKind.InsufficientStorage => false,
+                CottonAutomaticSyncFailureKind.PendingUploadChanged => false,
+                CottonAutomaticSyncFailureKind.RemotePathConflict => false,
+                CottonAutomaticSyncFailureKind.RemoteRevisionChanged => false,
+                CottonAutomaticSyncFailureKind.InvalidLocalItemName => false,
+                CottonAutomaticSyncFailureKind.LocalSourceUnavailable => false,
                 CottonAutomaticSyncFailureKind.Unexpected => false,
                 CottonAutomaticSyncFailureKind.None => false,
                 _ => throw new ArgumentOutOfRangeException(

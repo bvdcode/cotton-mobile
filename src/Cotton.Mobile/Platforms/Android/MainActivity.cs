@@ -13,6 +13,7 @@ using AndroidX.Activity.Result.Contract;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.ApplicationModel;
+using AndroidIntentFilter = Android.App.IntentFilterAttribute;
 
 namespace Cotton.Mobile.Platforms.Android
 {
@@ -29,6 +30,11 @@ namespace Cotton.Mobile.Platforms.Android
             | ConfigChanges.ScreenLayout
             | ConfigChanges.SmallestScreenSize
             | ConfigChanges.Density)]
+    [AndroidIntentFilter(
+        [Intent.ActionView],
+        Categories = [Intent.CategoryDefault, Intent.CategoryBrowsable],
+        DataScheme = CottonAuthorizationReturn.Scheme,
+        DataHost = CottonAuthorizationReturn.Host)]
     public class MainActivity : MauiAppCompatActivity
     {
         private const int DocumentTreeBridgeAttemptCount = 20;

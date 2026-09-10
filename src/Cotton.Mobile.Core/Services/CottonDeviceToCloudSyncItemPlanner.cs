@@ -44,7 +44,7 @@ namespace Cotton.Mobile.Services
                 return CreatePendingConfirmationItem(receipt, uploadedRemote);
             }
 
-            if (!receipt.MatchesLocalVersion(localFile)
+            if (!receipt.MatchesLocalContent(localFile)
                 || !string.Equals(receipt.RelativePath, localFile.RelativePath, StringComparison.Ordinal))
             {
                 if (receipt.IsUploaded && receipt.ContentHash is not null)
@@ -66,11 +66,13 @@ namespace Cotton.Mobile.Services
 
             if (_index.RemoteByPath.TryGetValue(
                 receipt.RelativePath,
-                out CottonDeviceToCloudRemoteItemSnapshot? pendingConflict))
+                out CottonDeviceToCloudRemoteItemSnapshot? pendingRemote))
             {
-                return CottonDeviceToCloudSyncPlanItemFactory.CreateReceiptConflict(
-                    receipt,
-                    pendingConflict);
+                return MatchesReceiptContent(receipt, pendingRemote.Entry)
+                    ? CreatePendingConfirmationItem(receipt, pendingRemote)
+                    : CottonDeviceToCloudSyncPlanItemFactory.CreateReceiptConflict(
+                        receipt,
+                        pendingRemote);
             }
 
             return CottonDeviceToCloudSyncPlanItemFactory.CreateReceipt(
@@ -119,9 +121,7 @@ namespace Cotton.Mobile.Services
                 return CottonDeviceToCloudSyncPlanItemFactory.CreateReceiptConflict(receipt, remoteItem);
             }
 
-            if ((receipt.SizeBytes.HasValue && remoteItem.Entry.SizeBytes != receipt.SizeBytes)
-                || receipt.ContentHash is null
-                || !string.Equals(remoteItem.Entry.ContentHash, receipt.ContentHash, StringComparison.Ordinal))
+            if (!MatchesReceiptContent(receipt, remoteItem.Entry))
             {
                 return CottonDeviceToCloudSyncPlanItemFactory.CreateReceipt(
                     CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision,
@@ -144,6 +144,16 @@ namespace Cotton.Mobile.Services
                 receipt,
                 remoteItem.Entry.Id,
                 remoteItem.Entry.ETag);
+        }
+
+        private static bool MatchesReceiptContent(
+            CottonUploadReceiptSnapshot receipt,
+            CottonFileBrowserEntry remoteFile)
+        {
+            return remoteFile.Type == CottonFileBrowserEntryType.File
+                && (!receipt.SizeBytes.HasValue || remoteFile.SizeBytes == receipt.SizeBytes)
+                && receipt.ContentHash is not null
+                && string.Equals(remoteFile.ContentHash, receipt.ContentHash, StringComparison.Ordinal);
         }
 
         private CottonDeviceToCloudSyncPlanItem CreateUploadedReceiptItem(

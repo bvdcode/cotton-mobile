@@ -178,6 +178,7 @@ namespace Cotton.Mobile.Services
                 CottonSyncDiagnosticLog.ReceiptsLoaded(_logger, root.Id, uploadReceipts.Count);
                 CottonDeviceToCloudSyncPlanSnapshot plan =
                     CottonDeviceToCloudSyncPlanner.Create(root, localContent, remoteContent, uploadReceipts);
+                LogRemotePathConflicts(root.Id, plan, remoteContent);
                 CottonSyncDiagnosticLog.PlanCreated(
                     _logger,
                     root.Id,
@@ -205,6 +206,34 @@ namespace Cotton.Mobile.Services
             finally
             {
                 _progressHub.Complete(root.Id);
+            }
+        }
+
+        private void LogRemotePathConflicts(
+            Guid rootId,
+            CottonDeviceToCloudSyncPlanSnapshot plan,
+            CottonDeviceToCloudRemoteContentSnapshot remoteContent)
+        {
+            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> remoteByPath = remoteContent.Items
+                .ToDictionary(item => item.RelativePath, StringComparer.OrdinalIgnoreCase);
+            foreach (CottonDeviceToCloudSyncPlanItem item in plan.Items.Where(item =>
+                item.Action == CottonDeviceToCloudSyncActionKind.RemotePathConflict))
+            {
+                remoteByPath.TryGetValue(
+                    item.RelativePath,
+                    out CottonDeviceToCloudRemoteItemSnapshot? remoteItem);
+                CottonSyncDiagnosticLog.RemotePathConflict(
+                    _logger,
+                    rootId,
+                    remoteItem?.Entry.Id ?? item.CloudItemId,
+                    remoteItem?.Entry.Type,
+                    item.SizeBytes == remoteItem?.Entry.SizeBytes,
+                    item.ContentHash is not null,
+                    remoteItem?.Entry.ContentHash is not null,
+                    string.Equals(
+                        item.ContentHash,
+                        remoteItem?.Entry.ContentHash,
+                        StringComparison.Ordinal));
             }
         }
     }

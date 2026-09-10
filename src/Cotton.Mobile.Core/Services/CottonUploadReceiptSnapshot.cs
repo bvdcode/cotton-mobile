@@ -232,11 +232,10 @@ namespace Cotton.Mobile.Services
             return string.Equals(LocalSourceId, localItem.LocalSourceId, StringComparison.Ordinal);
         }
 
-        public bool MatchesLocalVersion(CottonDeviceToCloudLocalItemSnapshot localItem)
+        public bool MatchesLocalContent(CottonDeviceToCloudLocalItemSnapshot localItem)
         {
             return MatchesLocalSource(localItem)
                 && SizeBytes == localItem.SizeBytes
-                && LocalUpdatedAtUtc == localItem.LocalUpdatedAtUtc
                 && ContentHash is not null
                 && localItem.ContentHash is not null
                 && string.Equals(ContentHash, localItem.ContentHash, StringComparison.Ordinal);

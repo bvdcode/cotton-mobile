@@ -83,6 +83,17 @@ namespace Cotton.Mobile.Services
             int blockedCount,
             int noOpCount);
 
+        [LoggerMessage(EventId = 2126, Level = LogLevel.Warning, Message = "Sync root {RootId} path conflict with cloud item {CloudItemId}: remote type {RemoteItemType}; size match {SizeMatches}; local hash present {LocalHashPresent}; cloud hash present {RemoteHashPresent}; hash match {ContentHashMatches}.")]
+        public static partial void RemotePathConflict(
+            ILogger logger,
+            Guid rootId,
+            Guid? cloudItemId,
+            CottonFileBrowserEntryType? remoteItemType,
+            bool sizeMatches,
+            bool localHashPresent,
+            bool remoteHashPresent,
+            bool contentHashMatches);
+
         [LoggerMessage(EventId = 2130, Level = LogLevel.Information, Message = "Sync root {RootId} upload {UploadNumber} started with {SizeBytes} bytes.")]
         public static partial void UploadStarted(
             ILogger logger,

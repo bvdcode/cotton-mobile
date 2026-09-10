@@ -110,7 +110,11 @@ namespace Cotton.Mobile.Platforms.Android
                     ShowRoot(state, CottonAutomaticSyncFailureKind.RemotePathConflict);
                     break;
                 case "pending-upload-changed":
-                    ShowRoot(state, CottonAutomaticSyncFailureKind.PendingUploadChanged);
+                    CottonSyncRootSnapshot root = ShowRoot(
+                        state,
+                        CottonAutomaticSyncFailureKind.PendingUploadChanged);
+                    await services.GetRequiredService<ICottonSyncRootStore>()
+                        .AddOrReplaceAsync(InstanceUri, root);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(scenario), scenario, "UI scenario is not supported.");
@@ -135,7 +139,7 @@ namespace Cotton.Mobile.Platforms.Android
             await navigation.PushModalAsync(new SyncRootSetupOptionsPage(source), animated: false);
         }
 
-        private static void ShowRoot(
+        private static CottonSyncRootSnapshot ShowRoot(
             ISyncSettingsViewState state,
             CottonAutomaticSyncFailureKind? failureKind = null)
         {
@@ -153,6 +157,7 @@ namespace Cotton.Mobile.Platforms.Android
             }
 
             state.ShowRoots(new SyncRootCollectionSnapshot([root], new HashSet<Guid>(), statuses));
+            return root;
         }
 
         private static void EnsureOffline(IServiceProvider services)

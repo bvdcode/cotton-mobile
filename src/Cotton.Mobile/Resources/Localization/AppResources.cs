@@ -39,6 +39,7 @@ namespace Cotton.Mobile.Resources.Localization
         public static string BackgroundSyncRestrictedMessage => GetString(nameof(BackgroundSyncRestrictedMessage));
         public static string BackgroundSyncSettingsText => GetString(nameof(BackgroundSyncSettingsText));
         public static string OpenBackgroundSyncSettingsDescription => GetString(nameof(OpenBackgroundSyncSettingsDescription));
+        public static string SyncSignInRequired => GetString(nameof(SyncSignInRequired));
         public static string SyncTitle => GetString(nameof(SyncTitle));
         public static string NoSyncFoldersTitle => GetString(nameof(NoSyncFoldersTitle));
         public static string NoSyncFoldersBody => GetString(nameof(NoSyncFoldersBody));

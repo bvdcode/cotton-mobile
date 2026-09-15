@@ -4,7 +4,6 @@
 using System.Buffers.Binary;
 using Android.App;
 using Android.Content;
-using Android.OS;
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Sdk.Notifications;
@@ -49,7 +48,7 @@ namespace Cotton.Mobile.Platforms.Android
                     deliveryPlan.UnreadCount - 1);
                 manager.Notify(
                     AndroidNotificationConstants.SummaryNotificationId,
-                    BuildNotification(
+                    AndroidNotificationBuilder.Build(
                         context,
                         AndroidNotificationConstants.SummaryNotificationId,
                         AppResources.AppTitle,
@@ -63,7 +62,7 @@ namespace Cotton.Mobile.Platforms.Android
                 int notificationId = CreateNotificationId(notification.Id);
                 manager.Notify(
                     notificationId,
-                    BuildNotification(
+                    AndroidNotificationBuilder.Build(
                         context,
                         notificationId,
                         notification.Title,
@@ -74,70 +73,11 @@ namespace Cotton.Mobile.Platforms.Android
             return CottonLocalNotificationDeliveryStatus.Delivered;
         }
 
-        private static Notification BuildNotification(
-            Context context,
-            int notificationId,
-            string title,
-            string? message,
-            CottonNotificationPriority priority)
-        {
-            string channelId = ResolveChannelId(priority);
-            Notification.Builder builder = new(context, channelId);
-
-            builder
-                .SetContentTitle(title)
-                .SetSmallIcon(Resource.Drawable.ic_stat_cotton_cloud)
-                .SetColor(context.GetColor(Resource.Color.cotton_accent))
-                .SetAutoCancel(true)
-                .SetShowWhen(true)
-                .SetGroup(AndroidNotificationConstants.GroupKey)
-                .SetCategory(Notification.CategoryMessage);
-
-            if (!string.IsNullOrWhiteSpace(message))
-            {
-                builder.SetContentText(message);
-                builder.SetStyle(new Notification.BigTextStyle().BigText(message));
-            }
-
-            PendingIntent? launchIntent = CreateLaunchIntent(context, notificationId);
-            if (launchIntent is not null)
-            {
-                builder.SetContentIntent(launchIntent);
-            }
-
-            return builder.Build();
-        }
-
-        private static PendingIntent? CreateLaunchIntent(Context context, int notificationId)
-        {
-            Intent? launchIntent = context.PackageManager?.GetLaunchIntentForPackage(
-                context.PackageName ?? string.Empty);
-            if (launchIntent is null)
-            {
-                return null;
-            }
-
-            PendingIntentFlags flags = PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable;
-
-            return PendingIntent.GetActivity(context, notificationId, launchIntent, flags);
-        }
-
         private static int CreateNotificationId(Guid notificationId)
         {
             int value = BinaryPrimitives.ReadInt32LittleEndian(notificationId.ToByteArray()) & int.MaxValue;
             return value == 0 ? 1 : value;
         }
 
-        private static string ResolveChannelId(CottonNotificationPriority priority)
-        {
-            return priority switch
-            {
-                CottonNotificationPriority.None => AndroidNotificationConstants.GeneralChannelId,
-                CottonNotificationPriority.Low => AndroidNotificationConstants.GeneralChannelId,
-                CottonNotificationPriority.Medium => AndroidNotificationConstants.GeneralChannelId,
-                CottonNotificationPriority.High => AndroidNotificationConstants.SecurityChannelId,
-                _ => throw new ArgumentOutOfRangeException(nameof(priority), priority, "Unknown notification priority."),
-            };
-        }
     }
 }

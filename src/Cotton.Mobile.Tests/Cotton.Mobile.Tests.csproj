@@ -21,4 +21,17 @@
 		<ProjectReference Include="..\Cotton.Mobile.Core\Cotton.Mobile.Core.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Compile Include="..\Cotton.Mobile\Services\CottonSessionService.cs" Link="Services\CottonSessionService.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\ICottonSessionService.cs" Link="Services\ICottonSessionService.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\CottonSessionResult.cs" Link="Services\CottonSessionResult.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\CottonSessionResultStatus.cs" Link="Services\CottonSessionResultStatus.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\CottonSessionDiagnosticLog.cs" Link="Services\CottonSessionDiagnosticLog.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\ICottonInstanceStore.cs" Link="Services\ICottonInstanceStore.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\ICottonPendingAppCodeSessionStore.cs" Link="Services\ICottonPendingAppCodeSessionStore.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\CottonPendingAppCodeSession.cs" Link="Services\CottonPendingAppCodeSession.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\ICottonAppCodeAuthorizationService.cs" Link="Services\ICottonAppCodeAuthorizationService.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\ICottonSessionNotificationService.cs" Link="Services\ICottonSessionNotificationService.cs" />
+	</ItemGroup>
+
 </Project>

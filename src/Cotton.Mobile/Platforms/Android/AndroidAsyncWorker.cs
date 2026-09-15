@@ -49,6 +49,12 @@ namespace Cotton.Mobile.Platforms.Android
 
         public override void OnStopped()
         {
+            ILogger? logger = GetLogger();
+            if (logger is not null)
+            {
+                AndroidAutomaticSyncDiagnosticLog.WorkerStopped(logger, StopReason, RunAttemptCount);
+            }
+
             _stoppingSource.Cancel();
             base.OnStopped();
         }
@@ -88,12 +94,20 @@ namespace Cotton.Mobile.Platforms.Android
             }
             catch (OperationCanceledException) when (_stoppingSource.IsCancellationRequested)
             {
-                result = RetryOrFailure();
+                result = Retry();
             }
             catch (Exception exception)
             {
                 LogFailure(exception);
-                result = RetryOrFailure();
+                CottonAutomaticSyncFailureKind failureKind = CottonAutomaticSyncFailureClassifier.Classify(exception);
+                if (CottonAutomaticSyncRetryPolicy.IsRetryable(failureKind))
+                {
+                    result = Retry();
+                }
+                else
+                {
+                    result = RetryOrFailure();
+                }
             }
 
             _ = completer.Set(result);
@@ -101,16 +115,20 @@ namespace Cotton.Mobile.Platforms.Android
 
         private void LogFailure(Exception exception)
         {
-            IServiceProvider? services = IPlatformApplication.Current?.Services;
-            ILoggerFactory? loggerFactory = services?.GetService<ILoggerFactory>();
-            if (loggerFactory is not null)
+            ILogger? logger = GetLogger();
+            if (logger is not null)
             {
-                ILogger logger = loggerFactory.CreateLogger(GetType().FullName ?? GetType().Name);
                 CottonLog.Warning(logger, FailureMessage, exception);
                 return;
             }
 
             _ = Log.Warn(LogTag, exception.ToString());
+        }
+
+        private ILogger? GetLogger()
+        {
+            return IPlatformApplication.Current?.Services.GetService<ILoggerFactory>()
+                ?.CreateLogger(GetType().FullName ?? GetType().Name);
         }
     }
 }

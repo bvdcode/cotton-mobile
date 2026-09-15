@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Net;
 using Cotton.Auth;
 using Cotton.Sdk;
 using Cotton.Sdk.Auth;
@@ -18,6 +17,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonPendingAppCodeSessionStore _pendingSessionStore;
         private readonly ICottonNotificationCursorStore _notificationCursorStore;
         private readonly ICottonAppCodeAuthorizationService _appCodeAuthorization;
+        private readonly ICottonSessionNotificationService _sessionNotifications;
         private readonly ILogger<CottonSessionService> _logger;
 
         public CottonSessionService(
@@ -28,6 +28,7 @@ namespace Cotton.Mobile.Services
             ICottonPendingAppCodeSessionStore pendingSessionStore,
             ICottonNotificationCursorStore notificationCursorStore,
             ICottonAppCodeAuthorizationService appCodeAuthorization,
+            ICottonSessionNotificationService sessionNotifications,
             ILogger<CottonSessionService> logger)
         {
             ArgumentNullException.ThrowIfNull(clientFactory);
@@ -37,6 +38,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(pendingSessionStore);
             ArgumentNullException.ThrowIfNull(notificationCursorStore);
             ArgumentNullException.ThrowIfNull(appCodeAuthorization);
+            ArgumentNullException.ThrowIfNull(sessionNotifications);
             ArgumentNullException.ThrowIfNull(logger);
 
             _clientFactory = clientFactory;
@@ -46,6 +48,7 @@ namespace Cotton.Mobile.Services
             _pendingSessionStore = pendingSessionStore;
             _notificationCursorStore = notificationCursorStore;
             _appCodeAuthorization = appCodeAuthorization;
+            _sessionNotifications = sessionNotifications;
             _logger = logger;
         }
 
@@ -88,12 +91,13 @@ namespace Cotton.Mobile.Services
                     .ValidateAsync(instanceUri, cancellationToken)
                     .ConfigureAwait(false);
                 CottonSessionDiagnosticLog.ProfileValidated(_logger);
+                _sessionNotifications.ClearSignInRequired();
                 await _appCodeAuthorization
                     .ClearPendingBestEffortAsync("session restore")
                     .ConfigureAwait(false);
                 return CottonSessionResult.Authenticated(instanceUri, user);
             }
-            catch (CottonApiException exception) when (IsAuthorizationFailure(exception))
+            catch (CottonTokenRefreshException exception) when (CottonRefreshTokenRejection.IsConfirmed(exception, _logger))
             {
                 CottonSessionDiagnosticLog.RestoreRejected(_logger, (int)exception.StatusCode.GetValueOrDefault());
                 await ClearRejectedAuthenticationBestEffortAsync(cancellationToken).ConfigureAwait(false);
@@ -130,7 +134,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Cotton mobile remote logout failed; clearing local session.", exception);
+                CottonSessionDiagnosticLog.RemoteLogoutFailed(_logger, exception);
             }
             finally
             {
@@ -140,6 +144,7 @@ namespace Cotton.Mobile.Services
 
         public async Task ClearLocalSessionAsync(CancellationToken cancellationToken = default)
         {
+            _sessionNotifications.ClearSignInRequired();
             List<Exception> failures = [];
             await TryClearLocalSessionAreaAsync(
                 _tokenStore.ClearAsync,
@@ -206,20 +211,9 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.WarningWithContext(
-                    _logger,
-                    "Failed to clear a Cotton mobile session area.",
-                    sessionAreaName,
-                    exception);
+                CottonSessionDiagnosticLog.SessionAreaClearFailed(_logger, sessionAreaName, exception);
                 failures.Add(exception);
             }
-        }
-
-        private static bool IsAuthorizationFailure(CottonApiException exception)
-        {
-            return exception.StatusCode is HttpStatusCode.Unauthorized
-                or HttpStatusCode.Forbidden
-                or HttpStatusCode.NotFound;
         }
     }
 }

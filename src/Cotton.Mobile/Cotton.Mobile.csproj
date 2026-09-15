@@ -61,7 +61,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(CottonUiTests)' == 'true' and '$(Configuration)' == 'Debug'">
-		<Compile Include="..\..\scripts\mobile\ui-tests\AndroidUploadUiScenarioReceiver.cs" />
+		<Compile Include="..\..\scripts\mobile\ui-tests\*.cs" />
 	</ItemGroup>
 
 	<Target

@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Platforms.Android
         public const string SecurityChannelId = "cotton.notifications.security";
         public const string GroupKey = "cotton.notifications.group";
         public const string PeriodicWorkName = "cotton.notifications.poll";
+        public const int SignInRequiredNotificationId = 19002;
         public const int SummaryNotificationId = 19001;
         public const int PeriodicIntervalMinutes = 15;
     }

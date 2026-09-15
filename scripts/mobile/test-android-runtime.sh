@@ -166,6 +166,7 @@ create_media_fixture
 run_media_sync_job
 wait_for_media_sync_start
 wait_for_media_sync_completion
+wait_for_media_sync_job "after missing-session completion"
 
 denied_output="$(run_diagnostic scan-media denied)"
 denied_access="$(read_metric "$denied_output" access)"

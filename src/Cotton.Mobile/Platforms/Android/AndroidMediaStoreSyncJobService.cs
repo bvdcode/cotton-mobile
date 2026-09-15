@@ -7,6 +7,7 @@ using Android.App.Job;
 using Android.Util;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Platforms.Android
 {
@@ -45,6 +46,13 @@ namespace Cotton.Mobile.Platforms.Android
 
         public override bool OnStopJob(JobParameters? @params)
         {
+            ILogger<AndroidMediaStoreSyncJobService>? logger = IPlatformApplication.Current?.Services
+                .GetService<ILogger<AndroidMediaStoreSyncJobService>>();
+            if (logger is not null && @params is not null && OperatingSystem.IsAndroidVersionAtLeast(31))
+            {
+                AndroidAutomaticSyncDiagnosticLog.MediaStoreStopped(logger, (int)@params.StopReason);
+            }
+
             CancellationTokenSource? cancellation;
             lock (_executionGate)
             {
@@ -75,6 +83,7 @@ namespace Cotton.Mobile.Platforms.Android
                 switch (result)
                 {
                     case AndroidAutomaticSyncExecutionResult.Completed:
+                    case AndroidAutomaticSyncExecutionResult.NoSession:
                         ICottonAutomaticSyncBackgroundScheduler scheduler = services
                             .GetRequiredService<ICottonAutomaticSyncBackgroundScheduler>();
                         await scheduler
@@ -83,10 +92,6 @@ namespace Cotton.Mobile.Platforms.Android
 #if DEBUG
                         _ = Log.Info(LogTag, "rescheduled");
 #endif
-                        CompleteIfRunning(parameters, cancellation, wantsReschedule: false);
-                        break;
-
-                    case AndroidAutomaticSyncExecutionResult.NoSession:
                         CompleteIfRunning(parameters, cancellation, wantsReschedule: false);
                         break;
 

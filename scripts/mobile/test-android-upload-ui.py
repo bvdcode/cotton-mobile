@@ -337,6 +337,100 @@ def wait_for_sign_in(emulator: Emulator) -> None:
     raise TimeoutError(f"Application did not reach sign-in. Visible text: {texts}")
 
 
+def check_worker_cancellation(emulator: Emulator) -> None:
+    """Require Android's worker stop callback to cancel the dispatched operation."""
+    tag = "CottonCancellationProbe"
+    emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
+    try:
+        emulator.scenario("worker-cancellation-start")
+        emulator.run("shell", "am", "kill", PACKAGE)
+        emulator.run("logcat", "-c")
+        jobs = emulator.text("shell", "dumpsys", "jobscheduler")
+        pattern = (
+            r"JOB (?:(?P<namespace>[^\s:]+):|#)[^\s/]+/(?P<id>\d+):[^\n]*"
+            + re.escape(
+                PACKAGE + "/androidx.work.impl.background.systemjob.SystemJobService"
+            )
+        )
+        scheduled = list(re.finditer(pattern, jobs))
+        if len(scheduled) != 1:
+            raise AssertionError("Expected exactly one scheduled cancellation probe.")
+        job = scheduled[0]
+        namespace = ["-n", job.group("namespace")] if job.group("namespace") else []
+        for expected in ("operation-started", "operation-stopped:cancelled=True"):
+            deadline = time.monotonic() + TIMEOUT_SECONDS
+            while time.monotonic() < deadline:
+                output = emulator.text("logcat", "-d", "-s", f"{tag}:I", "*:S")
+                if expected in output:
+                    break
+                time.sleep(0.25)
+            else:
+                raise AssertionError(
+                    f"Android worker did not report {expected}: {output}"
+                )
+            if expected == "operation-started":
+                emulator.run(
+                    "shell",
+                    "cmd",
+                    "jobscheduler",
+                    "timeout",
+                    *namespace,
+                    PACKAGE,
+                    job.group("id"),
+                )
+        if "system-stopped:reason=" not in output:
+            raise AssertionError(
+                "The dispatched operation stopped without Android's stop callback."
+            )
+        logging.info("Passed Android worker stop and operation cancellation")
+    finally:
+        emulator.scenario("worker-cancellation-cleanup")
+    activity = emulator.text(
+        "shell", "cmd", "package", "resolve-activity", "--brief", PACKAGE
+    ).splitlines()[-1]
+    emulator.run("shell", "am", "start", "-W", "-n", activity)
+    wait_for_sign_in(emulator)
+
+
+def check_sign_in_notification(emulator: Emulator) -> None:
+    """Verify one sign-in alert is posted and cleared after session recovery."""
+    if int(emulator.text("shell", "getprop", "ro.build.version.sdk")) >= 33:
+        emulator.run(
+            "shell", "pm", "grant", PACKAGE, "android.permission.POST_NOTIFICATIONS"
+        )
+    record = re.compile(
+        r"NotificationRecord[^\n]*pkg=" + re.escape(PACKAGE) + r" [^\n]*id=19002 "
+    )
+    emulator.scenario("sign-in-restored")
+    first_update: str | None = None
+    for _ in range(2):
+        emulator.scenario("sign-in-required")
+        notifications = emulator.text("shell", "dumpsys", "notification", "--noredact")
+        matches = list(record.finditer(notifications))
+        if len(matches) != 1:
+            raise AssertionError("Expected exactly one sign-in notification.")
+        update = re.search(r"mUpdateTimeMs=(\d+)", notifications[matches[0].end() :])
+        if update is None:
+            raise AssertionError("Notification update timestamp is missing.")
+        if first_update is None:
+            first_update = update.group(1)
+        elif first_update != update.group(1):
+            raise AssertionError(
+                "The repeated check posted the sign-in notification again."
+            )
+        if (
+            "Photo backup is paused. Sign in again to resume uploads."
+            not in notifications
+        ):
+            raise AssertionError(
+                "Sign-in notification does not explain why uploads stopped."
+            )
+    emulator.scenario("sign-in-restored")
+    if record.search(emulator.text("shell", "dumpsys", "notification", "--noredact")):
+        raise AssertionError("Sign-in notification remained after session recovery.")
+    logging.info("Passed sign-in notification delivery and recovery")
+
+
 def run_checks(
     emulator: Emulator, directory: Path, full: bool, dashboard_only: bool
 ) -> None:
@@ -352,6 +446,8 @@ def run_checks(
         raise RuntimeError(f"Upload test application is not installed: {activity}")
     emulator.run("shell", "am", "start", "-W", "-n", activity)
     wait_for_sign_in(emulator)
+    check_sign_in_notification(emulator)
+    check_worker_cancellation(emulator)
     completed: list[str] = []
     viewports = VIEWPORTS if full else VIEWPORTS[:1]
     display_scenarios = ("running",) if dashboard_only else SCENARIOS

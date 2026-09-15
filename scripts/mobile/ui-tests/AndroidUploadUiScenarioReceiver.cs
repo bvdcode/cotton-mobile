@@ -3,6 +3,7 @@
 
 #if ANDROID && DEBUG
 using Android.Content;
+using AndroidX.Work;
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
@@ -51,6 +52,24 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static async Task ShowAsync(IServiceProvider services, string scenario)
         {
+            if (scenario is "worker-cancellation-start" or "worker-cancellation-cleanup")
+            {
+                await ConfigureCancellationProbeAsync(scenario);
+                return;
+            }
+
+            if (scenario == "sign-in-required")
+            {
+                await services.GetRequiredService<ICottonSessionNotificationService>().ShowSignInRequiredAsync();
+                return;
+            }
+
+            if (scenario == "sign-in-restored")
+            {
+                services.GetRequiredService<ICottonSessionNotificationService>().ClearSignInRequired();
+                return;
+            }
+
             MainPageViewModel viewModel = services.GetRequiredService<MainPageViewModel>();
             INavigation navigation = services.GetRequiredService<AppShell>().Navigation;
             while (navigation.ModalStack.Count > 0)
@@ -119,6 +138,33 @@ namespace Cotton.Mobile.Platforms.Android
                 default:
                     throw new ArgumentOutOfRangeException(nameof(scenario), scenario, "UI scenario is not supported.");
             }
+        }
+
+        private static async Task ConfigureCancellationProbeAsync(string scenario)
+        {
+            WorkManager manager = WorkManager.GetInstance(global::Android.App.Application.Context)
+                ?? throw new InvalidOperationException("WorkManager is unavailable.");
+            IOperation cleanup = manager.CancelAllWork()
+                ?? throw new InvalidOperationException("Test work cleanup is unavailable.");
+            await AndroidWorkOperation.WaitAsync(cleanup, CancellationToken.None);
+            if (scenario == "worker-cancellation-cleanup")
+            {
+                return;
+            }
+
+            using Java.Lang.Class workerClass = Java.Lang.Class.FromType(typeof(AndroidCancellationProbeWorker))
+                ?? throw new InvalidOperationException("Test worker type is unavailable.");
+            using OneTimeWorkRequest.Builder builder = new(workerClass);
+            _ = builder.SetInitialDelay(5, Java.Util.Concurrent.TimeUnit.Seconds
+                ?? throw new InvalidOperationException("Second time unit is unavailable."));
+            OneTimeWorkRequest request = builder.Build()
+                ?? throw new InvalidOperationException("Test work request is unavailable.");
+            ExistingWorkPolicy policy = ExistingWorkPolicy.Replace
+                ?? throw new InvalidOperationException("Test work replacement policy is unavailable.");
+            IOperation enqueue = manager.EnqueueUniqueWork(
+                AndroidCancellationProbeWorker.WorkName, policy, request)
+                ?? throw new InvalidOperationException("Test work scheduling is unavailable.");
+            await AndroidWorkOperation.WaitAsync(enqueue, CancellationToken.None);
         }
 
         private static async Task ShowSourceAsync(INavigation navigation, string scenario)

@@ -105,4 +105,7 @@
   <data name="SecurityNotificationChannelDescription" xml:space="preserve"><value>Important account security alerts.</value></data>
   <data name="NotificationSummarySingleFormat" xml:space="preserve"><value>{0} + {1} unread notification</value></data>
   <data name="NotificationSummaryFormat" xml:space="preserve"><value>{0} + {1} unread notifications</value></data>
+  <data name="SyncSignInRequired" xml:space="preserve">
+    <value>Photo backup is paused. Sign in again to resume uploads.</value>
+  </data>
 </root>

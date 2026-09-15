@@ -24,6 +24,8 @@ namespace Cotton.Mobile.Services
                 ["Cotton.Mobile.Platforms.Android.AndroidAutomaticSyncExecutor"] = LogLevel.Information,
                 ["Cotton.Mobile.Platforms.Android.AndroidPeriodicSyncWorker"] = LogLevel.Information,
                 ["Cotton.Mobile.Platforms.Android.AndroidSyncRootWorker"] = LogLevel.Information,
+                ["Cotton.Mobile.Platforms.Android.AndroidMediaStoreSyncJobService"] = LogLevel.Information,
+                ["Cotton.Mobile.Platforms.Android.AndroidNotificationPollingWorker"] = LogLevel.Information,
                 ["Cotton.Sdk.Internal.CottonHttpTransport"] = LogLevel.Warning,
             };
 

@@ -35,7 +35,7 @@ namespace Cotton.Mobile.Platforms.Android
             {
                 AndroidAutomaticSyncExecutionResult.Completed => Success(),
                 AndroidAutomaticSyncExecutionResult.NoSession => Success(),
-                AndroidAutomaticSyncExecutionResult.RetryRequired => RetryOrFailure(),
+                AndroidAutomaticSyncExecutionResult.RetryRequired => Retry(),
                 AndroidAutomaticSyncExecutionResult.PermanentFailure => Failure(),
                 _ => throw new InvalidOperationException("Sync execution result is not supported."),
             };

@@ -39,5 +39,11 @@ namespace Cotton.Mobile.Services
 
         [LoggerMessage(EventId = 2013, Level = LogLevel.Information, Message = "Token store was cleared.")]
         public static partial void TokenStoreCleared(ILogger logger);
+
+        [LoggerMessage(EventId = 2014, Level = LogLevel.Warning, Message = "Remote logout failed; clearing local session.")]
+        public static partial void RemoteLogoutFailed(ILogger logger, Exception exception);
+
+        [LoggerMessage(EventId = 2015, Level = LogLevel.Warning, Message = "Failed to clear session area {Area}.")]
+        public static partial void SessionAreaClearFailed(ILogger logger, string area, Exception exception);
     }
 }

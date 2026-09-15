@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidAutomaticSyncExecutor(
         ICottonSessionService sessionService,
+        ICottonSessionNotificationService sessionNotifications,
         CottonAutomaticSyncDispatcher dispatcher,
         ICottonAutomaticSyncBackgroundScheduler backgroundScheduler,
         ILogger<AndroidAutomaticSyncExecutor> logger)
@@ -45,6 +46,12 @@ namespace Cotton.Mobile.Platforms.Android
             if (!session.IsAuthenticated || session.InstanceUri is null || session.User is null)
             {
                 AndroidAutomaticSyncDiagnosticLog.SessionMissing(_logger);
+                if (session.InstanceUri is not null
+                    && session.Status is CottonSessionResultStatus.SessionExpired or CottonSessionResultStatus.Unauthenticated)
+                {
+                    await sessionNotifications.ShowSignInRequiredAsync(cancellationToken).ConfigureAwait(false);
+                }
+
                 return AndroidAutomaticSyncExecutionResult.NoSession;
             }
 

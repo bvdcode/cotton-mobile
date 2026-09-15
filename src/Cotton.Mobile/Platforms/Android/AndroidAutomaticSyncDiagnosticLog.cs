@@ -23,6 +23,12 @@ namespace Cotton.Mobile.Platforms.Android
 
         [LoggerMessage(EventId = 2204, Level = LogLevel.Information, Message = "Android background sync scheduled {RetryCount} root retries.")]
         public static partial void RetriesScheduled(ILogger logger, int retryCount);
+
+        [LoggerMessage(EventId = 2205, Level = LogLevel.Warning, Message = "Android stopped background work: reason {StopReason}, attempt {RunAttemptCount}.")]
+        public static partial void WorkerStopped(ILogger logger, int stopReason, int runAttemptCount);
+
+        [LoggerMessage(EventId = 2206, Level = LogLevel.Warning, Message = "Android stopped MediaStore sync: reason {StopReason}.")]
+        public static partial void MediaStoreStopped(ILogger logger, int stopReason);
     }
 }
 #endif

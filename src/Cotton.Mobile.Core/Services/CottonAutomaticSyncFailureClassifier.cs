@@ -68,6 +68,16 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(exception);
 
+            if (exception is CottonTokenRefreshException refreshFailure)
+            {
+                if (CottonRefreshTokenRejection.IsConfirmed(refreshFailure))
+                {
+                    return CottonAutomaticSyncFailureKind.AuthenticationRequired;
+                }
+
+                return CottonAutomaticSyncFailureKind.ServerUnavailable;
+            }
+
             if (exception is CottonApiException { StatusCode: HttpStatusCode statusCode })
             {
                 return ClassifyApiStatus(statusCode);

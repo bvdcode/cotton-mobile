@@ -76,6 +76,71 @@ namespace Cotton.Mobile.Tests
                 runner.Triggers);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task LastCallerCancellationStopsUnderlyingRunAndAllowsLaterWork(bool selectedRoots)
+        {
+            using ControlledAutomaticSyncRunner runner = new();
+            CottonAutomaticSyncDispatcher dispatcher = new(runner);
+            using CancellationTokenSource cancellation = new();
+            Task<CottonAutomaticSyncRunResult> waiting = selectedRoots
+                ? dispatcher.RunRootsAsync(SyncTestRootFactory.SessionScope, [Guid.NewGuid()], cancellation.Token)
+                : dispatcher.RunAsync(SyncTestRootFactory.SessionScope,
+                    CottonAutomaticSyncTrigger.PeriodicReconciliation, cancellation.Token);
+            await runner.WaitForNextRunAsync();
+            CancellationToken executionToken = Assert.Single(runner.ExecutionTokens);
+
+            await cancellation.CancelAsync();
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => waiting);
+            try
+            {
+                Assert.True(executionToken.IsCancellationRequested, "The upload kept running after its last caller stopped.");
+            }
+            finally
+            {
+                dispatcher.Cancel(SyncTestRootFactory.SessionScope);
+            }
+
+            Task<CottonAutomaticSyncRunResult> next = dispatcher.RunAsync(
+                SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation,
+                TestContext.Current.CancellationToken);
+            await runner.WaitForNextRunAsync();
+            runner.ReleaseRun();
+            await next.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        }
+
+        [Fact]
+        public async Task UnderlyingRunStopsWhenBothCallersCancel()
+        {
+            using ControlledAutomaticSyncRunner runner = new();
+            CottonAutomaticSyncDispatcher dispatcher = new(runner);
+            using CancellationTokenSource firstCancellation = new();
+            using CancellationTokenSource secondCancellation = new();
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
+                SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation,
+                firstCancellation.Token);
+            await runner.WaitForNextRunAsync();
+            Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(
+                SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged,
+                secondCancellation.Token);
+            CancellationToken executionToken = Assert.Single(runner.ExecutionTokens);
+
+            await firstCancellation.CancelAsync();
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => first);
+            Assert.False(executionToken.IsCancellationRequested);
+            await secondCancellation.CancelAsync();
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => second);
+            try
+            {
+                Assert.True(executionToken.IsCancellationRequested, "The upload outlived both callers.");
+            }
+            finally
+            {
+                dispatcher.Cancel(SyncTestRootFactory.SessionScope);
+            }
+        }
+
         [Fact]
         public async Task DifferentAccountsOnTheSameInstanceDoNotShareExecution()
         {

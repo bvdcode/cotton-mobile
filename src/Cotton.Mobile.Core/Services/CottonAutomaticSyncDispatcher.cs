@@ -76,12 +76,44 @@ namespace Cotton.Mobile.Services
                     _states.Add(key, state);
                 }
 
+                state.AddWaiter();
                 queue(state);
                 state.ExecutionTask ??= ExecuteAsync(key, sessionScope, state);
                 executionTask = state.ExecutionTask;
             }
 
-            return executionTask.WaitAsync(cancellationToken);
+            return WaitForCompletionAsync(key, state, executionTask, cancellationToken);
+        }
+
+        private async Task<CottonAutomaticSyncRunResult> WaitForCompletionAsync(
+            (string InstanceUri, string AccountScopeKey) key,
+            CottonAutomaticSyncDispatchState state,
+            Task<CottonAutomaticSyncRunResult> executionTask,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await executionTask.WaitAsync(cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                bool cancel;
+                lock (_gate)
+                {
+                    cancel = state.RemoveWaiter() && !executionTask.IsCompleted;
+                    if (cancel && _states.TryGetValue(key, out CottonAutomaticSyncDispatchState? current)
+                        && ReferenceEquals(current, state))
+                    {
+                        _states.Remove(key);
+                    }
+                }
+
+                if (cancel)
+                {
+                    state.Cancel();
+                    await executionTask.ConfigureAwait(false);
+                }
+            }
         }
 
         private async Task<CottonAutomaticSyncRunResult> ExecuteAsync(
@@ -99,7 +131,6 @@ namespace Cotton.Mobile.Services
                     {
                         if (!state.HasPendingRequest)
                         {
-                            _states.Remove(key);
                             return result;
                         }
 

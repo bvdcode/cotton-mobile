@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Services
         private readonly CancellationTokenSource _cancellationSource = new();
         private readonly HashSet<Guid> _pendingRootIds = [];
         private bool _disposed;
+        private int _waiterCount;
 
         public bool HasPendingRequest => PendingTrigger.HasValue || _pendingRootIds.Count > 0;
 
@@ -17,6 +18,17 @@ namespace Cotton.Mobile.Services
         public Task<CottonAutomaticSyncRunResult>? ExecutionTask { get; set; }
 
         public CancellationToken CancellationToken => _cancellationSource.Token;
+
+        public void AddWaiter()
+        {
+            _waiterCount++;
+        }
+
+        public bool RemoveWaiter()
+        {
+            _waiterCount--;
+            return _waiterCount == 0;
+        }
 
         public void Queue(CottonAutomaticSyncTrigger trigger)
         {

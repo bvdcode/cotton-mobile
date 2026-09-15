@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Tests
         private readonly SemaphoreSlim _started = new(0);
         private readonly SemaphoreSlim _release = new(0);
 
+        public List<CancellationToken> ExecutionTokens { get; } = [];
+
         public List<CottonAutomaticSyncTrigger> Triggers { get; } = [];
 
         public List<IReadOnlyList<Guid>> RootSelections { get; } = [];
@@ -64,6 +66,10 @@ namespace Cotton.Mobile.Tests
         private async Task<CottonAutomaticSyncRunResult> RunControlledAsync(
             CancellationToken cancellationToken)
         {
+            lock (_gate)
+            {
+                ExecutionTokens.Add(cancellationToken);
+            }
             _started.Release();
             await _release.WaitAsync(cancellationToken);
             return Result;

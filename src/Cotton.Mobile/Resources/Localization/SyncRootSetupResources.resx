@@ -71,19 +71,19 @@
     <value>What should Cotton upload?</value>
   </data>
   <data name="SupportingText" xml:space="preserve">
-    <value>Choose where Cotton finds new files. Open the app or tap Run all to check now.</value>
+    <value>New photos and videos trigger a check. Other files are checked periodically. Android may delay background uploads.</value>
   </data>
   <data name="FolderTitle" xml:space="preserve">
     <value>Selected folder</value>
   </data>
   <data name="FolderSupportingText" xml:space="preserve">
-    <value>Upload new files from a folder. Background checks run periodically.</value>
+    <value>All new files in a folder and its subfolders, including photos, videos and documents.</value>
   </data>
   <data name="MediaTitle" xml:space="preserve">
-    <value>Media folders</value>
+    <value>Photos and videos</value>
   </data>
   <data name="MediaSupportingText" xml:space="preserve">
-    <value>Faster photo and video backup: new media triggers a check. Android may delay background uploads.</value>
+    <value>Photos and videos from selected albums in your Android media library.</value>
   </data>
   <data name="MediaAlbumPageTitle" xml:space="preserve">
     <value>Choose media folders</value>

@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task MediaStoreTriggerRunsOnlyMediaRoots()
+        public async Task MediaStoreTriggerRunsBothSelectedFoldersAndMediaRoots()
         {
             CottonSyncRootSnapshot folderRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonSyncRootSnapshot mediaRoot = SyncTestRootFactory.CreateMediaStoreRoot();
@@ -39,7 +39,9 @@ namespace Cotton.Mobile.Tests
 
             await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);
 
-            Assert.Equal([mediaRoot.Id], coordinator.RootIds);
+            Assert.Equal(2, coordinator.RunRootCount);
+            Assert.Contains(folderRoot.Id, coordinator.RootIds);
+            Assert.Contains(mediaRoot.Id, coordinator.RootIds);
         }
 
         [Fact]
@@ -62,8 +64,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains(mediaRoot.Id, coordinator.RootIds);
         }
 
-        [Fact]
-        public async Task PeriodicTriggerRunsOnlyCurrentAccountRoots()
+        [Theory]
+        [InlineData(CottonAutomaticSyncTrigger.PeriodicReconciliation)]
+        [InlineData(CottonAutomaticSyncTrigger.MediaStoreChanged)]
+        public async Task TriggerRunsOnlyCurrentAccountRoots(CottonAutomaticSyncTrigger trigger)
         {
             CottonSyncRootSnapshot currentRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonSyncRootSnapshot otherAccountRoot = SyncTestRootFactory.CreateMediaStoreRoot(
@@ -80,7 +84,7 @@ namespace Cotton.Mobile.Tests
                     NullLogger<SyncExecutionWorkflow>.Instance),
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation, TestContext.Current.CancellationToken);
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(SyncTestRootFactory.SessionScope, trigger, TestContext.Current.CancellationToken);
 
             Assert.Equal([currentRoot.Id], coordinator.RootIds);
             Assert.Equal([currentRoot.Id], result.SucceededRootIds);

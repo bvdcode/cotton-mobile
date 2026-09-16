@@ -32,7 +32,7 @@ namespace Cotton.Mobile.Services
 
             return RunSelectedAsync(
                 sessionScope,
-                root => ShouldRun(root, trigger),
+                static _ => true,
                 cancellationToken);
         }
 
@@ -111,19 +111,6 @@ namespace Cotton.Mobile.Services
                 succeededRootIds.Count,
                 failures.Count);
             return new CottonAutomaticSyncRunResult(succeededRootIds, failures);
-        }
-
-        private static bool ShouldRun(
-            CottonSyncRootSnapshot root,
-            CottonAutomaticSyncTrigger trigger)
-        {
-            return trigger switch
-            {
-                CottonAutomaticSyncTrigger.ApplicationResumed => true,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation => true,
-                CottonAutomaticSyncTrigger.MediaStoreChanged => root.LocalRoot.UsesMediaStore,
-                _ => throw new ArgumentOutOfRangeException(nameof(trigger), trigger, "Automatic sync trigger is not supported."),
-            };
         }
     }
 }

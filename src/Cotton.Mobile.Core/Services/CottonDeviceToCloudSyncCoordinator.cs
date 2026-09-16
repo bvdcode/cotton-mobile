@@ -7,6 +7,8 @@ namespace Cotton.Mobile.Services
 {
     public class CottonDeviceToCloudSyncCoordinator : ICottonDeviceToCloudSyncCoordinator
     {
+        private const int MaximumConflictSamples = 3;
+
         private readonly ICottonSyncRootStore _rootStore;
         private readonly ICottonSyncRootPauseStore _pauseStore;
         private readonly ICottonUploadReceiptStore _uploadReceiptStore;
@@ -214,10 +216,18 @@ namespace Cotton.Mobile.Services
             CottonDeviceToCloudSyncPlanSnapshot plan,
             CottonDeviceToCloudRemoteContentSnapshot remoteContent)
         {
+            CottonDeviceToCloudSyncPlanItem[] conflicts = [.. plan.Items.Where(item =>
+                item.Action == CottonDeviceToCloudSyncActionKind.RemotePathConflict)];
+            if (conflicts.Length == 0)
+            {
+                return;
+            }
+
+            CottonSyncDiagnosticLog.RemotePathConflictSummary(
+                _logger, rootId, conflicts.Length, Math.Min(conflicts.Length, MaximumConflictSamples));
             Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> remoteByPath = remoteContent.Items
                 .ToDictionary(item => item.RelativePath, StringComparer.OrdinalIgnoreCase);
-            foreach (CottonDeviceToCloudSyncPlanItem item in plan.Items.Where(item =>
-                item.Action == CottonDeviceToCloudSyncActionKind.RemotePathConflict))
+            foreach (CottonDeviceToCloudSyncPlanItem item in conflicts.Take(MaximumConflictSamples))
             {
                 remoteByPath.TryGetValue(
                     item.RelativePath,
@@ -228,12 +238,8 @@ namespace Cotton.Mobile.Services
                     remoteItem?.Entry.Id ?? item.CloudItemId,
                     remoteItem?.Entry.Type,
                     item.SizeBytes == remoteItem?.Entry.SizeBytes,
-                    item.ContentHash is not null,
-                    remoteItem?.Entry.ContentHash is not null,
-                    string.Equals(
-                        item.ContentHash,
-                        remoteItem?.Entry.ContentHash,
-                        StringComparison.Ordinal));
+                    item.ContentHash,
+                    remoteItem?.Entry.ContentHash);
             }
         }
     }

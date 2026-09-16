@@ -57,7 +57,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void WriteRotatesAndBoundsStoredHistory()
         {
-            const int recordCount = 400;
+            const int recordCount = 1800;
             using FileSystemCottonDiagnosticJournal journal = new(
                 _directory,
                 TimeProvider.System);
@@ -74,8 +74,9 @@ namespace Cotton.Mobile.Tests
 
             IReadOnlyList<string> records = journal.ReadAll();
             Assert.DoesNotContain(records, record => record.Contains("record-000-", StringComparison.Ordinal));
-            Assert.Contains(records, record => record.Contains("record-399-", StringComparison.Ordinal));
+            Assert.Contains(records, record => record.Contains("record-1799-", StringComparison.Ordinal));
             Assert.InRange(Directory.GetFiles(_directory).Length, 1, 2);
+            Assert.InRange(Directory.GetFiles(_directory).Sum(path => new FileInfo(path).Length), 1, 4 * 1024 * 1024);
         }
 
         public void Dispose()

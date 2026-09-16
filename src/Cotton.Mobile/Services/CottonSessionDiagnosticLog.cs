@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Services
         [LoggerMessage(EventId = 2008, Level = LogLevel.Information, Message = "Token store is empty.")]
         public static partial void TokenStoreEmpty(ILogger logger);
 
-        [LoggerMessage(EventId = 2009, Level = LogLevel.Information, Message = "Token store returned a complete pair.")]
+        [LoggerMessage(EventId = 2009, Level = LogLevel.Debug, Message = "Token store returned a complete pair.")]
         public static partial void TokenStoreLoaded(ILogger logger);
 
         [LoggerMessage(EventId = 2010, Level = LogLevel.Warning, Message = "Token store contained an incomplete pair and was cleared.")]

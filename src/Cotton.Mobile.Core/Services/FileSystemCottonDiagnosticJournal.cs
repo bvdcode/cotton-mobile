@@ -8,7 +8,7 @@ namespace Cotton.Mobile.Services
 {
     public class FileSystemCottonDiagnosticJournal : ICottonDiagnosticJournal, IDisposable
     {
-        private const int MaximumFileSizeBytes = 256 * 1024;
+        private const int MaximumFileSizeBytes = 2 * 1024 * 1024;
         private const string CurrentFileName = "diagnostics.log";
         private const string PreviousFileName = "diagnostics.previous.log";
 

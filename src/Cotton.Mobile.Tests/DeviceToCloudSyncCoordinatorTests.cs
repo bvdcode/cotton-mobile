@@ -1,4 +1,5 @@
 using Cotton.Mobile.Services;
+using Microsoft.Extensions.Logging;
 using static Cotton.Mobile.Tests.DeviceToCloudSyncCoordinatorTestData;
 using Xunit;
 
@@ -16,6 +17,8 @@ namespace Cotton.Mobile.Tests
         private readonly CottonSyncProgressHub _progressHub;
         private readonly CottonSyncRootExecutionLock _executionLock = new();
         private readonly CottonDeviceToCloudSyncCoordinator _coordinator;
+        private readonly FileSystemCottonDiagnosticJournal _journal;
+        private readonly LoggerFactory _loggerFactory;
 
         public DeviceToCloudSyncCoordinatorTests()
         {
@@ -23,6 +26,8 @@ namespace Cotton.Mobile.Tests
                 Path.GetTempPath(),
                 "cotton-device-to-cloud-coordinator-tests",
                 Guid.NewGuid().ToString("N"));
+            _journal = new FileSystemCottonDiagnosticJournal(Path.Combine(_directory, "diagnostics"), TimeProvider.System);
+            _loggerFactory = new LoggerFactory([new CottonDiagnosticLoggerProvider(_journal)]);
             _rootStore = new FileSystemCottonSyncRootStore(
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")),
                 NullLogger<FileSystemCottonSyncRootStore>.Instance, TimeProvider.System);
@@ -50,7 +55,7 @@ namespace Cotton.Mobile.Tests
                 executor,
                 _executionLock,
                 _progressHub,
-                NullLogger<CottonDeviceToCloudSyncCoordinator>.Instance);
+                _loggerFactory.CreateLogger<CottonDeviceToCloudSyncCoordinator>());
         }
 
         [Fact]
@@ -284,6 +289,8 @@ namespace Cotton.Mobile.Tests
 
         public void Dispose()
         {
+            _loggerFactory.Dispose();
+            _journal.Dispose();
             if (Directory.Exists(_directory))
             {
                 Directory.Delete(_directory, recursive: true);

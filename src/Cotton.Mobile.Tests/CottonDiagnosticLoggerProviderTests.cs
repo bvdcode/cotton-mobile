@@ -80,6 +80,26 @@ namespace Cotton.Mobile.Tests
             GC.SuppressFinalize(this);
         }
 
+        [Fact]
+        public void TokenReadsDoNotDisplaceSessionChanges()
+        {
+            using FileSystemCottonDiagnosticJournal journal = new(_directory, TimeProvider.System);
+            using CottonDiagnosticLoggerProvider provider = new(journal);
+            ILogger logger = provider.CreateLogger("Cotton.Mobile.Services.SecureStorageCottonTokenStore");
+            for (int index = 0; index < 1000; index++)
+            {
+                CottonSessionDiagnosticLog.TokenStoreLoaded(logger);
+            }
+
+            CottonSessionDiagnosticLog.TokenStoreSaved(logger);
+            CottonSessionDiagnosticLog.TokenStoreCleared(logger);
+
+            IReadOnlyList<string> records = journal.ReadAll();
+            Assert.Equal(2, records.Count);
+            Assert.Contains(records, record => record.Contains("\t2012\t", StringComparison.Ordinal));
+            Assert.Contains(records, record => record.Contains("\t2013\t", StringComparison.Ordinal));
+        }
+
         private static void ThrowDiagnosticException()
         {
             throw new InvalidOperationException("private exception detail");

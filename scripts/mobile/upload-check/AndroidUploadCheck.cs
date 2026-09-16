@@ -1,3 +1,4 @@
+using Cotton.Mobile.Services;
 using System.Diagnostics;
 using System.Globalization;
 using System.Xml.Linq;
@@ -73,10 +74,10 @@ namespace Cotton.Mobile.UploadChecks
 
         public async Task<string> ReadJournalAsync()
         {
-            await RunAsync("shell", "am", "broadcast", "-n",
-                settings.Package + "/dev.cottoncloud.mobile.AndroidDiagnosticJournalReceiver",
-                "-a", "dev.cottoncloud.app.DUMP_DIAGNOSTICS");
-            return await RunAsync("logcat", "-d", "-s", "CottonDiagnostics:I", "*:S", "-v", "raw");
+            string journal = await RunAsync("exec-out", "content", "read", "--uri",
+                $"content://{settings.Package}.diagnostics/journal");
+            CottonDiagnosticJournalTransfer.Validate(journal);
+            return journal;
         }
 
         public async Task StopAsync()

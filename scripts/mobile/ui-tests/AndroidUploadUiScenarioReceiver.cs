@@ -37,6 +37,22 @@ namespace Cotton.Mobile.Platforms.Android
                     ?? throw new InvalidDataException("UI scenario is required.");
                 IServiceProvider services = IPlatformApplication.Current?.Services
                     ?? throw new InvalidOperationException("Application services are unavailable.");
+                if (scenario == "media-access-pick")
+                {
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        _ = AndroidMediaAccessChecks.PickFolderAsync(services);
+                    });
+                    return;
+                }
+
+                if (scenario == "media-access-read")
+                {
+                    await AndroidMediaAccessChecks.ReadAsync(services, intent!);
+                    _ = global::Android.Util.Log.Info(LogTag, $"{requestId}:passed:{scenario}");
+                    return;
+                }
+
                 await MainThread.InvokeOnMainThreadAsync(() => ShowAsync(services, scenario));
                 _ = global::Android.Util.Log.Info(LogTag, $"{requestId}:passed:{scenario}");
             }
@@ -114,7 +130,7 @@ namespace Cotton.Mobile.Platforms.Android
                     break;
                 case "source-folder":
                 case "source-media":
-                    await ShowSourceAsync(navigation, scenario);
+                    await ShowSourceAsync(navigation, scenario, services);
                     break;
                 case "storage-full":
                     ShowRoot(state, CottonAutomaticSyncFailureKind.InsufficientStorage);
@@ -167,9 +183,11 @@ namespace Cotton.Mobile.Platforms.Android
             await AndroidWorkOperation.WaitAsync(enqueue, CancellationToken.None);
         }
 
-        private static async Task ShowSourceAsync(INavigation navigation, string scenario)
+        private static async Task ShowSourceAsync(
+            INavigation navigation, string scenario, IServiceProvider services)
         {
-            SyncRootSetupOptionsViewModel source = new(_ => { });
+            SyncRootSetupOptionsViewModel source = new(
+                _ => { }, services.GetRequiredService<MediaLocationAccessViewModel>());
             switch (scenario)
             {
                 case "source-folder":

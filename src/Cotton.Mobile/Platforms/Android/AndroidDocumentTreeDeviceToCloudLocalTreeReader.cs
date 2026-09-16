@@ -43,20 +43,23 @@ namespace Cotton.Mobile.Platforms.Android
         {
             EnsureSupportedRoot(instanceUri, root);
 
+            AndroidMediaContentAccess contentAccess = new();
+            string sourceVersion = contentAccess.CreateRevisionSourceVersion(RevisionSourceVersion);
             CottonContentRevisionIndexSnapshot? storedIndex = await _revisionStore
                 .LoadAsync(instanceUri, root, cancellationToken)
                 .ConfigureAwait(false);
             CottonContentRevisionIndexSnapshot? previousIndex = string.Equals(
                 storedIndex?.SourceVersion,
-                RevisionSourceVersion,
+                sourceVersion,
                 StringComparison.Ordinal)
                     ? storedIndex
                     : null;
             (CottonDeviceToCloudLocalContentSnapshot content, CottonContentRevisionIndexSnapshot revisionIndex) =
                 await Task.Run(
-                    () => ReadTree(root, previousIndex, cancellationToken),
+                    () => ReadTree(root, previousIndex, contentAccess, sourceVersion, cancellationToken),
                     cancellationToken)
                 .ConfigureAwait(false);
+            contentAccess.EnsureUnchanged();
             if (!revisionIndex.HasSameContentAs(storedIndex))
             {
                 await _revisionStore
@@ -71,6 +74,8 @@ namespace Cotton.Mobile.Platforms.Android
             ReadTree(
             CottonSyncRootSnapshot root,
             CottonContentRevisionIndexSnapshot? previousIndex,
+            AndroidMediaContentAccess contentAccess,
+            string sourceVersion,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -88,6 +93,7 @@ namespace Cotton.Mobile.Platforms.Android
 
             ReadChildren(
                 resolver,
+                contentAccess,
                 treeUri,
                 rootUri,
                 parentPath: string.Empty,
@@ -105,13 +111,14 @@ namespace Cotton.Mobile.Platforms.Android
                 items,
                 problems);
             CottonContentRevisionIndexSnapshot revisionIndex = new(
-                RevisionSourceVersion,
+                sourceVersion,
                 revisions);
             return (content, revisionIndex);
         }
 
         private static void ReadChildren(
             ContentResolver resolver,
+            AndroidMediaContentAccess contentAccess,
             AndroidUri treeUri,
             AndroidUri parentUri,
             string parentPath,
@@ -164,6 +171,7 @@ namespace Cotton.Mobile.Platforms.Android
                         child.DocumentId));
                     ReadChildren(
                         resolver,
+                        contentAccess,
                         treeUri,
                         child.Uri,
                         relativePath!,
@@ -181,6 +189,7 @@ namespace Cotton.Mobile.Platforms.Android
                 long? sizeBytes = ReadSizeBytes(cursor);
                 string contentHash = ResolveContentHash(
                     resolver,
+                    contentAccess,
                     child,
                     lastModifiedMilliseconds,
                     sizeBytes,

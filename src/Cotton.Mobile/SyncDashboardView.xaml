@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Cotton.Mobile"
              xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
@@ -145,6 +146,12 @@
                     <LinearItemsLayout Orientation="Vertical"
                                        ItemSpacing="0" />
                 </CollectionView.ItemsLayout>
+                <CollectionView.Header>
+                    <Grid IsVisible="{Binding MediaLocationAccess.IsPermissionNeeded}"
+                          Padding="0,0,0,12">
+                        <local:MediaLocationAccessView BindingContext="{Binding MediaLocationAccess}" />
+                    </Grid>
+                </CollectionView.Header>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
                         <Grid RowDefinitions="Auto,Auto">

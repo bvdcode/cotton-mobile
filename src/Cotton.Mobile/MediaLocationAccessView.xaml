@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.MediaLocationAccessView"
+             x:DataType="viewModels:MediaLocationAccessViewModel"
+             IsVisible="{Binding IsSupported}">
+    <Border Style="{StaticResource AppCard}">
+        <VerticalStackLayout Spacing="12">
+            <Label Text="{x:Static localization:MediaLocationResources.Title}"
+                   FontAttributes="Bold"
+                   Style="{StaticResource AppBodyText}" />
+            <Label Text="{x:Static localization:MediaLocationResources.GrantedMessage}"
+                   IsVisible="{Binding IsGranted}"
+                   Style="{StaticResource AppBodyText}" />
+            <VerticalStackLayout Spacing="12"
+                                 IsVisible="{Binding IsPermissionNeeded}">
+                <Label Text="{x:Static localization:MediaLocationResources.Explanation}"
+                       Style="{StaticResource AppBodyText}" />
+                <Label Text="{x:Static localization:MediaLocationResources.DeniedWarning}"
+                       Style="{StaticResource AppBodyText}" />
+                <Button Text="{Binding ActionText}"
+                        Command="{Binding RequestCommand}"
+                        StyleClass="FilledButton, TouchTarget" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

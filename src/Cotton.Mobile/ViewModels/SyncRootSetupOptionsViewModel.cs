@@ -14,11 +14,15 @@ namespace Cotton.Mobile.ViewModels
         private bool _deleteOriginalsAfterUpload;
         private bool _didComplete;
 
-        public SyncRootSetupOptionsViewModel(Action<SyncRootSetupOptions?> complete)
+        public SyncRootSetupOptionsViewModel(
+            Action<SyncRootSetupOptions?> complete,
+            MediaLocationAccessViewModel mediaLocationAccess)
         {
             ArgumentNullException.ThrowIfNull(complete);
 
             _complete = complete;
+            MediaLocationAccess = mediaLocationAccess;
+            MediaLocationAccess.Refresh();
             SelectFolderCommand = new Command(
                 () => SelectStorageKind(CottonSyncRootStorageKind.UserSelectedDocumentTree));
             SelectMediaCommand = new Command(
@@ -28,6 +32,8 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public Command SelectFolderCommand { get; }
+
+        public MediaLocationAccessViewModel MediaLocationAccess { get; }
 
         public Command SelectMediaCommand { get; }
 

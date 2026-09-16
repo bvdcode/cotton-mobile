@@ -4,7 +4,8 @@
 using Cotton.Mobile.ViewModels;
 namespace Cotton.Mobile.Services
 {
-    public class SyncRootSetupOptionsPickerService : ISyncRootSetupOptionsPickerService
+    public class SyncRootSetupOptionsPickerService(
+        MediaLocationAccessViewModel mediaLocationAccess) : ISyncRootSetupOptionsPickerService
     {
         public async Task<SyncRootSetupOptionsSession?> PickAsync(
             CancellationToken cancellationToken = default)
@@ -14,7 +15,8 @@ namespace Cotton.Mobile.Services
             TaskCompletionSource<SyncRootSetupOptions?> completion = new(
                 TaskCreationOptions.RunContinuationsAsynchronously);
             SyncRootSetupOptionsViewModel viewModel = new(
-                options => completion.TrySetResult(options));
+                options => completion.TrySetResult(options),
+                mediaLocationAccess);
             SyncRootSetupOptionsPage page = new(viewModel);
             INavigation navigation = await ModalPageNavigation.ShowAsync(page);
             using CancellationTokenRegistration registration = cancellationToken.Register(

@@ -53,6 +53,7 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static string ResolveContentHash(
             ContentResolver resolver,
+            AndroidMediaContentAccess contentAccess,
             AndroidUri contentUri,
             string localSourceId,
             long? revision,
@@ -62,6 +63,7 @@ namespace Cotton.Mobile.Platforms.Android
             AndroidMediaStoreScanStatistics statistics,
             CancellationToken cancellationToken)
         {
+            contentAccess.EnsureUnchanged();
             if (revision.HasValue
                 && sizeBytes.HasValue
                 && previousIndex is not null
@@ -81,7 +83,7 @@ namespace Cotton.Mobile.Platforms.Android
             }
 
             statistics.RecordHashedFile();
-            string contentHash = ComputeContentHash(resolver, contentUri, cancellationToken);
+            string contentHash = contentAccess.ComputeContentHash(resolver, contentUri, cancellationToken);
             if (revision.HasValue && sizeBytes.HasValue)
             {
                 revisions.Add(new CottonContentRevisionSnapshot(

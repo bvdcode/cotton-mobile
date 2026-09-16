@@ -32,6 +32,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<AndroidDocumentTreeDeviceToCloudLocalFileOperator>();
             services.AddSingleton<ICottonDeviceToCloudLocalFileOperator, AndroidDeviceToCloudLocalFileOperatorRouter>();
             services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
+            services.AddSingleton<ICottonMediaLocationPermissionService, AndroidMediaLocationPermissionService>();
             services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
             services.AddSingleton<ICottonSessionNotificationService, AndroidSessionNotificationService>();
             services.AddSingleton<ICottonNotificationBackgroundScheduler, AndroidNotificationBackgroundScheduler>();

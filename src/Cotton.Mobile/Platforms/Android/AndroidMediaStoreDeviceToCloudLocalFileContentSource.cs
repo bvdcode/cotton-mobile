@@ -26,8 +26,7 @@ namespace Cotton.Mobile.Platforms.Android
                 ?? throw new InvalidOperationException("Android media upload item has an invalid content URI.");
             ContentResolver resolver = global::Android.App.Application.Context.ContentResolver
                 ?? throw new InvalidOperationException("Android content resolver is unavailable.");
-            Stream stream = resolver.OpenInputStream(contentUri)
-                ?? throw new IOException("Could not open Android media content for upload.");
+            Stream stream = AndroidMediaContentAccess.OpenRead(resolver, contentUri);
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(stream);
         }

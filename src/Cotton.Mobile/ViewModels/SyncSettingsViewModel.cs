@@ -34,6 +34,7 @@ namespace Cotton.Mobile.ViewModels
             SyncSettingsManagementHandler managementHandler,
             SyncSettingsStatusObserver statusObserver,
             BackgroundSyncRestrictionViewModel backgroundRestriction,
+            MediaLocationAccessViewModel mediaLocationAccess,
             ILogger<SyncSettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(statusObserver);
@@ -45,6 +46,8 @@ namespace Cotton.Mobile.ViewModels
             _statusObserver = statusObserver;
             BackgroundRestriction = backgroundRestriction
                 ?? throw new ArgumentNullException(nameof(backgroundRestriction));
+            MediaLocationAccess = mediaLocationAccess
+                ?? throw new ArgumentNullException(nameof(mediaLocationAccess));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _statusObserver.Attach(this);
             AddRootCommand = CreateAddRootCommand();
@@ -68,6 +71,8 @@ namespace Cotton.Mobile.ViewModels
         public IRelayCommand ExitEditModeCommand { get; }
 
         public BackgroundSyncRestrictionViewModel BackgroundRestriction { get; }
+
+        public MediaLocationAccessViewModel MediaLocationAccess { get; }
 
         public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = [];
 

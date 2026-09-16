@@ -15,6 +15,7 @@ namespace Cotton.Mobile.Platforms.Android
     {
         private static async Task ReadCollectionAsync(
             ContentResolver resolver,
+            AndroidMediaContentAccess contentAccess,
             AndroidMediaStoreCollectionKind collectionKind,
             AndroidMediaStoreScope scope,
             Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> items,
@@ -43,6 +44,7 @@ namespace Cotton.Mobile.Platforms.Android
                     scanStartedAtUtc);
                 string contentHash = ResolveContentHash(
                     resolver,
+                    contentAccess,
                     candidate.ContentUri,
                     candidate.LocalSourceId,
                     candidate.Revision,

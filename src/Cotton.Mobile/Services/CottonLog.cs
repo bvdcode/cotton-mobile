@@ -55,6 +55,15 @@ namespace Cotton.Mobile.Services
             PermissionStatus status);
 
         [LoggerMessage(
+            EventId = 12,
+            Level = LogLevel.Information,
+            Message = "Media access permission result: {Status}; location data access granted: {IsGranted}")]
+        public static partial void MediaLocationPermissionResult(
+            ILogger logger,
+            PermissionStatus status,
+            bool isGranted);
+
+        [LoggerMessage(
             EventId = 11,
             Level = LogLevel.Debug,
             Message = "{Message} Context: {Context}; file id: {FileId}")]

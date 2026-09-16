@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Preserve location data</value></data>
+  <data name="Explanation" xml:space="preserve"><value>Android asks for photo and video access so Cotton can preserve the location data inside them. This access is used only to back up your files. Cotton does not determine or track your current location.</value></data>
+  <data name="DeniedWarning" xml:space="preserve"><value>Without this permission, Android can remove location data before Cotton reads the file. Uploads may then differ from your originals. Cotton keeps those originals on your device, even if automatic deletion is enabled.</value></data>
+  <data name="GrantedMessage" xml:space="preserve"><value>Location data in your photos and videos will be preserved.</value></data>
+  <data name="AllowText" xml:space="preserve"><value>Allow access</value></data>
+  <data name="SettingsText" xml:space="preserve"><value>Open settings</value></data>
+</root>

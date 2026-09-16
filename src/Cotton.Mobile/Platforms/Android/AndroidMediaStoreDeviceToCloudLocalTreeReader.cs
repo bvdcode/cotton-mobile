@@ -5,7 +5,6 @@
 using Android.Content;
 using Android.Provider;
 using Cotton.Mobile.Services;
-using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Platforms.Android
 {
@@ -70,7 +69,8 @@ namespace Cotton.Mobile.Platforms.Android
                 throw new UnauthorizedAccessException("Android media access is not available.");
             }
 
-            string sourceVersion = CreateSourceVersion();
+            AndroidMediaContentAccess contentAccess = new();
+            string sourceVersion = contentAccess.CreateRevisionSourceVersion(CreateSourceVersion());
             CottonContentRevisionIndexSnapshot? storedIndex = await _revisionStore
                 .LoadAsync(instanceUri, root, cancellationToken)
                 .ConfigureAwait(false);
@@ -89,12 +89,14 @@ namespace Cotton.Mobile.Platforms.Android
                         root,
                         selectedScope,
                         access,
+                        contentAccess,
                         sourceVersion,
                         previousIndex,
                         checkpoint,
                         cancellationToken),
                     cancellationToken)
                 .ConfigureAwait(false);
+            contentAccess.EnsureUnchanged();
             CottonContentRevisionIndexSnapshot revisionIndex = result.RevisionIndex
                 ?? throw new InvalidOperationException("Android MediaStore revision index was not produced.");
             await checkpoint
@@ -108,6 +110,7 @@ namespace Cotton.Mobile.Platforms.Android
             CottonSyncRootSnapshot root,
             AndroidMediaStoreScope scope,
             AndroidMediaReadAccessSnapshot access,
+            AndroidMediaContentAccess contentAccess,
             string sourceVersion,
             CottonContentRevisionIndexSnapshot? previousIndex,
             CottonContentRevisionCheckpoint checkpoint,
@@ -126,6 +129,7 @@ namespace Cotton.Mobile.Platforms.Android
             {
                 await ReadCollectionAsync(
                     resolver,
+                    contentAccess,
                     AndroidMediaStoreCollectionKind.Images,
                     scope,
                     items,
@@ -143,6 +147,7 @@ namespace Cotton.Mobile.Platforms.Android
             {
                 await ReadCollectionAsync(
                     resolver,
+                    contentAccess,
                     AndroidMediaStoreCollectionKind.Videos,
                     scope,
                     items,
@@ -172,16 +177,6 @@ namespace Cotton.Mobile.Platforms.Android
             List<CottonContentRevisionSnapshot> revisions)
         {
             return new CottonContentRevisionIndexSnapshot(sourceVersion, revisions);
-        }
-
-        private static string ComputeContentHash(
-            ContentResolver resolver,
-            AndroidUri contentUri,
-            CancellationToken cancellationToken)
-        {
-            using Stream content = resolver.OpenInputStream(contentUri)
-                ?? throw new IOException("Could not open Android media content.");
-            return CottonContentHash.ComputeSha256(content, cancellationToken);
         }
 
         private static ContentResolver GetContentResolver()

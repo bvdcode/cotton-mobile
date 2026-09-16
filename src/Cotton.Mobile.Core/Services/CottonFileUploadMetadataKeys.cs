@@ -6,7 +6,7 @@ namespace Cotton.Mobile.Services
     public static class CottonFileUploadMetadataKeys
     {
         public const string Source = "cottonMobileSource";
-        public const string OriginalLastModifiedUtc = "cottonMobileOriginalLastModifiedUtc";
+        public const string OriginalLastModified = "cottonMobileOriginalLastModified";
         public const string UploadOperationId = "cottonMobileUploadOperationId";
         public const string QualityPolicy = "cottonMobileQualityPolicy";
         public const string CompressionQuality = "cottonMobileCompressionQuality";

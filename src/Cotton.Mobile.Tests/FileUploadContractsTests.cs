@@ -61,7 +61,7 @@ namespace Cotton.Mobile.Tests
                 new Dictionary<string, string>
                 {
                     [$" {CottonFileUploadMetadataKeys.Source} "] = " picked-photo ",
-                    [CottonFileUploadMetadataKeys.OriginalLastModifiedUtc] = " 2026-06-19T10:00:00.0000000Z ",
+                    [CottonFileUploadMetadataKeys.OriginalLastModified] = " 2026-06-19T10:00:00.0000000Z ",
                     [" "] = "ignored",
                     ["ignored"] = " ",
                 });
@@ -69,7 +69,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("picked-photo", snapshot.Metadata[CottonFileUploadMetadataKeys.Source]);
             Assert.Equal(
                 "2026-06-19T10:00:00.0000000Z",
-                snapshot.Metadata[CottonFileUploadMetadataKeys.OriginalLastModifiedUtc]);
+                snapshot.Metadata[CottonFileUploadMetadataKeys.OriginalLastModified]);
             Assert.DoesNotContain("ignored", snapshot.Metadata.Keys);
         }
 

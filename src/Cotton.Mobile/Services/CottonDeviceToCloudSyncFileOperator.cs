@@ -106,7 +106,7 @@ namespace Cotton.Mobile.Services
             };
             if (item.LocalUpdatedAtUtc.HasValue)
             {
-                metadata[CottonFileUploadMetadataKeys.OriginalLastModifiedUtc] =
+                metadata[CottonFileUploadMetadataKeys.OriginalLastModified] =
                     item.LocalUpdatedAtUtc.Value.ToString("O", CultureInfo.InvariantCulture);
             }
 

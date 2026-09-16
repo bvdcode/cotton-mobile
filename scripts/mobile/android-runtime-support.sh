@@ -45,7 +45,7 @@ wait_for_boot() {
   local attempt
   for attempt in {1..120}; do
     if [[ "$("$adb_bin" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; then
-      "$adb_bin" shell input keyevent 82 >/dev/null 2>&1 || true
+      "$adb_bin" shell wm dismiss-keyguard >/dev/null
       return
     fi
 

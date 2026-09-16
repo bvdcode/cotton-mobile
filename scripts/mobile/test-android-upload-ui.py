@@ -158,6 +158,39 @@ class Emulator:
             time.sleep(0.25)
         raise TimeoutError(f"UI scenario did not complete: {name}")
 
+    def scroll_to_end(self) -> None:
+        """Reveal content below the current scrollable viewport."""
+        previous = b""
+        for _ in range(6):
+            hierarchy = self.hierarchy()
+            serialized = ET.tostring(hierarchy)
+            if serialized == previous:
+                return
+            previous = serialized
+            scrollable_bounds = [
+                bounds(node)
+                for node in hierarchy.iter("node")
+                if node.get("scrollable") == "true"
+            ]
+            if not scrollable_bounds:
+                return
+            left, top, right, bottom = max(
+                scrollable_bounds,
+                key=lambda area: (area[2] - area[0]) * (area[3] - area[1]),
+            )
+            x = str((left + right) // 2)
+            inset = (bottom - top) // 5
+            self.run(
+                "shell",
+                "input",
+                "swipe",
+                x,
+                str(bottom - inset),
+                x,
+                str(top + inset),
+                "150",
+            )
+
 
 def capture(emulator: Emulator, directory: Path, name: str) -> ET.Element:
     """Save a screenshot and matching accessibility hierarchy."""
@@ -292,26 +325,9 @@ def capture_pending_upload(
     )
 
 
-def capture_source_end(
-    emulator: Emulator, directory: Path, name: str, viewport: Viewport
-) -> None:
+def capture_source_end(emulator: Emulator, directory: Path, name: str) -> None:
     """Verify source options remain reachable when they extend below the screen."""
-    previous = b""
-    for _ in range(6):
-        serialized = ET.tostring(emulator.hierarchy())
-        if serialized == previous:
-            break
-        previous = serialized
-        emulator.run(
-            "shell",
-            "input",
-            "swipe",
-            str(viewport.width // 2),
-            str(viewport.height * 4 // 5),
-            str(viewport.width // 2),
-            str(viewport.height // 3),
-            "150",
-        )
+    emulator.scroll_to_end()
     hierarchy = capture(emulator, directory, f"{name}-end")
     if name.endswith("source-folder"):
         assert_message(hierarchy, "Delete originals after upload")
@@ -464,6 +480,8 @@ def run_checks(
             for scenario in scenarios:
                 emulator.scenario(scenario)
                 name = f"{viewport.name}-{theme_name}-{scenario}"
+                if scenario == "running" or scenario in FAILURE_STATUS_PREFIXES:
+                    emulator.scroll_to_end()
                 hierarchy = capture(emulator, directory, name)
                 if scenario in OFFLINE_MESSAGES:
                     assert_message(hierarchy, OFFLINE_MESSAGES[scenario])
@@ -483,7 +501,7 @@ def run_checks(
                         )
                     assert_message(hierarchy, "Syncing 4 of 10 changes…")
                 if scenario.startswith("source-"):
-                    capture_source_end(emulator, directory, name, viewport)
+                    capture_source_end(emulator, directory, name)
                 if scenario in FAILURE_MESSAGES:
                     capture_failure(emulator, directory, name, scenario, hierarchy)
                 if scenario == "pending-upload-changed":

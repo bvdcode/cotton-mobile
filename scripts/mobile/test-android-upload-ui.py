@@ -436,6 +436,7 @@ def run_checks(
 ) -> None:
     """Check actual command feedback and capture affected pages."""
     directory.mkdir(parents=True, exist_ok=True)
+    emulator.run("shell", "cmd", "connectivity", "airplane-mode", "enable")
     emulator.run("shell", "svc", "wifi", "disable")
     emulator.run("shell", "svc", "data", "disable")
     emulator.run("shell", "am", "force-stop", PACKAGE)
@@ -513,6 +514,7 @@ def main() -> None:
         emulator.run("shell", "wm", "density", "reset")
         emulator.run("shell", "settings", "put", "system", "font_scale", "1.0")
         emulator.run("shell", "cmd", "uimode", "night", "auto")
+        emulator.run("shell", "cmd", "connectivity", "airplane-mode", "disable")
         emulator.run("shell", "svc", "wifi", "enable")
         emulator.run("shell", "svc", "data", "enable")
 

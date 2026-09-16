@@ -1,4 +1,9 @@
 cleanup() {
+  local exit_code="$?"
+  if (( exit_code != 0 )); then
+    capture_runtime_failure
+  fi
+
   if [[ -x "$adb_bin" ]]; then
     local media_uri
     for media_uri in "$remote_media_uri" "$excluded_media_uri"; do
@@ -12,6 +17,27 @@ cleanup() {
 
   if [[ -n "$emulator_pid" ]]; then
     wait "$emulator_pid" >/dev/null 2>&1 || true
+  fi
+
+  return "$exit_code"
+}
+
+capture_runtime_failure() {
+  local output_root="${COTTON_ANDROID_UPLOAD_UI_OUTPUT:-}"
+  if [[ -z "$output_root" ]]; then
+    return
+  fi
+
+  local output_directory="$output_root/runtime-failure"
+  mkdir -p "$output_directory" || return
+  if [[ -f "$emulator_log" ]]; then
+    cp "$emulator_log" "$output_directory/emulator.log" || true
+  fi
+
+  if [[ -x "$adb_bin" ]]; then
+    timeout 15 "$adb_bin" logcat -b all -d >"$output_directory/logcat.txt" 2>&1 || true
+    timeout 15 "$adb_bin" shell dumpsys activity lastanr >"$output_directory/last-anr.txt" 2>&1 || true
+    timeout 15 "$adb_bin" exec-out screencap -p >"$output_directory/screen.png" 2>"$output_directory/screen-error.txt" || true
   fi
 }
 

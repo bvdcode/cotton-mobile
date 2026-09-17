@@ -22,6 +22,9 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static async Task<CottonAutomaticSyncRunResult> WaitAsync(CancellationToken cancellationToken)
         {
+            using CancellationTokenRegistration registration = cancellationToken.Register(() =>
+                global::Android.Util.Log.Info(LogTag, $"cancellation-callback:main={MainThread.IsMainThread}"));
+            _ = global::Android.Util.Log.Info(LogTag, $"operation-thread:main={MainThread.IsMainThread}");
             _ = global::Android.Util.Log.Info(LogTag, "operation-started");
             try
             {

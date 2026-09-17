@@ -41,9 +41,9 @@ namespace Cotton.Mobile.Platforms.Android
             IExecutor executor = ContextCompat.GetMainExecutor(global::Android.App.Application.Context)
                 ?? throw new InvalidOperationException("Android main executor is unavailable.");
             completer.AddCancellationListener(
-                new Java.Lang.Runnable(_stoppingSource.Cancel),
+                new Java.Lang.Runnable(RequestStop),
                 executor);
-            _ = CompleteAsync(completer);
+            _ = Task.Run(() => CompleteAsync(completer));
             return new Java.Lang.String(GetType().Name);
         }
 
@@ -55,8 +55,25 @@ namespace Cotton.Mobile.Platforms.Android
                 AndroidAutomaticSyncDiagnosticLog.WorkerStopped(logger, StopReason, RunAttemptCount);
             }
 
-            _stoppingSource.Cancel();
+            RequestStop();
             base.OnStopped();
+        }
+
+        private void RequestStop()
+        {
+            _ = StopAsync();
+        }
+
+        private async Task StopAsync()
+        {
+            try
+            {
+                await _stoppingSource.CancelAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                LogFailure(exception);
+            }
         }
 
         protected abstract Task<ListenableWorker.Result> ExecuteAsync(

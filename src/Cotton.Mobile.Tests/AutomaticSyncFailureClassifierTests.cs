@@ -40,6 +40,50 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
+        [InlineData(WebExceptionStatus.NameResolutionFailure)]
+        [InlineData(WebExceptionStatus.ProxyNameResolutionFailure)]
+        [InlineData(WebExceptionStatus.ConnectFailure)]
+        [InlineData(WebExceptionStatus.ConnectionClosed)]
+        [InlineData(WebExceptionStatus.KeepAliveFailure)]
+        [InlineData(WebExceptionStatus.ReceiveFailure)]
+        [InlineData(WebExceptionStatus.SendFailure)]
+        public void AndroidNetworkFailuresRemainRetryable(WebExceptionStatus status)
+        {
+            WebException exception = new("Network unavailable", status);
+
+            CottonAutomaticSyncFailureKind actual = CottonAutomaticSyncFailureClassifier.Classify(exception);
+
+            Assert.Equal(CottonAutomaticSyncFailureKind.NetworkUnavailable, actual);
+            Assert.True(CottonAutomaticSyncRetryPolicy.IsRetryable(actual));
+        }
+
+        [Fact]
+        public void AndroidNetworkTimeoutRemainsRetryable()
+        {
+            WebException exception = new("Request timed out", WebExceptionStatus.Timeout);
+
+            CottonAutomaticSyncFailureKind actual = CottonAutomaticSyncFailureClassifier.Classify(exception);
+
+            Assert.Equal(CottonAutomaticSyncFailureKind.TimedOut, actual);
+            Assert.True(CottonAutomaticSyncRetryPolicy.IsRetryable(actual));
+        }
+
+        [Theory]
+        [InlineData(WebExceptionStatus.TrustFailure)]
+        [InlineData(WebExceptionStatus.SecureChannelFailure)]
+        [InlineData(WebExceptionStatus.ProtocolError)]
+        [InlineData(WebExceptionStatus.UnknownError)]
+        public void OtherWebFailuresDoNotBecomeUnlimitedNetworkRetries(WebExceptionStatus status)
+        {
+            WebException exception = new("Request failed", status);
+
+            CottonAutomaticSyncFailureKind actual = CottonAutomaticSyncFailureClassifier.Classify(exception);
+
+            Assert.Equal(CottonAutomaticSyncFailureKind.Unexpected, actual);
+            Assert.False(CottonAutomaticSyncRetryPolicy.IsRetryable(actual));
+        }
+
+        [Theory]
         [InlineData(CottonAutomaticSyncFailureKind.NetworkUnavailable, true)]
         [InlineData(CottonAutomaticSyncFailureKind.TimedOut, true)]
         [InlineData(CottonAutomaticSyncFailureKind.ServerUnavailable, true)]

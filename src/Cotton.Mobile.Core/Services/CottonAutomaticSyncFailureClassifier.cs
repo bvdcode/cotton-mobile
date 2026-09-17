@@ -93,6 +93,22 @@ namespace Cotton.Mobile.Services
                 return CottonAutomaticSyncFailureKind.NetworkUnavailable;
             }
 
+            if (exception is WebException webException)
+            {
+                return webException.Status switch
+                {
+                    WebExceptionStatus.NameResolutionFailure
+                        or WebExceptionStatus.ProxyNameResolutionFailure
+                        or WebExceptionStatus.ConnectFailure
+                        or WebExceptionStatus.ConnectionClosed
+                        or WebExceptionStatus.KeepAliveFailure
+                        or WebExceptionStatus.ReceiveFailure
+                        or WebExceptionStatus.SendFailure => CottonAutomaticSyncFailureKind.NetworkUnavailable,
+                    WebExceptionStatus.Timeout => CottonAutomaticSyncFailureKind.TimedOut,
+                    _ => CottonAutomaticSyncFailureKind.Unexpected,
+                };
+            }
+
             if (exception is UnauthorizedAccessException)
             {
                 return CottonAutomaticSyncFailureKind.LocalAccessUnavailable;

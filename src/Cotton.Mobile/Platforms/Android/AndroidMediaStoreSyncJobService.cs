@@ -122,6 +122,9 @@ namespace Cotton.Mobile.Platforms.Android
                     default:
                         throw new InvalidOperationException("Sync execution result is not supported.");
                 }
+#if DEBUG
+                _ = Log.Info(LogTag, "completed");
+#endif
             }
             catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
             {
@@ -164,9 +167,6 @@ namespace Cotton.Mobile.Platforms.Android
             if (isRunning)
             {
                 JobFinished(parameters, wantsReschedule);
-#if DEBUG
-                _ = Log.Info(LogTag, "completed");
-#endif
             }
         }
 

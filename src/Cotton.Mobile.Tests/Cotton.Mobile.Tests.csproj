@@ -22,6 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="..\Cotton.Mobile\Platforms\Android\AndroidJobExecution.cs" Link="Platforms\Android\AndroidJobExecution.cs" />
 		<Compile Include="..\Cotton.Mobile\Services\CottonSessionService.cs" Link="Services\CottonSessionService.cs" />
 		<Compile Include="..\Cotton.Mobile\Services\ICottonSessionService.cs" Link="Services\ICottonSessionService.cs" />
 		<Compile Include="..\Cotton.Mobile\Services\CottonSessionResult.cs" Link="Services\CottonSessionResult.cs" />

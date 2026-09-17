@@ -144,6 +144,8 @@ if [[ -n "${COTTON_ANDROID_UPLOAD_UI_OUTPUT:-}" ]]; then
     --adb "$adb_bin" \
     --serial "$("$adb_bin" get-serialno | tr -d '\r')" \
     --output "$COTTON_ANDROID_UPLOAD_UI_OUTPUT"
+  "$adb_bin" shell pm clear "$package_name" >/dev/null
+  "$adb_bin" shell am set-standby-bucket "$package_name" active
 fi
 deep_link_output="$(
   "$adb_bin" shell pm resolve-activity --brief \

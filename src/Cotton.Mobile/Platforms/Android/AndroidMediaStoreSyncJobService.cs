@@ -21,7 +21,7 @@ namespace Cotton.Mobile.Platforms.Android
 
         private const string LogTag = "CottonMediaSyncJob";
         private readonly Lock _executionGate = new();
-        private CancellationTokenSource? _executionCancellation;
+        private AndroidJobExecution? _executionCancellation;
 
         public override bool OnStartJob(JobParameters? @params)
         {
@@ -30,17 +30,21 @@ namespace Cotton.Mobile.Platforms.Android
                 return false;
             }
 
-            CancellationTokenSource cancellation = new();
+            AndroidJobExecution cancellation = new();
             lock (_executionGate)
             {
-                _executionCancellation?.Cancel();
+                if (_executionCancellation is not null)
+                {
+                    _ = StopAsync(_executionCancellation);
+                }
+
                 _executionCancellation = cancellation;
             }
 
 #if DEBUG
             _ = Log.Info(LogTag, "started");
 #endif
-            _ = ExecuteAsync(@params, cancellation);
+            _ = Task.Run(() => ExecuteAsync(@params, cancellation));
             return true;
         }
 
@@ -53,20 +57,36 @@ namespace Cotton.Mobile.Platforms.Android
                 AndroidAutomaticSyncDiagnosticLog.MediaStoreStopped(logger, (int)@params.StopReason);
             }
 
-            CancellationTokenSource? cancellation;
+            AndroidJobExecution? cancellation;
             lock (_executionGate)
             {
                 cancellation = _executionCancellation;
                 _executionCancellation = null;
             }
 
-            cancellation?.Cancel();
+            if (cancellation is not null)
+            {
+                _ = StopAsync(cancellation);
+            }
+
             return true;
+        }
+
+        private static async Task StopAsync(AndroidJobExecution cancellation)
+        {
+            try
+            {
+                await cancellation.CancelAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _ = Log.Error(LogTag, exception.ToString());
+            }
         }
 
         private async Task ExecuteAsync(
             JobParameters parameters,
-            CancellationTokenSource cancellation)
+            AndroidJobExecution cancellation)
         {
             try
             {
@@ -96,8 +116,8 @@ namespace Cotton.Mobile.Platforms.Android
                         break;
 
                     case AndroidAutomaticSyncExecutionResult.RetryRequired:
-                        throw new InvalidOperationException(
-                            "MediaStore sync unexpectedly requested a direct retry.");
+                        CompleteIfRunning(parameters, cancellation, wantsReschedule: true);
+                        break;
 
                     default:
                         throw new InvalidOperationException("Sync execution result is not supported.");
@@ -115,13 +135,20 @@ namespace Cotton.Mobile.Platforms.Android
             finally
             {
                 ClearExecution(cancellation);
-                cancellation.Dispose();
+                try
+                {
+                    await cancellation.DisposeAsync().ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    _ = Log.Error(LogTag, exception.ToString());
+                }
             }
         }
 
         private void CompleteIfRunning(
             JobParameters parameters,
-            CancellationTokenSource cancellation,
+            AndroidJobExecution cancellation,
             bool wantsReschedule)
         {
             bool isRunning;
@@ -143,7 +170,7 @@ namespace Cotton.Mobile.Platforms.Android
             }
         }
 
-        private void ClearExecution(CancellationTokenSource cancellation)
+        private void ClearExecution(AndroidJobExecution cancellation)
         {
             lock (_executionGate)
             {

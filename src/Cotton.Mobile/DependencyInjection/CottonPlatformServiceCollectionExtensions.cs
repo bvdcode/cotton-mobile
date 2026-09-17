@@ -40,6 +40,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<ICottonAutomaticSyncBackgroundScheduler, AndroidAutomaticSyncBackgroundScheduler>();
             services.AddSingleton<IBackgroundSyncRestrictionService, AndroidBackgroundSyncRestrictionService>();
             services.AddSingleton<AndroidAutomaticSyncExecutor>();
+            services.AddSingleton(new CottonBackgroundExecutionWindow(CottonBackgroundExecutionWindow.DefaultDuration));
             return services;
         }
     }

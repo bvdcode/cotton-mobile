@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Platforms.Android
         private const string FailureMessage = "Android background worker failed.";
         private const int MaximumRetryCount = 3;
 
-        private readonly CancellationTokenSource _stoppingSource = new();
+        private readonly AndroidJobExecution _stoppingSource = new();
 
         public override IListenableFuture StartWork()
         {
@@ -128,6 +128,14 @@ namespace Cotton.Mobile.Platforms.Android
             }
 
             _ = completer.Set(result);
+            try
+            {
+                await _stoppingSource.DisposeAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                LogFailure(exception);
+            }
         }
 
         private void LogFailure(Exception exception)

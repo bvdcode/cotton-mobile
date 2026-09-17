@@ -353,12 +353,15 @@ def wait_for_sign_in(emulator: Emulator) -> None:
     raise TimeoutError(f"Application did not reach sign-in. Visible text: {texts}")
 
 
-def check_worker_cancellation(emulator: Emulator) -> None:
+def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
     """Require Android's worker stop callback to cancel the dispatched operation."""
     tag = "CottonCancellationProbe"
     emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
     try:
-        emulator.scenario("worker-cancellation-start")
+        scenario = "worker-cancellation-start"
+        if budget:
+            scenario = "worker-budget-start"
+        emulator.scenario(scenario)
         emulator.run("shell", "am", "kill", PACKAGE)
         emulator.run("logcat", "-c")
         jobs = emulator.text("shell", "dumpsys", "jobscheduler")
@@ -373,11 +376,24 @@ def check_worker_cancellation(emulator: Emulator) -> None:
             raise AssertionError("Expected exactly one scheduled cancellation probe.")
         job = scheduled[0]
         namespace = ["-n", job.group("namespace")] if job.group("namespace") else []
-        for expected in (
+        emulator.run(
+            "shell",
+            "cmd",
+            "jobscheduler",
+            "run",
+            "-f",
+            *namespace,
+            PACKAGE,
+            job.group("id"),
+        )
+        expected_results = [
             "operation-started",
             "operation-stopped:cancelled=True",
             "cancellation-callback:main=False",
-        ):
+        ]
+        if budget:
+            expected_results.append("window-ended:retry")
+        for expected in expected_results:
             deadline = time.monotonic() + TIMEOUT_SECONDS
             while time.monotonic() < deadline:
                 output = emulator.text("logcat", "-d", "-s", f"{tag}:I", "*:S")
@@ -388,7 +404,7 @@ def check_worker_cancellation(emulator: Emulator) -> None:
                 raise AssertionError(
                     f"Android worker did not report {expected}: {output}"
                 )
-            if expected == "operation-started":
+            if expected == "operation-started" and not budget:
                 emulator.run(
                     "shell",
                     "cmd",
@@ -398,13 +414,18 @@ def check_worker_cancellation(emulator: Emulator) -> None:
                     PACKAGE,
                     job.group("id"),
                 )
-        if "system-stopped:reason=" not in output:
+        if not budget and "system-stopped:reason=" not in output:
             raise AssertionError(
                 "The dispatched operation stopped without Android's stop callback."
             )
         if "operation-thread:main=False" not in output:
             raise AssertionError("The worker started its operation on the UI thread.")
-        logging.info("Passed Android worker stop and operation cancellation")
+        if budget:
+            if "system-stopped:reason=" in output:
+                raise AssertionError("Android stopped the job before its own window.")
+            logging.info("Passed worker execution window and deferred retry")
+        else:
+            logging.info("Passed Android worker stop and operation cancellation")
     finally:
         emulator.scenario("worker-cancellation-cleanup")
     activity = emulator.text(
@@ -590,6 +611,7 @@ def run_checks(
     wait_for_sign_in(emulator)
     check_sign_in_notification(emulator)
     check_worker_cancellation(emulator)
+    check_worker_cancellation(emulator, budget=True)
     check_review_cancellation(emulator)
     completed: list[str] = []
     viewports = VIEWPORTS if full else VIEWPORTS[:1]

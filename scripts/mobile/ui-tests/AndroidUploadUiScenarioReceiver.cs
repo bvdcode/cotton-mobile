@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Platforms.Android
                 return;
             }
 
-            if (scenario is "worker-cancellation-start" or "worker-cancellation-cleanup")
+            if (scenario is "worker-cancellation-start" or "worker-cancellation-cleanup" or "worker-budget-start")
             {
                 await ConfigureCancellationProbeAsync(scenario);
                 return;
@@ -180,7 +180,13 @@ namespace Cotton.Mobile.Platforms.Android
                 return;
             }
 
-            using Java.Lang.Class workerClass = Java.Lang.Class.FromType(typeof(AndroidCancellationProbeWorker))
+            Type workerType = scenario switch
+            {
+                "worker-cancellation-start" => typeof(AndroidCancellationProbeWorker),
+                "worker-budget-start" => typeof(AndroidBudgetProbeWorker),
+                _ => throw new ArgumentOutOfRangeException(nameof(scenario)),
+            };
+            using Java.Lang.Class workerClass = Java.Lang.Class.FromType(workerType)
                 ?? throw new InvalidOperationException("Test worker type is unavailable.");
             using OneTimeWorkRequest.Builder builder = new(workerClass);
             _ = builder.SetInitialDelay(5, Java.Util.Concurrent.TimeUnit.Seconds

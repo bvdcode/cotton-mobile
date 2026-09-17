@@ -9,6 +9,9 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public static partial class AndroidAutomaticSyncDiagnosticLog
     {
+        [LoggerMessage(EventId = 2207, Level = LogLevel.Information, Message = "Background execution window ended; unfinished work will resume in a later job.")]
+        public static partial void ExecutionWindowEnded(ILogger logger);
+
         [LoggerMessage(EventId = 2201, Level = LogLevel.Information, Message = "Android background sync started with trigger {Trigger}; retry root: {HasRetryRoot}.")]
         public static partial void Started(
             ILogger logger,

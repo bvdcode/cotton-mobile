@@ -12,6 +12,7 @@ namespace Cotton.Mobile.Platforms.Android
         ICottonSessionNotificationService sessionNotifications,
         CottonAutomaticSyncDispatcher dispatcher,
         ICottonAutomaticSyncBackgroundScheduler backgroundScheduler,
+        CottonBackgroundExecutionWindow executionWindow,
         ILogger<AndroidAutomaticSyncExecutor> logger)
     {
         private readonly ICottonSessionService _sessionService =
@@ -27,6 +28,23 @@ namespace Cotton.Mobile.Platforms.Android
             CottonAutomaticSyncTrigger trigger,
             Guid? retryRootId,
             CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return await executionWindow.RunAsync(
+                    token => ExecuteCoreAsync(trigger, retryRootId, token), cancellationToken).ConfigureAwait(false);
+            }
+            catch (CottonBackgroundWindowExpiredException)
+            {
+                AndroidAutomaticSyncDiagnosticLog.ExecutionWindowEnded(_logger);
+                return AndroidAutomaticSyncExecutionResult.RetryRequired;
+            }
+        }
+
+        private async Task<AndroidAutomaticSyncExecutionResult> ExecuteCoreAsync(
+            CottonAutomaticSyncTrigger trigger,
+            Guid? retryRootId,
+            CancellationToken cancellationToken)
         {
             if (!Enum.IsDefined(trigger))
             {

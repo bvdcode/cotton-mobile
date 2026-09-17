@@ -373,7 +373,11 @@ def check_worker_cancellation(emulator: Emulator) -> None:
             raise AssertionError("Expected exactly one scheduled cancellation probe.")
         job = scheduled[0]
         namespace = ["-n", job.group("namespace")] if job.group("namespace") else []
-        for expected in ("operation-started", "operation-stopped:cancelled=True"):
+        for expected in (
+            "operation-started",
+            "operation-stopped:cancelled=True",
+            "cancellation-callback:main=False",
+        ):
             deadline = time.monotonic() + TIMEOUT_SECONDS
             while time.monotonic() < deadline:
                 output = emulator.text("logcat", "-d", "-s", f"{tag}:I", "*:S")
@@ -398,6 +402,8 @@ def check_worker_cancellation(emulator: Emulator) -> None:
             raise AssertionError(
                 "The dispatched operation stopped without Android's stop callback."
             )
+        if "operation-thread:main=False" not in output:
+            raise AssertionError("The worker started its operation on the UI thread.")
         logging.info("Passed Android worker stop and operation cancellation")
     finally:
         emulator.scenario("worker-cancellation-cleanup")
@@ -406,6 +412,34 @@ def check_worker_cancellation(emulator: Emulator) -> None:
     ).splitlines()[-1]
     emulator.run("shell", "am", "start", "-W", "-n", activity)
     wait_for_sign_in(emulator)
+
+
+def check_review_cancellation(emulator: Emulator) -> None:
+    """Require Android's stop lifecycle to cancel the foreground review scope."""
+    emulator.scenario("original-media-review-cancellation")
+    deadline = time.monotonic() + TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        output = emulator.text("logcat", "-d", "-s", "CottonUploadUiTests:I", "*:S")
+        if "original-media-review:hash-started" in output:
+            break
+        time.sleep(0.1)
+    else:
+        raise AssertionError(f"Foreground review did not start hashing: {output}")
+    emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
+    deadline = time.monotonic() + TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        output = emulator.text("logcat", "-d", "-s", "CottonUploadUiTests:I", "*:S")
+        if "original-media-review:stopped" in output:
+            break
+        time.sleep(0.25)
+    else:
+        raise AssertionError(f"Leaving the application did not stop review: {output}")
+    activity = emulator.text(
+        "shell", "cmd", "package", "resolve-activity", "--brief", PACKAGE
+    ).splitlines()[-1]
+    emulator.run("shell", "am", "start", "-W", "-n", activity)
+    wait_for_sign_in(emulator)
+    logging.info("Passed foreground review cancellation on Android Home")
 
 
 def check_sign_in_notification(emulator: Emulator) -> None:
@@ -447,6 +481,97 @@ def check_sign_in_notification(emulator: Emulator) -> None:
     logging.info("Passed sign-in notification delivery and recovery")
 
 
+def check_permission_transition(emulator: Emulator, directory: Path, name: str) -> None:
+    """Grant media access and require the row to disappear on the same screen."""
+    api = int(emulator.text("shell", "getprop", "ro.build.version.sdk"))
+    if api < 29:
+        return
+    emulator.run("shell", "pm", "clear", PACKAGE)
+    activity = emulator.text(
+        "shell", "cmd", "package", "resolve-activity", "--brief", PACKAGE
+    ).splitlines()[-1]
+    emulator.run("shell", "am", "start", "-W", "-n", activity)
+    wait_for_sign_in(emulator)
+    emulator.scenario("running")
+    emulator.scroll_to_end()
+    before = capture(emulator, directory, f"{name}-before")
+    allow = next(
+        node for node in before.iter("node") if node.get("text") == "Allow access"
+    )
+    left, top, right, bottom = bounds(allow)
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+    dialog = emulator.hierarchy()
+    permission_button = (
+        ":id/permission_allow_all_button"
+        if api >= 34
+        else ":id/permission_allow_button"
+    )
+    allow_all = next(
+        node
+        for node in dialog.iter("node")
+        if node.get("resource-id", "").endswith(permission_button)
+    )
+    left, top, right, bottom = bounds(allow_all)
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+    after = capture(emulator, directory, f"{name}-after")
+    texts = [node.get("text", "") for node in after.iter("node")]
+    if "Allow access" in texts or "Preserve location data" in texts:
+        raise AssertionError("The granted permission row is still present.")
+    title = next(
+        node
+        for node in after.iter("node")
+        if node.get("text", "").startswith("Camera backups")
+    )
+    parents = {child: parent for parent in after.iter() for child in parent}
+    collection = parents[title]
+    while collection.get("class") != "androidx.recyclerview.widget.RecyclerView":
+        collection = parents[collection]
+    pause = next(
+        node for node in after.iter("node") if node.get("content-desc") == "Pause"
+    )
+    if bounds(title)[1] - bounds(collection)[1] > bounds(pause)[3] - bounds(pause)[1]:
+        raise AssertionError(
+            "Removing the permission row left empty space above the folder."
+        )
+    assert_dashboard_layout(after, "running")
+
+
+def check_original_prompt(
+    emulator: Emulator, directory: Path, name: str, accept: bool
+) -> None:
+    """Render the native recovery question and exercise both decisions."""
+    emulator.scenario("running")
+    emulator.scenario("original-media-prompt")
+    hierarchy = capture(emulator, directory, name)
+    texts = [node.get("text", "") for node in hierarchy.iter("node")]
+    if "Restore location data?" not in texts or not any(
+        "300 cloud files" in text for text in texts
+    ):
+        raise AssertionError("The original media question is incomplete.")
+    label = "Yes, restore" if accept else "Keep current copies"
+    button = next(
+        node
+        for node in hierarchy.iter("node")
+        if node.get("text", "").casefold() == label.casefold()
+    )
+    left, top, right, bottom = bounds(button)
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+    deadline = time.monotonic() + TIMEOUT_SECONDS
+    expected = f"original-media-prompt:accepted={accept}"
+    while time.monotonic() < deadline:
+        output = emulator.text("logcat", "-d", "-s", "CottonUploadUiTests:I", "*:S")
+        if expected in output:
+            return
+        time.sleep(0.25)
+    raise AssertionError(f"The native question did not report its decision: {output}")
+
+
 def run_checks(
     emulator: Emulator, directory: Path, full: bool, dashboard_only: bool
 ) -> None:
@@ -465,6 +590,7 @@ def run_checks(
     wait_for_sign_in(emulator)
     check_sign_in_notification(emulator)
     check_worker_cancellation(emulator)
+    check_review_cancellation(emulator)
     completed: list[str] = []
     viewports = VIEWPORTS if full else VIEWPORTS[:1]
     display_scenarios = ("running",) if dashboard_only else SCENARIOS
@@ -472,6 +598,14 @@ def run_checks(
         for theme in ("no", "yes"):
             theme_name = "light" if theme == "no" else "dark"
             emulator.configure(viewport, theme)
+            permission_case = f"{viewport.name}-{theme_name}-permission-transition"
+            check_permission_transition(emulator, directory, permission_case)
+            completed.append(permission_case)
+            logging.info("Passed %s", permission_case)
+            prompt_case = f"{viewport.name}-{theme_name}-original-media-prompt"
+            check_original_prompt(emulator, directory, prompt_case, theme == "no")
+            completed.append(prompt_case)
+            logging.info("Passed %s", prompt_case)
             scenarios = (
                 (*OFFLINE_MESSAGES, *display_scenarios)
                 if viewport.name == "phone"

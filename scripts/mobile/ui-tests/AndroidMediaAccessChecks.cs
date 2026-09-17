@@ -120,6 +120,13 @@ namespace Cotton.Mobile.Platforms.Android
                 throw new InvalidOperationException("Upload stream differs from the scanned content.");
             }
 
+            if (AndroidMediaContentAccess.HasLocationPermission && OperatingSystem.IsAndroidVersionAtLeast(31))
+            {
+                string? redactedHash = await services.GetRequiredService<ICottonRedactedMediaHashSource>()
+                    .ComputeAsync(root, file);
+                _ = global::Android.Util.Log.Info(LogTag, $"Redacted:{root.LocalRoot.StorageKind}:{fileName}:{redactedHash}");
+            }
+
             if (root.DeletesOriginalsAfterUpload && !AndroidMediaContentAccess.HasLocationPermission)
             {
                 CottonDeviceToCloudLocalFileDeleteStatus deletion = await services

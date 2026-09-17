@@ -16,6 +16,7 @@ namespace Cotton.Mobile.Services
         private readonly CottonRecursiveRemoteContentLoader _remoteContentLoader;
         private readonly CottonUploadOnlySyncPlanExecutor _planExecutor;
         private readonly CottonSyncRootExecutionLock _executionLock;
+        private readonly CottonMediaOriginalRestoreExecutor _originalRestore;
         private readonly CottonSyncProgressHub _progressHub;
         private readonly ILogger<CottonDeviceToCloudSyncCoordinator> _logger;
 
@@ -27,6 +28,7 @@ namespace Cotton.Mobile.Services
             CottonRecursiveRemoteContentLoader remoteContentLoader,
             CottonUploadOnlySyncPlanExecutor planExecutor,
             CottonSyncRootExecutionLock executionLock,
+            CottonMediaOriginalRestoreExecutor originalRestore,
             CottonSyncProgressHub progressHub,
             ILogger<CottonDeviceToCloudSyncCoordinator> logger)
         {
@@ -47,6 +49,7 @@ namespace Cotton.Mobile.Services
             _remoteContentLoader = remoteContentLoader;
             _planExecutor = planExecutor;
             _executionLock = executionLock;
+            _originalRestore = originalRestore ?? throw new ArgumentNullException(nameof(originalRestore));
             _progressHub = progressHub;
             _logger = logger;
         }
@@ -174,6 +177,14 @@ namespace Cotton.Mobile.Services
                     .LoadAsync(instanceUri, root, cancellationToken)
                     .ConfigureAwait(false);
                 CottonSyncDiagnosticLog.CloudScanCompleted(_logger, root.Id, remoteContent.Items.Count);
+                int restored = await _originalRestore.ApplyAsync(root, localContent, remoteContent, cancellationToken)
+                    .ConfigureAwait(false);
+                if (restored > 0)
+                {
+                    remoteContent = await _remoteContentLoader.LoadAsync(instanceUri, root, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
                 IReadOnlyList<CottonUploadReceiptSnapshot> uploadReceipts = await _uploadReceiptStore
                     .LoadAsync(instanceUri, root, cancellationToken)
                     .ConfigureAwait(false);
@@ -194,6 +205,13 @@ namespace Cotton.Mobile.Services
                 CottonDeviceToCloudSyncExecutionResult executionResult = await _planExecutor
                     .ExecuteAsync(instanceUri, root, plan, cancellationToken)
                     .ConfigureAwait(false);
+                if (restored > 0)
+                {
+                    executionResult = new CottonDeviceToCloudSyncExecutionResult(executionResult.UploadedCount,
+                        executionResult.ConfirmedUploadCount + restored, executionResult.CreatedFolderCount,
+                        executionResult.DeletedLocalFileCount, executionResult.SkippedCount, executionResult.BlockedCount);
+                }
+
                 CottonSyncDiagnosticLog.ExecutionCompleted(
                     _logger,
                     root.Id,

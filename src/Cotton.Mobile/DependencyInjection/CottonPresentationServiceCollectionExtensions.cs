@@ -21,6 +21,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<SyncSettingsManagementHandler>();
             services.AddSingleton<BackgroundSyncRestrictionViewModel>();
             services.AddSingleton<MediaLocationAccessViewModel>();
+            services.AddSingleton<MediaOriginalRestoreReviewHandler>();
             services.AddSingleton<SyncSettingsViewModel>();
             services.AddSingleton<MainPageViewModel>();
             services.AddSingleton<MainPage>();

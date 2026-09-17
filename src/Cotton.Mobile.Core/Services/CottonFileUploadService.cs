@@ -80,6 +80,7 @@ namespace Cotton.Mobile.Services
                 source,
                 result,
                 fileId);
+            request.Metadata = null;
             NodeFileManifestDto updatedFile = await client.Files
                 .UpdateContentAsync(fileId, request, expectedETag.Trim(), cancellationToken)
                 .ConfigureAwait(false);

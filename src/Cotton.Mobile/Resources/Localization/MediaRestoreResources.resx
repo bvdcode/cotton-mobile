@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Restore location data?</value></data>
+  <data name="ConfirmationFormat" xml:space="preserve"><value>Original media is now accessible. We found {0} cloud files that match copies with location data removed by Android. Replace these copies with the originals? Uploads will continue in the background and resume if interrupted.</value></data>
+  <data name="Restore" xml:space="preserve"><value>Yes, restore</value></data>
+  <data name="KeepCopies" xml:space="preserve"><value>Keep current copies</value></data>
+</root>

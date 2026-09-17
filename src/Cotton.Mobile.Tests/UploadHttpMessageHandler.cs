@@ -21,7 +21,19 @@ namespace Cotton.Mobile.Tests
 
         public HttpStatusCode FailureStatus { get; init; } = HttpStatusCode.ServiceUnavailable;
 
-        public CancellationTokenSource? CancelAfterChunk { get; init; }
+        public CancellationTokenSource? CancelAfterChunk { get; set; }
+
+        public string? ExpectedETag { get; set; }
+
+        public string? ReceivedIfMatch { get; private set; }
+
+        public HttpStatusCode? UpdateFailureStatus { get; set; }
+
+        public bool LoseUpdateResponse { get; set; }
+
+        public Dictionary<string, string> ExistingMetadata { get; } = new(StringComparer.Ordinal);
+
+        public NodeFileManifestDto? UpdatedFile { get; private set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request,
@@ -42,6 +54,28 @@ namespace Cotton.Mobile.Tests
                 case "/api/v1/files/from-chunks":
                     return await PublishFileAsync(request, cancellationToken);
                 default:
+                    if (uri.AbsolutePath.EndsWith("/update-content", StringComparison.Ordinal)
+                        && Guid.TryParse(uri.Segments[^2].TrimEnd('/'), out Guid fileId))
+                    {
+                        if (request.Method != HttpMethod.Patch)
+                        {
+                            throw new InvalidOperationException("File updates require PATCH.");
+                        }
+
+                        ReceivedIfMatch = request.Headers.GetValues("If-Match").Single();
+                        if (ReceivedIfMatch != ExpectedETag)
+                        {
+                            throw new InvalidDataException("File update must include the expected cloud revision.");
+                        }
+
+                        if (UpdateFailureStatus.HasValue)
+                        {
+                            return new HttpResponseMessage(UpdateFailureStatus.Value);
+                        }
+
+                        return await PublishFileAsync(request, cancellationToken, fileId);
+                    }
+
                     if (uri.AbsolutePath.StartsWith("/api/v1/chunks/", StringComparison.Ordinal)
                         && uri.AbsolutePath.EndsWith("/exists", StringComparison.Ordinal))
                     {
@@ -84,7 +118,8 @@ namespace Cotton.Mobile.Tests
 
         private async Task<HttpResponseMessage> PublishFileAsync(
             HttpRequestMessage request,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            Guid? updatedFileId = null)
         {
             HttpContent content = request.Content ?? throw new InvalidOperationException("File body is missing.");
             CreateFileFromChunksRequestDto file = await content
@@ -105,15 +140,28 @@ namespace Cotton.Mobile.Tests
             }
 
             PublishedFiles.Add(file);
-            return Json(new NodeFileManifestDto
+            NodeFileManifestDto result = new()
             {
-                Id = Guid.NewGuid(),
+                Id = updatedFileId ?? Guid.NewGuid(),
                 Name = file.Name,
                 SizeBytes = length,
                 ContentType = file.ContentType,
                 ContentHash = file.Hash,
-                Metadata = file.Metadata ?? throw new InvalidDataException("Upload metadata is missing."),
-            });
+                ETag = "sha256-" + file.Hash,
+                Metadata = file.Metadata is null && updatedFileId.HasValue
+                    ? new Dictionary<string, string>(ExistingMetadata, StringComparer.Ordinal)
+                    : file.Metadata ?? throw new InvalidDataException("Upload metadata is missing."),
+            };
+            if (updatedFileId.HasValue)
+            {
+                UpdatedFile = result;
+                if (LoseUpdateResponse)
+                {
+                    throw new HttpRequestException("Response lost after the content update.");
+                }
+            }
+
+            return Json(result);
         }
 
         private static HttpResponseMessage Json<T>(T value)

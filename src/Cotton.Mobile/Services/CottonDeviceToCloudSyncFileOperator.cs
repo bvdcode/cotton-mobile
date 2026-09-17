@@ -1,22 +1,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Globalization;
-
 namespace Cotton.Mobile.Services
 {
     public class CottonDeviceToCloudSyncFileOperator(
         ICottonFileUploadService uploadService,
-        ICottonDeviceToCloudLocalFileContentSource localContentSource,
+        CottonSyncFileUploadSourceFactory sourceFactory,
         ICottonFileBrowserService fileBrowserService) :
         ICottonDeviceToCloudSyncFileOperator
     {
-        private const string MetadataSourceValue = "device-to-cloud-sync";
-
         private readonly ICottonFileUploadService _uploadService =
             uploadService ?? throw new ArgumentNullException(nameof(uploadService));
-        private readonly ICottonDeviceToCloudLocalFileContentSource _localContentSource =
-            localContentSource ?? throw new ArgumentNullException(nameof(localContentSource));
+        private readonly CottonSyncFileUploadSourceFactory _sourceFactory =
+            sourceFactory ?? throw new ArgumentNullException(nameof(sourceFactory));
         private readonly ICottonFileBrowserService _fileBrowserService =
             fileBrowserService ?? throw new ArgumentNullException(nameof(fileBrowserService));
 
@@ -34,7 +30,7 @@ namespace Cotton.Mobile.Services
             return _uploadService.UploadAsync(
                 instanceUri,
                 parentFolder,
-                CreateUploadSource(instanceUri, root, item),
+                _sourceFactory.Create(instanceUri, root, item),
                 progress,
                 cancellationToken);
         }
@@ -80,43 +76,6 @@ namespace Cotton.Mobile.Services
                 && string.Equals(remoteFile.ETag, item.ExpectedRemoteETag, StringComparison.Ordinal)
                 && remoteFile.SizeBytes == item.SizeBytes
                 && string.Equals(remoteFile.ContentHash, item.ContentHash, StringComparison.Ordinal);
-        }
-
-        private CottonFileUploadSource CreateUploadSource(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item)
-        {
-            return new CottonFileUploadSource(
-                new CottonFileUploadSourceSnapshot(
-                    item.DisplayName,
-                    item.ContentType,
-                    item.SizeBytes,
-                    CreateUploadMetadata(item),
-                    item.ContentHash),
-                token => _localContentSource.OpenReadAsync(instanceUri, root, item, token));
-        }
-
-        private static Dictionary<string, string> CreateUploadMetadata(
-            CottonDeviceToCloudSyncPlanItem item)
-        {
-            Dictionary<string, string> metadata = new(StringComparer.Ordinal)
-            {
-                [CottonFileUploadMetadataKeys.Source] = MetadataSourceValue,
-            };
-            if (item.LocalUpdatedAtUtc.HasValue)
-            {
-                metadata[CottonFileUploadMetadataKeys.OriginalLastModified] =
-                    item.LocalUpdatedAtUtc.Value.ToString("O", CultureInfo.InvariantCulture);
-            }
-
-            if (item.UploadOperationId.HasValue)
-            {
-                metadata[CottonFileUploadMetadataKeys.UploadOperationId] =
-                    item.UploadOperationId.Value.ToString("N");
-            }
-
-            return metadata;
         }
 
         private static void EnsureUploadItem(

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileSystemCottonUploadReceiptStore : ICottonUploadReceiptStore, IDisposable
+    public class FileSystemCottonUploadReceiptStore : ICottonUploadReceiptStore, ICottonRestoredUploadReceiptStore, IDisposable
     {
         private const int SchemaVersion = 1;
         private const string ReceiptFileExtension = ".json";
@@ -91,6 +91,33 @@ namespace Cotton.Mobile.Services
 
                 await CottonAtomicJsonFile
                     .WriteAsync(filePath, CreateStoredReceipt(root, receipt), cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                _writeLock.Release();
+            }
+        }
+
+        public async Task SaveRestoredAsync(
+            CottonSyncRootSnapshot root,
+            CottonUploadReceiptSnapshot receipt,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(root);
+            ArgumentNullException.ThrowIfNull(receipt);
+            EnsureSupportedRoot(root.InstanceUri, root);
+            if (!receipt.IsUploaded)
+            {
+                throw new ArgumentException("Restored originals require a confirmed cloud revision.", nameof(receipt));
+            }
+
+            string directory = _pathProvider.CreateUploadReceiptDirectory(root.InstanceUri, root);
+            string path = Path.Combine(directory, CreateReceiptFileName(receipt.LocalSourceId));
+            await _writeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await CottonAtomicJsonFile.WriteAsync(path, CreateStoredReceipt(root, receipt), cancellationToken)
                     .ConfigureAwait(false);
             }
             finally

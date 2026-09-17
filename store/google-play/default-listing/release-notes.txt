@@ -1,5 +1,5 @@
 Closed testing build for Cotton Cloud.
 
-Adds account and security notifications without a third-party push provider. New notifications arrive immediately through the active Cotton connection while the app is open and are checked periodically by Android in the background.
+After granting media access, you can restore verified cloud copies that Android previously uploaded without location data. Confirm once to queue the originals for upload.
 
-Large notification backlogs are summarized into one useful alert instead of flooding the notification tray.
+Fixes empty space after dismissing the media permission notice. Improves background task cancellation and retries after temporary network failures.

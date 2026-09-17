@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:Cotton.Mobile"
@@ -140,153 +140,156 @@
 
             <CollectionView Grid.Row="2"
                             IsVisible="{Binding IsListVisible}"
-                            ItemsSource="{Binding Roots}"
+                            ItemsSource="{Binding DashboardItems}"
                             ItemSizingStrategy="MeasureAllItems">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical"
                                        ItemSpacing="0" />
                 </CollectionView.ItemsLayout>
-                <CollectionView.Header>
-                    <Grid IsVisible="{Binding MediaLocationAccess.IsPermissionNeeded}"
-                          Padding="0,0,0,12">
-                        <local:MediaLocationAccessView BindingContext="{Binding MediaLocationAccess}" />
-                    </Grid>
-                </CollectionView.Header>
                 <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="services:CottonSyncRootListItem">
-                        <Grid RowDefinitions="Auto,Auto">
-                            <VerticalStackLayout Padding="4,10"
-                                                 Spacing="8">
-                                <Grid ColumnSpacing="12"
-                                      IsClippedToBounds="True">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="{StaticResource AppTouchTargetSize}" />
-                                    </Grid.ColumnDefinitions>
-                                    <Border Style="{StaticResource AppIconFrame}">
-                                        <Image Style="{StaticResource AppIcon}">
-                                            <Image.Source>
-                                                <FontImageSource FontFamily="MaterialOutlined"
-                                                                 Glyph="{x:Static symbols:MaterialOutlined.Folder}"
-                                                                 Color="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}" />
-                                            </Image.Source>
-                                            <Image.Triggers>
-                                                <DataTrigger TargetType="Image"
-                                                             Binding="{Binding UsesMediaStore}"
-                                                             Value="True">
-                                                    <Setter Property="Source"
-                                                            Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
-                                                </DataTrigger>
-                                                <DataTrigger TargetType="Image"
-                                                             Binding="{Binding IsAttentionVisible}"
-                                                             Value="True">
-                                                    <Setter Property="Source"
-                                                            Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Error}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
-                                                </DataTrigger>
-                                            </Image.Triggers>
-                                        </Image>
-                                    </Border>
+                    <local:SyncDashboardTemplateSelector>
+                        <local:SyncDashboardTemplateSelector.MediaLocationTemplate>
+                            <DataTemplate x:DataType="viewModels:MediaLocationAccessViewModel">
+                                <local:MediaLocationAccessView Margin="0,0,0,12" />
+                            </DataTemplate>
+                        </local:SyncDashboardTemplateSelector.MediaLocationTemplate>
+                        <local:SyncDashboardTemplateSelector.SyncRootTemplate>
+                            <DataTemplate x:DataType="services:CottonSyncRootListItem">
+                                <Grid RowDefinitions="Auto,Auto">
+                                    <VerticalStackLayout Padding="4,10"
+                                                         Spacing="8">
+                                        <Grid ColumnSpacing="12"
+                                              IsClippedToBounds="True">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="{StaticResource AppTouchTargetSize}" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource AppIconFrame}">
+                                                <Image Style="{StaticResource AppIcon}">
+                                                    <Image.Source>
+                                                        <FontImageSource FontFamily="MaterialOutlined"
+                                                                         Glyph="{x:Static symbols:MaterialOutlined.Folder}"
+                                                                         Color="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}" />
+                                                    </Image.Source>
+                                                    <Image.Triggers>
+                                                        <DataTrigger TargetType="Image"
+                                                                     Binding="{Binding UsesMediaStore}"
+                                                                     Value="True">
+                                                            <Setter Property="Source"
+                                                                    Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                                                        </DataTrigger>
+                                                        <DataTrigger TargetType="Image"
+                                                                     Binding="{Binding IsAttentionVisible}"
+                                                                     Value="True">
+                                                            <Setter Property="Source"
+                                                                    Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Error}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                                                        </DataTrigger>
+                                                    </Image.Triggers>
+                                                </Image>
+                                            </Border>
 
-                                    <Grid Grid.Column="1"
-                                          RowDefinitions="Auto,Auto"
-                                          RowSpacing="3"
-                                          IsClippedToBounds="True"
-                                          InputTransparent="True"
-                                          MinimumHeightRequest="{StaticResource AppTouchTargetSize}"
-                                          SemanticProperties.Description="{Binding StatusActionText}"
-                                          VerticalOptions="Center">
-                                        <Grid.GestureRecognizers>
-                                            <TapGestureRecognizer
-                                                Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
-                                                CommandParameter="{Binding StatusAction}" />
-                                        </Grid.GestureRecognizers>
-                                        <Grid.Triggers>
-                                            <DataTrigger TargetType="Grid"
-                                                         Binding="{Binding CanUseStatusAction}"
-                                                         Value="True">
-                                                <Setter Property="InputTransparent" Value="False" />
-                                            </DataTrigger>
-                                        </Grid.Triggers>
-                                        <Label Text="{Binding DisplayPathText}"
-                                               FontAttributes="Bold"
-                                               Style="{StaticResource AppBodyText}"
-                                               LineBreakMode="TailTruncation"
-                                               MaxLines="1" />
-                                        <Label Grid.Row="1"
-                                               Text="{Binding StatusText}"
-                                               Style="{StaticResource AppBodyText}"
-                                               LineBreakMode="WordWrap"
-                                               VerticalOptions="Center">
-                                            <Label.Triggers>
-                                                <DataTrigger TargetType="Label"
-                                                             Binding="{Binding CanUseStatusAction}"
-                                                             Value="True">
-                                                    <Setter Property="TextColor"
-                                                            Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                                </DataTrigger>
-                                            </Label.Triggers>
-                                        </Label>
-                                    </Grid>
+                                            <Grid Grid.Column="1"
+                                                  RowDefinitions="Auto,Auto"
+                                                  RowSpacing="3"
+                                                  IsClippedToBounds="True"
+                                                  InputTransparent="True"
+                                                  MinimumHeightRequest="{StaticResource AppTouchTargetSize}"
+                                                  SemanticProperties.Description="{Binding StatusActionText}"
+                                                  VerticalOptions="Center">
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer
+                                                        Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                        CommandParameter="{Binding StatusAction}" />
+                                                </Grid.GestureRecognizers>
+                                                <Grid.Triggers>
+                                                    <DataTrigger TargetType="Grid"
+                                                                 Binding="{Binding CanUseStatusAction}"
+                                                                 Value="True">
+                                                        <Setter Property="InputTransparent" Value="False" />
+                                                    </DataTrigger>
+                                                </Grid.Triggers>
+                                                <Label Text="{Binding DisplayPathText}"
+                                                       FontAttributes="Bold"
+                                                       Style="{StaticResource AppBodyText}"
+                                                       LineBreakMode="TailTruncation"
+                                                       MaxLines="1" />
+                                                <Label Grid.Row="1"
+                                                       Text="{Binding StatusText}"
+                                                       Style="{StaticResource AppBodyText}"
+                                                       LineBreakMode="WordWrap"
+                                                       VerticalOptions="Center">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label"
+                                                                     Binding="{Binding CanUseStatusAction}"
+                                                                     Value="True">
+                                                            <Setter Property="TextColor"
+                                                                    Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </Grid>
 
-                                    <Button Grid.Column="2"
-                                            Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
-                                            CommandParameter="{Binding PauseResumeAction}"
-                                            IsVisible="{Binding BindingContext.ArePrimaryActionsVisible, Source={x:Reference SyncViewRoot}}"
-                                            SemanticProperties.Description="{Binding PauseResumeActionText}"
-                                            WidthRequest="{StaticResource AppTouchTargetSize}"
-                                            Padding="0"
-                                            StyleClass="TextButton, TouchTarget">
-                                        <Button.ImageSource>
-                                            <FontImageSource FontFamily="MaterialOutlined"
-                                                             Glyph="{x:Static symbols:MaterialOutlined.Pause}"
-                                                             Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                                        </Button.ImageSource>
-                                        <Button.Triggers>
-                                            <DataTrigger TargetType="Button"
-                                                         Binding="{Binding IsPaused}"
-                                                         Value="False">
-                                                <Setter Property="Command"
-                                                        Value="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}" />
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="Button"
-                                                         Binding="{Binding PauseResumeAction.Action}"
-                                                         Value="{x:Static services:CottonSyncRootAction.Resume}">
-                                                <Setter Property="ImageSource"
-                                                        Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Play_arrow}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
-                                            </DataTrigger>
-                                        </Button.Triggers>
-                                    </Button>
+                                            <Button Grid.Column="2"
+                                                    Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                    CommandParameter="{Binding PauseResumeAction}"
+                                                    IsVisible="{Binding BindingContext.ArePrimaryActionsVisible, Source={x:Reference SyncViewRoot}}"
+                                                    SemanticProperties.Description="{Binding PauseResumeActionText}"
+                                                    WidthRequest="{StaticResource AppTouchTargetSize}"
+                                                    Padding="0"
+                                                    StyleClass="TextButton, TouchTarget">
+                                                <Button.ImageSource>
+                                                    <FontImageSource FontFamily="MaterialOutlined"
+                                                                     Glyph="{x:Static symbols:MaterialOutlined.Pause}"
+                                                                     Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                                </Button.ImageSource>
+                                                <Button.Triggers>
+                                                    <DataTrigger TargetType="Button"
+                                                                 Binding="{Binding IsPaused}"
+                                                                 Value="False">
+                                                        <Setter Property="Command"
+                                                                Value="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Button"
+                                                                 Binding="{Binding PauseResumeAction.Action}"
+                                                                 Value="{x:Static services:CottonSyncRootAction.Resume}">
+                                                        <Setter Property="ImageSource"
+                                                                Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Play_arrow}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
+                                                    </DataTrigger>
+                                                </Button.Triggers>
+                                            </Button>
 
-                                    <Button Grid.Column="2"
-                                            Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
-                                            CommandParameter="{Binding DeleteAction}"
-                                            IsEnabled="{Binding CanDeleteSync}"
-                                            IsVisible="{Binding BindingContext.IsEditMode, Source={x:Reference SyncViewRoot}}"
-                                            SemanticProperties.Description="{Binding DeleteSyncActionText}"
-                                            WidthRequest="{StaticResource AppTouchTargetSize}"
-                                            Padding="0"
-                                            StyleClass="TextButton, TouchTarget">
-                                        <Button.ImageSource>
-                                            <FontImageSource FontFamily="MaterialOutlined"
-                                                             Glyph="{x:Static symbols:MaterialOutlined.Delete}"
-                                                             Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
-                                        </Button.ImageSource>
-                                    </Button>
+                                            <Button Grid.Column="2"
+                                                    Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                    CommandParameter="{Binding DeleteAction}"
+                                                    IsEnabled="{Binding CanDeleteSync}"
+                                                    IsVisible="{Binding BindingContext.IsEditMode, Source={x:Reference SyncViewRoot}}"
+                                                    SemanticProperties.Description="{Binding DeleteSyncActionText}"
+                                                    WidthRequest="{StaticResource AppTouchTargetSize}"
+                                                    Padding="0"
+                                                    StyleClass="TextButton, TouchTarget">
+                                                <Button.ImageSource>
+                                                    <FontImageSource FontFamily="MaterialOutlined"
+                                                                     Glyph="{x:Static symbols:MaterialOutlined.Delete}"
+                                                                     Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                                                </Button.ImageSource>
+                                            </Button>
+                                        </Grid>
+
+                                        <ProgressBar Progress="{Binding ProgressValue}"
+                                                     IsVisible="{Binding IsProgressDeterminate}"
+                                                     Margin="8,0"
+                                                     ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+                                    </VerticalStackLayout>
+                                    <BoxView Grid.Row="1"
+                                             Style="{StaticResource AppDivider}"
+                                             IsVisible="{Binding IsDividerVisible}"
+                                             />
                                 </Grid>
-
-                                <ProgressBar Progress="{Binding ProgressValue}"
-                                             IsVisible="{Binding IsProgressDeterminate}"
-                                             Margin="8,0"
-                                             ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-
-                            </VerticalStackLayout>
-                            <BoxView Grid.Row="1"
-                                     Style="{StaticResource AppDivider}"
-                                     IsVisible="{Binding IsDividerVisible}"
-                                     />
-                        </Grid>
-                    </DataTemplate>
+                            </DataTemplate>
+                        </local:SyncDashboardTemplateSelector.SyncRootTemplate>
+                    </local:SyncDashboardTemplateSelector>
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </Grid>

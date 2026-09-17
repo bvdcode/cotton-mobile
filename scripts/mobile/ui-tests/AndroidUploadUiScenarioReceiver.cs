@@ -68,6 +68,18 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static async Task ShowAsync(IServiceProvider services, string scenario)
         {
+            if (scenario == "original-media-review-cancellation")
+            {
+                _ = AndroidOriginalMediaChecks.CheckCancellationAsync(services);
+                return;
+            }
+
+            if (scenario == "original-media-prompt")
+            {
+                _ = AndroidOriginalMediaChecks.ShowPromptAsync(services);
+                return;
+            }
+
             if (scenario is "worker-cancellation-start" or "worker-cancellation-cleanup")
             {
                 await ConfigureCancellationProbeAsync(scenario);

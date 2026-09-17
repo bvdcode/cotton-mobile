@@ -36,6 +36,18 @@ namespace Cotton.Mobile.Services
             }
         }
 
+        public CottonDeviceToCloudRemoteFolderIndex(CottonSyncRootSnapshot root, CottonDeviceToCloudRemoteContentSnapshot content)
+        {
+            _foldersByPath = new Dictionary<string, CottonFolderHandle>(StringComparer.OrdinalIgnoreCase)
+            {
+                [string.Empty] = root.CloudFolder.ToFolderHandle(),
+            };
+            foreach (CottonDeviceToCloudRemoteItemSnapshot item in content.Items.Where(item => item.Entry.IsFolder))
+            {
+                _foldersByPath.Add(item.RelativePath, new CottonFolderHandle(item.Entry.Id, item.Entry.Name));
+            }
+        }
+
         public CottonFolderHandle ResolveParent(CottonDeviceToCloudSyncPlanItem item)
         {
             ArgumentNullException.ThrowIfNull(item);

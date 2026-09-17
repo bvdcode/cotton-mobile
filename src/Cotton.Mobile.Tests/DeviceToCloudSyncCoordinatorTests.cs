@@ -16,6 +16,7 @@ namespace Cotton.Mobile.Tests
         private readonly DeviceToCloudCoordinatorFileOperator _fileOperator;
         private readonly CottonSyncProgressHub _progressHub;
         private readonly CottonSyncRootExecutionLock _executionLock = new();
+        private readonly MediaOriginalRestoreTestEnvironment _originalRestore = new();
         private readonly CottonDeviceToCloudSyncCoordinator _coordinator;
         private readonly FileSystemCottonDiagnosticJournal _journal;
         private readonly LoggerFactory _loggerFactory;
@@ -54,6 +55,7 @@ namespace Cotton.Mobile.Tests
                 new CottonRecursiveRemoteContentLoader(_remoteFolderContentSource),
                 executor,
                 _executionLock,
+                _originalRestore.Executor,
                 _progressHub,
                 _loggerFactory.CreateLogger<CottonDeviceToCloudSyncCoordinator>());
         }
@@ -289,6 +291,7 @@ namespace Cotton.Mobile.Tests
 
         public void Dispose()
         {
+            _originalRestore.Dispose();
             _loggerFactory.Dispose();
             _journal.Dispose();
             if (Directory.Exists(_directory))

@@ -17,6 +17,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly SyncSettingsSetupHandler _setupHandler;
         private readonly SyncSettingsManagementHandler _managementHandler;
         private readonly SyncSettingsStatusObserver _statusObserver;
+        private readonly MediaOriginalRestoreReviewHandler _originalRestore;
         private readonly ILogger<SyncSettingsViewModel> _logger;
         private Uri? _instanceUri;
         private string? _accountScopeKey;
@@ -35,6 +36,7 @@ namespace Cotton.Mobile.ViewModels
             SyncSettingsStatusObserver statusObserver,
             BackgroundSyncRestrictionViewModel backgroundRestriction,
             MediaLocationAccessViewModel mediaLocationAccess,
+            MediaOriginalRestoreReviewHandler originalRestore,
             ILogger<SyncSettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(statusObserver);
@@ -44,10 +46,12 @@ namespace Cotton.Mobile.ViewModels
             _setupHandler = setupHandler ?? throw new ArgumentNullException(nameof(setupHandler));
             _managementHandler = managementHandler ?? throw new ArgumentNullException(nameof(managementHandler));
             _statusObserver = statusObserver;
+            _originalRestore = originalRestore;
             BackgroundRestriction = backgroundRestriction
                 ?? throw new ArgumentNullException(nameof(backgroundRestriction));
             MediaLocationAccess = mediaLocationAccess
                 ?? throw new ArgumentNullException(nameof(mediaLocationAccess));
+            MediaLocationAccess.PropertyChanged += OnMediaLocationAccessChanged;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _statusObserver.Attach(this);
             AddRootCommand = CreateAddRootCommand();
@@ -75,6 +79,8 @@ namespace Cotton.Mobile.ViewModels
         public MediaLocationAccessViewModel MediaLocationAccess { get; }
 
         public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = [];
+
+        public RangeObservableCollection<object> DashboardItems { get; } = [];
 
         public bool IsBusy
         {
@@ -171,10 +177,12 @@ namespace Cotton.Mobile.ViewModels
             Configure(instanceUri, accountScopeKey);
             await _loadingHandler.LoadAsync(this, cancellationToken);
             await _setupHandler.ResumePendingSetupAsync(this, cancellationToken);
+            _originalRestore.Configure(instanceUri, accountScopeKey);
         }
 
         public void Clear()
         {
+            _originalRestore.Clear();
             _instanceUri = null;
             _accountScopeKey = null;
             ReplaceRoots([]);
@@ -221,10 +229,36 @@ namespace Cotton.Mobile.ViewModels
             }
 
             Roots.ReplaceWith(items);
+            RefreshDashboardItems();
             foreach (CottonSyncRootListItem item in Roots)
             {
                 item.PropertyChanged += OnRootPropertyChanged;
             }
+        }
+
+        private void OnMediaLocationAccessChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs eventArgs)
+        {
+            if (eventArgs.PropertyName == nameof(MediaLocationAccessViewModel.IsGranted) && MediaLocationAccess.IsGranted)
+            {
+                _originalRestore.PermissionGranted();
+            }
+
+            if (eventArgs.PropertyName == nameof(MediaLocationAccessViewModel.IsPermissionNeeded))
+            {
+                RefreshDashboardItems();
+            }
+        }
+
+        private void RefreshDashboardItems()
+        {
+            List<object> items = [];
+            if (MediaLocationAccess.IsPermissionNeeded)
+            {
+                items.Add(MediaLocationAccess);
+            }
+
+            items.AddRange(Roots);
+            DashboardItems.ReplaceWith(items);
         }
 
         Uri? ISyncSettingsViewState.InstanceUri => _instanceUri;

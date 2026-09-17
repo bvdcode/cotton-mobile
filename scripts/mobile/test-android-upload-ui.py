@@ -362,7 +362,6 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
         if budget:
             scenario = "worker-budget-start"
         emulator.scenario(scenario)
-        emulator.run("shell", "am", "kill", PACKAGE)
         emulator.run("logcat", "-c")
         jobs = emulator.text("shell", "dumpsys", "jobscheduler")
         pattern = (

@@ -22,13 +22,17 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static async Task<CottonAutomaticSyncRunResult> WaitAsync(CancellationToken cancellationToken)
         {
+            TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
             using CancellationTokenRegistration registration = cancellationToken.Register(() =>
-                global::Android.Util.Log.Info(LogTag, $"cancellation-callback:main={MainThread.IsMainThread}"));
+            {
+                _ = global::Android.Util.Log.Info(LogTag, $"cancellation-callback:main={MainThread.IsMainThread}");
+                completion.TrySetCanceled(cancellationToken);
+            });
             _ = global::Android.Util.Log.Info(LogTag, $"operation-thread:main={MainThread.IsMainThread}");
             _ = global::Android.Util.Log.Info(LogTag, "operation-started");
             try
             {
-                await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken).ConfigureAwait(false);
+                await completion.Task.ConfigureAwait(false);
                 return CottonAutomaticSyncRunResult.Empty;
             }
             finally

@@ -376,7 +376,7 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
             raise AssertionError("Expected exactly one scheduled cancellation probe.")
         job = scheduled[0]
         namespace = ["-n", job.group("namespace")] if job.group("namespace") else []
-        emulator.run(
+        scheduled_start = emulator.text(
             "shell",
             "cmd",
             "jobscheduler",
@@ -386,6 +386,7 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
             PACKAGE,
             job.group("id"),
         )
+        logging.info("Forced scheduled worker: %s", scheduled_start)
         expected_results = [
             "operation-started",
             "operation-stopped:cancelled=True",
@@ -405,7 +406,7 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
                     f"Android worker did not report {expected}: {output}"
                 )
             if expected == "operation-started" and not budget:
-                emulator.run(
+                system_stop = emulator.text(
                     "shell",
                     "cmd",
                     "jobscheduler",
@@ -414,6 +415,7 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
                     PACKAGE,
                     job.group("id"),
                 )
+                logging.info("Requested system worker stop: %s", system_stop)
         if not budget and "system-stopped:reason=" not in output:
             raise AssertionError(
                 "The dispatched operation stopped without Android's stop callback."

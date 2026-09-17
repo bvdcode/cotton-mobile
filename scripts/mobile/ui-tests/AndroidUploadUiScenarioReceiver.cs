@@ -189,8 +189,8 @@ namespace Cotton.Mobile.Platforms.Android
             using Java.Lang.Class workerClass = Java.Lang.Class.FromType(workerType)
                 ?? throw new InvalidOperationException("Test worker type is unavailable.");
             using OneTimeWorkRequest.Builder builder = new(workerClass);
-            _ = builder.SetInitialDelay(5, Java.Util.Concurrent.TimeUnit.Seconds
-                ?? throw new InvalidOperationException("Second time unit is unavailable."));
+            _ = builder.SetInitialDelay(1, Java.Util.Concurrent.TimeUnit.Minutes
+                ?? throw new InvalidOperationException("Minute time unit is unavailable."));
             OneTimeWorkRequest request = builder.Build()
                 ?? throw new InvalidOperationException("Test work request is unavailable.");
             ExistingWorkPolicy policy = ExistingWorkPolicy.Replace

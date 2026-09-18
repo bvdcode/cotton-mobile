@@ -33,17 +33,55 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void SyncNavigationAnnouncesTheActionItExecutes()
+        public void AuthenticatedNavigationUsesTheMaterialTabView()
         {
             XDocument document = XDocument.Parse(RepositoryPath.ReadText($"{ViewDirectory}/MainPage.xaml"));
-            XElement button = document.Descendants().Single(element =>
-                element.Name.LocalName == "Button"
-                && GetAttribute(element, "Command")?.Value.Contains("ShowSyncCommand", StringComparison.Ordinal) == true);
+            XElement tabView = document.Descendants().Single(element =>
+                element.Name.LocalName == "TabView");
+            IReadOnlyList<XElement> tabs = tabView.Elements().Where(element =>
+                element.Name.LocalName == "TabItem").ToList();
 
-            Assert.Contains(
-                "OpenSyncDescription",
-                GetAttributeContaining(button, "Description")?.Value,
-                StringComparison.Ordinal);
+            Assert.Equal("Bottom", GetAttribute(tabView, "TabPlacement")?.Value);
+            Assert.Equal(
+                "{Binding Display.SelectedDestination, Mode=TwoWay}",
+                GetAttribute(tabView, "CurrentItem")?.Value);
+            Assert.Equal(2, tabs.Count);
+            Assert.Contains(tabs, tab =>
+                GetAttribute(tab, "Title")?.Value.Contains("SyncTitle", StringComparison.Ordinal) == true);
+            Assert.Contains(tabs, tab =>
+                GetAttribute(tab, "Title")?.Value.Contains("ProfileTitle", StringComparison.Ordinal) == true);
+        }
+
+        [Fact]
+        public void MainPageProvidesItsBindingContextBeforeTabViewInitialization()
+        {
+            string source = RepositoryPath.ReadText($"{ViewDirectory}/MainPage.xaml.cs");
+
+            int bindingContext = source.IndexOf("BindingContext = viewModel;", StringComparison.Ordinal);
+            int initialization = source.IndexOf("InitializeComponent();", StringComparison.Ordinal);
+
+            Assert.True(bindingContext >= 0);
+            Assert.True(initialization > bindingContext);
+        }
+
+        [Fact]
+        public void SyncSourceChoiceUsesTheNativeRadioButtonGroup()
+        {
+            XDocument document = XDocument.Parse(
+                RepositoryPath.ReadText($"{ViewDirectory}/SyncRootSetupOptionsPage.xaml"));
+            XElement group = document.Descendants().Single(element =>
+                GetAttributeContaining(element, "GroupName")?.Value == "SyncSource");
+            IReadOnlyList<XElement> options = group.Descendants().Where(element =>
+                element.Name.LocalName == "RadioButton").ToList();
+
+            Assert.Equal(
+                "{Binding StorageKind, Mode=TwoWay}",
+                GetAttributeContaining(group, "SelectedValue")?.Value);
+            Assert.Equal(2, options.Count);
+            Assert.DoesNotContain(document.Descendants(), element =>
+                element.Name.LocalName == "RadioButtonGroupView");
+            Assert.DoesNotContain(document.Descendants(), element =>
+                element.Name.LocalName == "ButtonView");
         }
 
         [Fact]

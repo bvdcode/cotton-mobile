@@ -72,10 +72,6 @@ namespace Cotton.Mobile.ViewModels
                 () => AsyncCommandExecution.RunAsync(
                     _userInteractionService.OpenRepositoryAsync,
                     LogUnhandledCommandException));
-            ShowSyncCommand = new AsyncRelayCommand(
-                () => AsyncCommandExecution.RunAsync(ShowSyncAsync, LogUnhandledCommandException));
-            ShowProfileCommand = new AsyncRelayCommand(
-                () => AsyncCommandExecution.RunAsync(ShowProfileAsync, LogUnhandledCommandException));
         }
 
         public MainPageDisplayState Display { get; }
@@ -95,10 +91,6 @@ namespace Cotton.Mobile.ViewModels
         public IAsyncRelayCommand PrivacyPolicyCommand { get; }
 
         public IAsyncRelayCommand OpenRepositoryCommand { get; }
-
-        public IAsyncRelayCommand ShowSyncCommand { get; }
-
-        public IAsyncRelayCommand ShowProfileCommand { get; }
 
         public async Task RestoreSessionOnceAsync()
         {
@@ -221,18 +213,6 @@ namespace Cotton.Mobile.ViewModels
             Sync.Clear();
             Display.ShowSignIn(state.Status);
             RefreshCommands();
-        }
-
-        private Task ShowSyncAsync()
-        {
-            Display.ShowDestination(AppNavigationDestination.Sync);
-            return Task.CompletedTask;
-        }
-
-        private Task ShowProfileAsync()
-        {
-            Display.ShowDestination(AppNavigationDestination.Profile);
-            return Task.CompletedTask;
         }
 
         private void RefreshCommands()

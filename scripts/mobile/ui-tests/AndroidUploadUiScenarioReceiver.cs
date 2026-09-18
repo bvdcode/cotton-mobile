@@ -166,6 +166,7 @@ namespace Cotton.Mobile.Platforms.Android
                     break;
                 case "source-folder":
                 case "source-media":
+                case "source-switch":
                     await ShowSourceAsync(navigation, scenario, services);
                     break;
                 case "storage-full":
@@ -235,10 +236,12 @@ namespace Cotton.Mobile.Platforms.Android
             switch (scenario)
             {
                 case "source-folder":
-                    source.SelectFolderCommand.Execute(null);
+                    source.StorageKind = CottonSyncRootStorageKind.UserSelectedDocumentTree;
                     break;
                 case "source-media":
-                    source.SelectMediaCommand.Execute(null);
+                    source.StorageKind = CottonSyncRootStorageKind.MediaStore;
+                    break;
+                case "source-switch":
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(scenario));

@@ -16,8 +16,6 @@ namespace Cotton.Mobile.Resources.Localization
 
         public static string DeniedWarning => GetString(nameof(DeniedWarning));
 
-        public static string GrantedMessage => GetString(nameof(GrantedMessage));
-
         public static string AllowText => GetString(nameof(AllowText));
 
         public static string SettingsText => GetString(nameof(SettingsText));

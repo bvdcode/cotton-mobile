@@ -107,13 +107,14 @@ namespace Cotton.Mobile.ViewModels
         public AppNavigationDestination SelectedDestination
         {
             get => _selectedDestination;
-            private set
+            set
             {
-                if (SetProperty(ref _selectedDestination, value))
+                if (!Enum.IsDefined(value))
                 {
-                    OnPropertyChanged(nameof(IsSyncDestinationVisible));
-                    OnPropertyChanged(nameof(IsProfileDestinationVisible));
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
+
+                SetProperty(ref _selectedDestination, value);
             }
         }
 
@@ -151,12 +152,6 @@ namespace Cotton.Mobile.ViewModels
         public bool IsBrandHeaderVisible => !IsAuthenticatedVisible;
 
         public bool IsLegalFooterVisible => IsSignInVisible;
-
-        public bool IsSyncDestinationVisible =>
-            IsAuthenticatedVisible && SelectedDestination == AppNavigationDestination.Sync;
-
-        public bool IsProfileDestinationVisible =>
-            IsAuthenticatedVisible && SelectedDestination == AppNavigationDestination.Profile;
 
         public void ShowSessionRestore(string message)
         {
@@ -267,8 +262,6 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsAuthenticatedVisible));
             OnPropertyChanged(nameof(IsBrandHeaderVisible));
             OnPropertyChanged(nameof(IsLegalFooterVisible));
-            OnPropertyChanged(nameof(IsSyncDestinationVisible));
-            OnPropertyChanged(nameof(IsProfileDestinationVisible));
         }
 
         private void ShowLoading(string message, bool showIndicator)

@@ -5,6 +5,8 @@
     <color name="cotton_dark_viewer_system_bar_background">#090B0A</color>
     <color name="cotton_splash_background">#090B0A</color>
     <color name="cotton_accent">#C6FF00</color>
+    <color name="cotton_control_activated">#4F6200</color>
+    <color name="cotton_control_inactive">#737A77</color>
     <color name="cotton_text_highlight">#3DC6FF00</color>
     <color name="cotton_transparent">#00000000</color>
     <color name="cotton_document_surface">#FFFFFF</color>

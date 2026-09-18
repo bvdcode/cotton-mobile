@@ -136,7 +136,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(item.CanResolvePendingUpload);
             Assert.Equal(CottonSyncRootAction.ResolvePendingUpload, item.StatusAction?.Action);
-            Assert.Equal("Resolve pending upload", item.StatusActionText);
+            Assert.Equal("Retry uploads", item.StatusActionText);
         }
 
         [Fact]

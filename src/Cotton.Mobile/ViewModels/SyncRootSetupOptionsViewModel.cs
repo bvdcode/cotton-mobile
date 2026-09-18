@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -23,44 +22,33 @@ namespace Cotton.Mobile.ViewModels
             _complete = complete;
             MediaLocationAccess = mediaLocationAccess;
             MediaLocationAccess.Refresh();
-            SelectFolderCommand = new Command(
-                () => SelectStorageKind(CottonSyncRootStorageKind.UserSelectedDocumentTree));
-            SelectMediaCommand = new Command(
-                () => SelectStorageKind(CottonSyncRootStorageKind.MediaStore));
             ContinueCommand = new Command(Continue, () => _storageKind.HasValue && !_didComplete);
             CancelCommand = new Command(Cancel);
         }
 
-        public Command SelectFolderCommand { get; }
-
         public MediaLocationAccessViewModel MediaLocationAccess { get; }
-
-        public Command SelectMediaCommand { get; }
 
         public Command ContinueCommand { get; }
 
         public Command CancelCommand { get; }
 
-        public bool IsFolderSelected => _storageKind == CottonSyncRootStorageKind.UserSelectedDocumentTree;
+        public CottonSyncRootStorageKind? StorageKind
+        {
+            get => _storageKind;
+            set => SelectStorageKind(value);
+        }
 
-        public bool IsMediaSelected => _storageKind == CottonSyncRootStorageKind.MediaStore;
-
-        public bool IsDeleteOptionVisible => IsFolderSelected;
-
-        public string FolderDescription => SyncRootSetupResources.CreateSourceDescription(
-            SyncRootSetupResources.FolderTitle,
-            IsFolderSelected);
-
-        public string MediaDescription => SyncRootSetupResources.CreateSourceDescription(
-            SyncRootSetupResources.MediaTitle,
-            IsMediaSelected);
+        public bool IsDeleteOptionVisible =>
+            StorageKind == CottonSyncRootStorageKind.UserSelectedDocumentTree;
 
         public bool IsInteractionLocked => _didComplete;
 
         public bool DeleteOriginalsAfterUpload
         {
             get => _deleteOriginalsAfterUpload;
-            set => SetProperty(ref _deleteOriginalsAfterUpload, value && IsFolderSelected);
+            set => SetProperty(
+                ref _deleteOriginalsAfterUpload,
+                value && StorageKind == CottonSyncRootStorageKind.UserSelectedDocumentTree);
         }
 
         public void Cancel()
@@ -68,10 +56,11 @@ namespace Cotton.Mobile.ViewModels
             CompleteOnce(options: null);
         }
 
-        private void SelectStorageKind(CottonSyncRootStorageKind storageKind)
+        private void SelectStorageKind(CottonSyncRootStorageKind? storageKind)
         {
             switch (storageKind)
             {
+                case null:
                 case CottonSyncRootStorageKind.UserSelectedDocumentTree:
                     break;
 
@@ -83,17 +72,12 @@ namespace Cotton.Mobile.ViewModels
                     throw new ArgumentOutOfRangeException(nameof(storageKind), "Sync source is not supported.");
             }
 
-            if (_storageKind == storageKind)
+            if (!SetProperty(ref _storageKind, storageKind, nameof(StorageKind)))
             {
                 return;
             }
 
-            _storageKind = storageKind;
-            OnPropertyChanged(nameof(IsFolderSelected));
-            OnPropertyChanged(nameof(IsMediaSelected));
             OnPropertyChanged(nameof(IsDeleteOptionVisible));
-            OnPropertyChanged(nameof(FolderDescription));
-            OnPropertyChanged(nameof(MediaDescription));
             ContinueCommand.ChangeCanExecute();
         }
 

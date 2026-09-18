@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.DependencyInjection;
+using Cotton.Mobile.Platforms.Android;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Handlers;
 using UraniumUI;
@@ -18,7 +19,11 @@ namespace Cotton.Mobile
                 .UseMauiApp<App>()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
-                .ConfigureMauiHandlers(handlers => handlers.AddHandler<Button, ButtonHandler>())
+                .ConfigureMauiHandlers(handlers =>
+                {
+                    handlers.AddHandler<Button, ButtonHandler>();
+                    AndroidRadioButtonHandlerConfiguration.Configure();
+                })
                 .ConfigureFonts(fonts => fonts.AddMaterialSymbolsFonts())
                 .AddCottonDiagnostics();
 

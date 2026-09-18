@@ -115,8 +115,7 @@ namespace Cotton.Mobile.Tests
             display.ShowAuthenticated(profile);
 
             Assert.True(display.IsAuthenticatedVisible);
-            Assert.True(display.IsSyncDestinationVisible);
-            Assert.False(display.IsProfileDestinationVisible);
+            Assert.Equal(AppNavigationDestination.Sync, display.SelectedDestination);
             Assert.False(display.IsBrandHeaderVisible);
             Assert.True(display.IsLogoutEnabled);
             Assert.Equal("Mobile Demo", display.ProfileName);
@@ -138,13 +137,11 @@ namespace Cotton.Mobile.Tests
 
             display.ShowDestination(AppNavigationDestination.Profile);
 
-            Assert.False(display.IsSyncDestinationVisible);
-            Assert.True(display.IsProfileDestinationVisible);
+            Assert.Equal(AppNavigationDestination.Profile, display.SelectedDestination);
 
             display.ShowDestination(AppNavigationDestination.Sync);
 
-            Assert.True(display.IsSyncDestinationVisible);
-            Assert.False(display.IsProfileDestinationVisible);
+            Assert.Equal(AppNavigationDestination.Sync, display.SelectedDestination);
         }
     }
 }

@@ -18,10 +18,12 @@ PACKAGE = "dev.cottoncloud.app.debug"
 RECEIVER = f"{PACKAGE}/dev.cottoncloud.app.debug.UploadUiScenarioReceiver"
 LOG_TAG = "CottonUploadUiTests"
 TIMEOUT_SECONDS = 40
+LOGGER = logging.getLogger(__name__)
 SCENARIOS = (
     "running",
     "source-folder",
     "source-media",
+    "source-switch",
     "storage-full",
     "destination-missing",
     "review-required",
@@ -278,6 +280,107 @@ def bounds(node: ET.Element) -> tuple[int, int, int, int]:
     return values[0], values[1], values[2], values[3]
 
 
+def find_node_by_id(hierarchy: ET.Element, resource_id: str) -> ET.Element:
+    """Find one Android view by the stable MAUI automation id suffix."""
+    matches = [
+        node
+        for node in hierarchy.iter("node")
+        if node.get("resource-id", "").endswith(f":id/{resource_id}")
+    ]
+    if len(matches) != 1:
+        raise AssertionError(f"Expected one view with id {resource_id}.")
+    return matches[0]
+
+
+def radio_is_selected(node: ET.Element) -> bool:
+    """Read the selected state exposed by Android's native radio button."""
+    if node.get("class") != "android.widget.RadioButton":
+        raise AssertionError("Source selection is not a native Android radio button.")
+    if node.get("clickable") != "true" or node.get("enabled") != "true":
+        raise AssertionError("Source radio button is not accessible for activation.")
+    checked = node.get("checked")
+    if checked not in {"true", "false"}:
+        raise AssertionError("Source radio button does not expose its checked state.")
+    return checked == "true"
+
+
+def tap_node(emulator: Emulator, node: ET.Element) -> None:
+    """Tap the center of one accessibility node."""
+    left, top, right, bottom = bounds(node)
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+
+
+def wait_for_radio_selection(emulator: Emulator, selected_id: str) -> ET.Element:
+    """Wait until the ready radio group owns exactly one selection."""
+    option_ids = ("SourceFolderOption", "SourceMediaOption")
+    deadline = time.monotonic() + TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        hierarchy = emulator.hierarchy()
+        selections = {
+            option_id: radio_is_selected(find_node_by_id(hierarchy, option_id))
+            for option_id in option_ids
+        }
+        if selections[selected_id] and sum(selections.values()) == 1:
+            return hierarchy
+        time.sleep(0.25)
+    raise AssertionError(f"Radio group did not select only {selected_id}.")
+
+
+def check_source_selection_sequence(
+    emulator: Emulator, directory: Path, name: str, initial: ET.Element
+) -> None:
+    """Exercise the real Photos, Folder, Photos selection sequence."""
+    option_ids = ("SourceFolderOption", "SourceMediaOption")
+    initial_nodes = {
+        option_id: find_node_by_id(initial, option_id) for option_id in option_ids
+    }
+    if any(radio_is_selected(node) for node in initial_nodes.values()):
+        raise AssertionError("Source selection must start without a default choice.")
+    initial_geometry = {
+        option_id: bounds(node) for option_id, node in initial_nodes.items()
+    }
+
+    steps = (
+        ("SourceMediaOption", "photos-first"),
+        ("SourceFolderOption", "folder"),
+        ("SourceMediaOption", "photos-again"),
+    )
+    hierarchy = initial
+    for option_id, suffix in steps:
+        tap_node(emulator, find_node_by_id(hierarchy, option_id))
+        hierarchy = wait_for_radio_selection(emulator, option_id)
+        captured = capture(emulator, directory, f"{name}-{suffix}")
+        actual_geometry = {
+            current_id: bounds(find_node_by_id(captured, current_id))
+            for current_id in option_ids
+        }
+        if actual_geometry != initial_geometry:
+            raise AssertionError(
+                "Selecting a source changed the radio options' geometry: "
+                f"initial={initial_geometry}, actual={actual_geometry}"
+            )
+        hierarchy = captured
+
+
+def check_tab_navigation(
+    emulator: Emulator, directory: Path, name: str, hierarchy: ET.Element
+) -> None:
+    """Exercise UraniumUI tab navigation and preserve the cached dashboard."""
+    profile = find_action_button(hierarchy, "Profile")
+    tap_node(emulator, profile)
+    wait_for_message(emulator, "Your Cotton Cloud connection and app settings.")
+    profile_hierarchy = capture(emulator, directory, f"{name}-profile")
+    assert_message(profile_hierarchy, "Profile")
+
+    sync = find_action_button(profile_hierarchy, "Sync")
+    tap_node(emulator, sync)
+    wait_for_message(emulator, "Syncing 4 of 10 changes…")
+    returned = capture(emulator, directory, f"{name}-sync-return")
+    assert_dashboard_layout(returned, "running")
+
+
 def assert_dashboard_layout(hierarchy: ET.Element, scenario: str) -> None:
     """Require stable text geometry and a card-width progress indicator."""
     nodes = list(hierarchy.iter("node"))
@@ -449,7 +552,7 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
             PACKAGE,
             job.group("id"),
         )
-        logging.info("Forced scheduled worker: %s", scheduled_start)
+        LOGGER.info("Forced scheduled worker: %s", scheduled_start)
         expected_results = [
             "operation-started",
             "operation-stopped:cancelled=True",
@@ -480,7 +583,7 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
                     PACKAGE,
                     job.group("id"),
                 )
-                logging.info("Requested system worker stop: %s", system_stop)
+                LOGGER.info("Requested system worker stop: %s", system_stop)
         if not budget and "system-stopped:reason=" not in output:
             raise AssertionError(
                 "The dispatched operation stopped without Android's stop callback."
@@ -490,14 +593,14 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
         if budget:
             if "system-stopped:reason=" in output:
                 raise AssertionError("Android stopped the job before its own window.")
-            logging.info("Passed worker execution window and deferred retry")
+            LOGGER.info("Passed worker execution window and deferred retry")
         else:
             returned = re.search(r"stop-callback-returned:milliseconds=(\d+)", output)
             if returned is None or int(returned.group(1)) >= 500:
                 raise AssertionError(f"Worker stop waited for diagnostic I/O: {output}")
             if output.index("operation-stopped:") > output.index("stop-log-released"):
                 raise AssertionError(f"Diagnostic I/O delayed cancellation: {output}")
-            logging.info("Passed Android worker stop and operation cancellation")
+            LOGGER.info("Passed Android worker stop and operation cancellation")
     finally:
         emulator.scenario("worker-cancellation-cleanup")
     activity = emulator.text(
@@ -538,7 +641,7 @@ def check_native_job_stop(emulator: Emulator) -> None:
             raise AssertionError(f"Native stop logged on the main thread: {output}")
         if output.index("native-stop-returned:") > output.index("stop-log-released"):
             raise AssertionError(f"Native stop waited for diagnostic I/O: {output}")
-        logging.info("Passed native job stop with blocked diagnostic I/O")
+        LOGGER.info("Passed native job stop with blocked diagnostic I/O")
     finally:
         emulator.scenario("native-stop-cleanup")
 
@@ -552,7 +655,7 @@ def check_background_restriction(emulator: Emulator) -> None:
         emulator.scenario("background-restricted")
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"+{PACKAGE}")
         emulator.scenario("background-unrestricted")
-        logging.info("Passed battery optimization and unrestricted detection")
+        LOGGER.info("Passed battery optimization and unrestricted detection")
     finally:
         prefix = "+" if originally_exempt else "-"
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}")
@@ -583,12 +686,27 @@ def check_background_notice(emulator: Emulator, directory: Path) -> None:
                 for node in hierarchy.iter("node")
                 if "battery optimization" in node.get("text", "").lower()
             ]
-            pause = next(
+            permission_titles = [
                 node
                 for node in hierarchy.iter("node")
-                if node.get("content-desc") == "Pause"
-            )
-            positions.append(bounds(pause)[1])
+                if node.get("text") == "Preserve location data"
+            ]
+            if len(permission_titles) == 1:
+                following = permission_titles[0]
+            elif not permission_titles:
+                pause_buttons = [
+                    node
+                    for node in hierarchy.iter("node")
+                    if node.get("content-desc") == "Pause"
+                ]
+                if len(pause_buttons) != 1:
+                    raise AssertionError(
+                        "No stable content followed the battery optimization notice."
+                    )
+                following = pause_buttons[0]
+            else:
+                raise AssertionError("Multiple media permission notices are visible.")
+            positions.append(bounds(following)[1])
             if exempt:
                 if notices:
                     raise AssertionError(
@@ -603,7 +721,7 @@ def check_background_notice(emulator: Emulator, directory: Path) -> None:
                 notice_height = notice_bounds[3] - notice_bounds[1]
         if positions[1] > positions[0] - notice_height:
             raise AssertionError("Battery warning disappeared but left its row space.")
-        logging.info("Passed battery warning collapse after Android settings change")
+        LOGGER.info("Passed battery warning collapse after Android settings change")
     finally:
         prefix = "+" if originally_exempt else "-"
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}")
@@ -636,7 +754,7 @@ def check_review_cancellation(emulator: Emulator) -> None:
     ).splitlines()[-1]
     emulator.run("shell", "am", "start", "-W", "-n", activity)
     wait_for_sign_in(emulator)
-    logging.info("Passed foreground review cancellation on Android Home")
+    LOGGER.info("Passed foreground review cancellation on Android Home")
 
 
 def check_sign_in_notification(emulator: Emulator) -> None:
@@ -675,7 +793,7 @@ def check_sign_in_notification(emulator: Emulator) -> None:
     emulator.scenario("sign-in-restored")
     if record.search(emulator.text("shell", "dumpsys", "notification", "--noredact")):
         raise AssertionError("Sign-in notification remained after session recovery.")
-    logging.info("Passed sign-in notification delivery and recovery")
+    LOGGER.info("Passed sign-in notification delivery and recovery")
 
 
 def check_permission_transition(emulator: Emulator, directory: Path, name: str) -> None:
@@ -815,11 +933,11 @@ def run_checks(
             permission_case = f"{viewport.name}-{theme_name}-permission-transition"
             check_permission_transition(emulator, directory, permission_case)
             completed.append(permission_case)
-            logging.info("Passed %s", permission_case)
+            LOGGER.info("Passed %s", permission_case)
             prompt_case = f"{viewport.name}-{theme_name}-original-media-prompt"
             check_original_prompt(emulator, directory, prompt_case, theme == "no")
             completed.append(prompt_case)
-            logging.info("Passed %s", prompt_case)
+            LOGGER.info("Passed %s", prompt_case)
             scenarios = (
                 (*OFFLINE_MESSAGES, *display_scenarios)
                 if viewport.name == "phone"
@@ -848,6 +966,11 @@ def run_checks(
                             "Pause button is unavailable during upload."
                         )
                     assert_message(hierarchy, "Syncing 4 of 10 changes…")
+                    check_tab_navigation(emulator, directory, name, hierarchy)
+                if scenario == "source-switch":
+                    check_source_selection_sequence(
+                        emulator, directory, name, hierarchy
+                    )
                 if scenario.startswith("source-"):
                     capture_source_end(emulator, directory, name)
                 if scenario in FAILURE_MESSAGES:
@@ -855,7 +978,7 @@ def run_checks(
                 if scenario == "pending-upload-changed":
                     capture_pending_upload(emulator, directory, name, hierarchy)
                 completed.append(name)
-                logging.info("Passed %s", name)
+                LOGGER.info("Passed %s", name)
     (directory / "results.json").write_text(
         json.dumps({"passed": completed}, indent=2) + "\n", encoding="utf-8"
     )

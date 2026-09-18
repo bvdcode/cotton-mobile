@@ -14,8 +14,8 @@ namespace Cotton.Mobile
             ArgumentNullException.ThrowIfNull(viewModel);
 
             _viewModel = viewModel;
-            InitializeComponent();
             BindingContext = viewModel;
+            InitializeComponent();
         }
 
         protected override async void OnAppearing()

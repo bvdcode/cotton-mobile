@@ -111,60 +111,20 @@
                     StyleClass="TextButton, TouchTarget" />
         </HorizontalStackLayout>
 
-        <Grid Grid.RowSpan="2"
-              RowDefinitions="*,Auto"
-              IsVisible="{Binding Display.IsAuthenticatedVisible}">
-            <local:SyncDashboardView Grid.Row="0"
-                                     BindingContext="{Binding Sync}"
-                                     IsVisible="{Binding BindingContext.Display.IsSyncDestinationVisible, Source={x:Reference RootPage}}" />
-
-            <local:ProfileView Grid.Row="0"
-                               IsVisible="{Binding Display.IsProfileDestinationVisible}" />
-
-            <Grid Grid.Row="1"
-                  ColumnDefinitions="*,*"
-                  Style="{StaticResource AppNavigationBar}">
-                <Button Text="{x:Static localization:AppResources.SyncTitle}"
-                        Command="{Binding ShowSyncCommand}"
-                        ContentLayout="Top,4"
-                        SemanticProperties.Description="{x:Static localization:AppResources.OpenSyncDescription}"
-                        StyleClass="TextButton, NavigationBarItem">
-                    <Button.ImageSource>
-                        <FontImageSource FontFamily="MaterialOutlined"
-                                         Glyph="{x:Static symbols:MaterialOutlined.Sync_alt}"
-                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                    </Button.ImageSource>
-                    <Button.Triggers>
-                        <DataTrigger TargetType="Button"
-                                     Binding="{Binding Display.IsSyncDestinationVisible}"
-                                     Value="True">
-                            <Setter Property="BackgroundColor"
-                                    Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
-
-                <Button Grid.Column="1"
-                        Text="{x:Static localization:AppResources.ProfileTitle}"
-                        Command="{Binding ShowProfileCommand}"
-                        ContentLayout="Top,4"
-                        SemanticProperties.Description="{x:Static localization:AppResources.OpenProfileDescription}"
-                        StyleClass="TextButton, NavigationBarItem">
-                    <Button.ImageSource>
-                        <FontImageSource FontFamily="MaterialOutlined"
-                                         Glyph="{x:Static symbols:MaterialOutlined.Account_circle}"
-                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                    </Button.ImageSource>
-                    <Button.Triggers>
-                        <DataTrigger TargetType="Button"
-                                     Binding="{Binding Display.IsProfileDestinationVisible}"
-                                     Value="True">
-                            <Setter Property="BackgroundColor"
-                                    Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" />
-                        </DataTrigger>
-                    </Button.Triggers>
-                </Button>
-            </Grid>
-        </Grid>
+        <material:TabView Grid.RowSpan="2"
+                          IsVisible="{Binding Display.IsAuthenticatedVisible}"
+                          TabPlacement="Bottom"
+                          CachingStrategy="CacheOnLayout"
+                          UseAnimation="False"
+                          CurrentItem="{Binding Display.SelectedDestination, Mode=TwoWay}">
+            <material:TabItem Title="{x:Static localization:AppResources.SyncTitle}"
+                              Data="{x:Static viewModels:AppNavigationDestination.Sync}">
+                <local:SyncDashboardView BindingContext="{Binding Source={x:Reference RootPage}, Path=BindingContext.Sync}" />
+            </material:TabItem>
+            <material:TabItem Title="{x:Static localization:AppResources.ProfileTitle}"
+                              Data="{x:Static viewModels:AppNavigationDestination.Profile}">
+                <local:ProfileView BindingContext="{Binding Source={x:Reference RootPage}, Path=BindingContext}" />
+            </material:TabItem>
+        </material:TabView>
     </Grid>
 </ContentPage>

@@ -223,13 +223,10 @@ namespace Cotton.Mobile.ViewModels
             RefreshCommands();
         }
 
-        private async Task ShowSyncAsync()
+        private Task ShowSyncAsync()
         {
             Display.ShowDestination(AppNavigationDestination.Sync);
-            if (Sync.RunAllCommand.CanExecute(null))
-            {
-                await Sync.RunAllCommand.ExecuteAsync(null);
-            }
+            return Task.CompletedTask;
         }
 
         private Task ShowProfileAsync()

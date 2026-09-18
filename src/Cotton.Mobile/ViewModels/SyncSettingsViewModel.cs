@@ -51,7 +51,8 @@ namespace Cotton.Mobile.ViewModels
                 ?? throw new ArgumentNullException(nameof(backgroundRestriction));
             MediaLocationAccess = mediaLocationAccess
                 ?? throw new ArgumentNullException(nameof(mediaLocationAccess));
-            MediaLocationAccess.PropertyChanged += OnMediaLocationAccessChanged;
+            MediaLocationAccess.PropertyChanged += OnDashboardNoticeChanged;
+            BackgroundRestriction.PropertyChanged += OnDashboardNoticeChanged;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _statusObserver.Attach(this);
             AddRootCommand = CreateAddRootCommand();
@@ -236,14 +237,15 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private void OnMediaLocationAccessChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs eventArgs)
+        private void OnDashboardNoticeChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs eventArgs)
         {
             if (eventArgs.PropertyName == nameof(MediaLocationAccessViewModel.IsGranted) && MediaLocationAccess.IsGranted)
             {
                 _originalRestore.PermissionGranted();
             }
 
-            if (eventArgs.PropertyName == nameof(MediaLocationAccessViewModel.IsPermissionNeeded))
+            if (eventArgs.PropertyName is nameof(MediaLocationAccessViewModel.IsPermissionNeeded)
+                or nameof(BackgroundSyncRestrictionViewModel.IsVisible))
             {
                 RefreshDashboardItems();
             }
@@ -252,6 +254,11 @@ namespace Cotton.Mobile.ViewModels
         private void RefreshDashboardItems()
         {
             List<object> items = [];
+            if (BackgroundRestriction.IsVisible)
+            {
+                items.Add(BackgroundRestriction);
+            }
+
             if (MediaLocationAccess.IsPermissionNeeded)
             {
                 items.Add(MediaLocationAccess);

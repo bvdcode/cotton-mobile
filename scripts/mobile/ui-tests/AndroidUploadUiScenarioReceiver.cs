@@ -68,6 +68,17 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static async Task ShowAsync(IServiceProvider services, string scenario)
         {
+            if (scenario is "background-restricted" or "background-unrestricted")
+            {
+                bool expected = scenario == "background-restricted";
+                if (services.GetRequiredService<IBackgroundSyncRestrictionService>().IsRestricted != expected)
+                {
+                    throw new InvalidOperationException("Battery restriction detection did not match Android settings.");
+                }
+
+                return;
+            }
+
             if (scenario is "native-stop-start" or "native-stop-cleanup")
             {
                 AndroidStopProbeJobService.Configure(scenario == "native-stop-cleanup");

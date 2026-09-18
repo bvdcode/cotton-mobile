@@ -10,6 +10,8 @@ namespace Cotton.Mobile
     {
         public DataTemplate MediaLocationTemplate { get; set; } = null!;
 
+        public DataTemplate BackgroundRestrictionTemplate { get; set; } = null!;
+
         public DataTemplate SyncRootTemplate { get; set; } = null!;
 
         protected override DataTemplate OnSelectTemplate(object item, BindableObject container)
@@ -17,6 +19,7 @@ namespace Cotton.Mobile
             return item switch
             {
                 MediaLocationAccessViewModel => MediaLocationTemplate,
+                BackgroundSyncRestrictionViewModel => BackgroundRestrictionTemplate,
                 CottonSyncRootListItem => SyncRootTemplate,
                 _ => throw new ArgumentException("Unsupported sync dashboard item.", nameof(item)),
             };

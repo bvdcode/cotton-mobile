@@ -6,6 +6,7 @@ using System.Runtime.Versioning;
 using Android.App;
 using Android.App.Usage;
 using Android.Content;
+using Android.OS;
 using Cotton.Mobile.Services;
 using AndroidSettings = Android.Provider.Settings;
 using AndroidUri = Android.Net.Uri;
@@ -14,8 +15,17 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidBackgroundSyncRestrictionService : IBackgroundSyncRestrictionService
     {
-        public bool IsRestricted => OperatingSystem.IsAndroidVersionAtLeast(28)
-            && IsRestrictedOnAndroid28OrLater();
+        public bool IsRestricted
+        {
+            get
+            {
+                Context context = global::Android.App.Application.Context;
+                PowerManager powerManager = context.GetSystemService(Context.PowerService) as PowerManager
+                    ?? throw new InvalidOperationException("Android power manager is unavailable.");
+                return !powerManager.IsIgnoringBatteryOptimizations(context.PackageName)
+                    || (OperatingSystem.IsAndroidVersionAtLeast(28) && IsRestrictedOnAndroid28OrLater());
+            }
+        }
 
         public Task OpenSettingsAsync(CancellationToken cancellationToken = default)
         {

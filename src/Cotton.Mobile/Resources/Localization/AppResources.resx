@@ -29,7 +29,7 @@
   <data name="EditSyncsModeTitle" xml:space="preserve"><value>Manage syncs</value></data>
   <data name="EnterEditSyncsModeDescription" xml:space="preserve"><value>Manage syncs</value></data>
   <data name="ExitEditSyncsModeDescription" xml:space="preserve"><value>Close sync management</value></data>
-  <data name="BackgroundSyncRestrictedMessage" xml:space="preserve"><value>Android may delay background uploads.</value></data>
+  <data name="BackgroundSyncRestrictedMessage" xml:space="preserve"><value>Battery optimization can delay uploads. Allow unrestricted battery use in Android settings.</value></data>
   <data name="BackgroundSyncSettingsText" xml:space="preserve"><value>Review</value></data>
   <data name="OpenBackgroundSyncSettingsDescription" xml:space="preserve"><value>Review Android background activity settings</value></data>
   <data name="SyncTitle" xml:space="preserve"><value>Sync</value></data>

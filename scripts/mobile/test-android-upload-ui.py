@@ -510,6 +510,74 @@ def check_native_job_stop(emulator: Emulator) -> None:
         emulator.scenario("native-stop-cleanup")
 
 
+def check_background_restriction(emulator: Emulator) -> None:
+    """Read both Android battery modes and restore the emulator's initial mode."""
+    entries = emulator.text("shell", "cmd", "deviceidle", "whitelist").splitlines()
+    originally_exempt = any(f",{PACKAGE}," in entry for entry in entries)
+    try:
+        emulator.run("shell", "cmd", "deviceidle", "whitelist", f"-{PACKAGE}")
+        emulator.scenario("background-restricted")
+        emulator.run("shell", "cmd", "deviceidle", "whitelist", f"+{PACKAGE}")
+        emulator.scenario("background-unrestricted")
+        logging.info("Passed battery optimization and unrestricted detection")
+    finally:
+        prefix = "+" if originally_exempt else "-"
+        emulator.run("shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}")
+
+
+def check_background_notice(emulator: Emulator, directory: Path) -> None:
+    """Require battery permission changes to collapse the complete warning row."""
+    entries = emulator.text("shell", "cmd", "deviceidle", "whitelist").splitlines()
+    originally_exempt = any(f",{PACKAGE}," in entry for entry in entries)
+    activity = emulator.text(
+        "shell", "cmd", "package", "resolve-activity", "--brief", PACKAGE
+    ).splitlines()[-1]
+    positions: list[int] = []
+    notice_height = 0
+    emulator.configure(VIEWPORTS[0], "no")
+    try:
+        for exempt, name in ((False, "before"), (True, "after")):
+            prefix = "+" if exempt else "-"
+            emulator.run(
+                "shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}"
+            )
+            emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
+            emulator.run("shell", "am", "start", "-W", "-n", activity)
+            emulator.scenario("running")
+            hierarchy = capture(emulator, directory, f"battery-notice-{name}")
+            notices = [
+                node
+                for node in hierarchy.iter("node")
+                if "battery optimization" in node.get("text", "").lower()
+            ]
+            pause = next(
+                node
+                for node in hierarchy.iter("node")
+                if node.get("content-desc") == "Pause"
+            )
+            positions.append(bounds(pause)[1])
+            if exempt:
+                if notices:
+                    raise AssertionError(
+                        "Battery warning remained after granting access."
+                    )
+            else:
+                if len(notices) != 1:
+                    raise AssertionError(
+                        "Battery warning is missing for optimized mode."
+                    )
+                notice_bounds = bounds(notices[0])
+                notice_height = notice_bounds[3] - notice_bounds[1]
+        if positions[1] > positions[0] - notice_height:
+            raise AssertionError("Battery warning disappeared but left its row space.")
+        logging.info("Passed battery warning collapse after Android settings change")
+    finally:
+        prefix = "+" if originally_exempt else "-"
+        emulator.run("shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}")
+        emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
+        emulator.run("shell", "am", "start", "-W", "-n", activity)
+
+
 def check_review_cancellation(emulator: Emulator) -> None:
     """Require Android's stop lifecycle to cancel the foreground review scope."""
     emulator.scenario("original-media-review-cancellation")
@@ -629,7 +697,18 @@ def check_permission_transition(emulator: Emulator, directory: Path, name: str) 
     pause = next(
         node for node in after.iter("node") if node.get("content-desc") == "Pause"
     )
-    if bounds(title)[1] - bounds(collection)[1] > bounds(pause)[3] - bounds(pause)[1]:
+    preceding_content_bottom = max(
+        [bounds(collection)[1]]
+        + [
+            bounds(node)[3]
+            for node in collection.iter("node")
+            if node.get("content-desc") == "Review Android background activity settings"
+        ]
+    )
+    if (
+        bounds(title)[1] - preceding_content_bottom
+        > bounds(pause)[3] - bounds(pause)[1]
+    ):
         raise AssertionError(
             "Removing the permission row left empty space above the folder."
         )
@@ -685,10 +764,12 @@ def run_checks(
     emulator.run("shell", "am", "start", "-W", "-n", activity)
     wait_for_sign_in(emulator)
     check_sign_in_notification(emulator)
+    check_background_restriction(emulator)
     check_worker_cancellation(emulator)
     check_worker_cancellation(emulator, budget=True)
     check_native_job_stop(emulator)
     check_review_cancellation(emulator)
+    check_background_notice(emulator, directory)
     completed: list[str] = []
     viewports = VIEWPORTS if full else VIEWPORTS[:1]
     display_scenarios = ("running",) if dashboard_only else SCENARIOS

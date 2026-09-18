@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.ViewModels;
+using UraniumUI.Dialogs;
 
 namespace Cotton.Mobile.DependencyInjection
 {
@@ -10,6 +11,12 @@ namespace Cotton.Mobile.DependencyInjection
         public static IServiceCollection AddCottonPresentation(this IServiceCollection services)
         {
             ArgumentNullException.ThrowIfNull(services);
+            services.Configure<DialogOptions>(options => options.GetBackdropColor = () =>
+            {
+                Application application = Application.Current
+                    ?? throw new InvalidOperationException("Application resources are unavailable.");
+                return (Color)application.Resources["DialogBackdrop"];
+            });
             services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
             services.AddSingleton<MainPageSessionCoordinator>();
             services.AddSingleton<MainPageUserInteractionService>();

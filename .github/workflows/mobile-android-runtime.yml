@@ -67,6 +67,9 @@ jobs:
             sudo chmod 666 /dev/kvm
           fi
 
+      - name: Install UI test dependencies
+        run: python3 -m pip install -r scripts/mobile/requirements-ui.txt
+
       - name: Test Android runtime behavior
         timeout-minutes: 20
         env:

@@ -32,6 +32,7 @@
     <Color x:Key="InverseOnSurface">#EEF1EF</Color>
     <Color x:Key="InversePrimary">#C6FF00</Color>
     <Color x:Key="Scrim">#000000</Color>
+    <Color x:Key="DialogBackdrop">#80000000</Color>
 
     <Color x:Key="PrimaryDark">#C6FF00</Color>
     <Color x:Key="OnPrimaryDark">#151900</Color>

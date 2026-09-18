@@ -47,7 +47,7 @@ jobs:
 
       - name: Validate upload UI runner
         run: |
-          python3 -m pip install ruff==0.16.6 mypy==2.3.1
+          python3 -m pip install ruff==0.16.6 mypy==2.3.1 -r scripts/mobile/requirements-ui.txt
           ruff check scripts/mobile/test-android-upload-ui.py --select E,F,I
           ruff format scripts/mobile/test-android-upload-ui.py --check
           mypy scripts/mobile/test-android-upload-ui.py --strict

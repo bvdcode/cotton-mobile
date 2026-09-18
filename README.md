@@ -46,6 +46,7 @@ The emulator checks exercise offline commands, pause availability during uploads
 ```shell
 dotnet build src/Cotton.Mobile/Cotton.Mobile.csproj -f net10.0-android -c Debug -p:CottonUiTests=true -p:OutputPath=bin/UploadUiTests/
 adb -s emulator-5554 install -r src/Cotton.Mobile/bin/UploadUiTests/dev.cottoncloud.app.debug-Signed.apk
+python -m pip install -r scripts/mobile/requirements-ui.txt
 python scripts/mobile/test-android-upload-ui.py --serial emulator-5554 --output .qa/upload-ui --full
 ```
 

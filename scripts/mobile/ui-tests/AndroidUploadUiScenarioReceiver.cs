@@ -151,6 +151,13 @@ namespace Cotton.Mobile.Platforms.Android
                     ShowRoot(state);
                     state.IsBusy = true;
                     progress.Report(CottonSyncProgressSnapshot.ApplyingChanges(RootId, 4, 10));
+                    state.IsBusy = false;
+                    if (viewModel.Sync.RunAllCommand.CanExecute(null))
+                    {
+                        throw new InvalidOperationException("A second full sync can start during background sync.");
+                    }
+
+                    state.IsBusy = true;
                     if (!viewModel.Sync.PauseRootCommand.CanExecute(viewModel.Sync.Roots[0].PauseResumeAction))
                     {
                         throw new InvalidOperationException("Pause is unavailable during a manual upload.");
@@ -269,6 +276,15 @@ namespace Cotton.Mobile.Platforms.Android
             CottonSyncRootSnapshot root = ShowRoot(state, failureKind);
             await services.GetRequiredService<ICottonSyncRootStore>()
                 .AddOrReplaceAsync(InstanceUri, root);
+            if (failureKind == CottonAutomaticSyncFailureKind.RemotePathConflict)
+            {
+                CottonDeviceToCloudSyncPlanSnapshot plan = new(
+                    root.Id, root.CloudFolder.FolderId, root.CloudFolder.FolderName, []);
+                CottonDeviceToCloudSyncExecutionResult execution = new(0, 0, 0, 0, 0, 3);
+                state.Status = CottonSyncSettingsRunStatusText.CreateCompletedStatus(
+                    new CottonDeviceToCloudSyncRunSummary(
+                        [CottonDeviceToCloudSyncRootRunResult.Completed(root, plan, execution)]));
+            }
         }
 
         private static void EnsureOffline(IServiceProvider services)

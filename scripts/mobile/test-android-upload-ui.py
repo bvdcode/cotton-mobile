@@ -12,6 +12,8 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
 
+from PIL import Image
+
 PACKAGE = "dev.cottoncloud.app.debug"
 RECEIVER = f"{PACKAGE}/dev.cottoncloud.app.debug.UploadUiScenarioReceiver"
 LOG_TAG = "CottonUploadUiTests"
@@ -216,6 +218,30 @@ def assert_message(hierarchy: ET.Element, expected: str) -> None:
         )
 
 
+def assert_dialog_backdrop(directory: Path, background: str, dialog: str) -> None:
+    """Require a half-opacity black scrim outside the dialog in either theme."""
+    with (
+        Image.open(directory / f"{background}.png") as before,
+        Image.open(directory / f"{dialog}.png") as after,
+    ):
+        if before.size != after.size:
+            raise AssertionError("Opening a dialog changed the display dimensions.")
+        width, height = before.size
+        for x in (width // 32, width - width // 32 - 1):
+            y = height // 2
+            area = (x, y, x + 1, y + 1)
+            original = before.convert("RGB").crop(area).tobytes()
+            overlay = after.convert("RGB").crop(area).tobytes()
+            if any(
+                abs(actual - initial / 2) > 3
+                for initial, actual in zip(original, overlay, strict=True)
+            ):
+                raise AssertionError(
+                    f"Incorrect dialog backdrop in {dialog} at ({x}, {y}): "
+                    f"background={tuple(original)}, dialog={tuple(overlay)}"
+                )
+
+
 def find_action_button(hierarchy: ET.Element, text: str) -> ET.Element:
     """Find one enabled native action button by its visible label."""
     buttons = [
@@ -307,9 +333,14 @@ def capture_failure(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
     if scenario == "cloud-path-conflict":
+        assert_message(
+            hierarchy,
+            "Sync incomplete. 3 items need attention. Review the folders below.",
+        )
         title = "Replace conflicting files in Camera backups?"
         wait_for_message(emulator, title)
         dialog = capture(emulator, directory, f"{name}-replacement")
+        assert_dialog_backdrop(directory, name, f"{name}-replacement")
         assert_message(dialog, title)
         assert_message(dialog, REPLACE_CLOUD_CONFLICT_MESSAGE)
         find_action_button(dialog, "Replace cloud file")
@@ -326,6 +357,7 @@ def capture_failure(
 
     wait_for_message(emulator, "Sync details for Camera backups")
     dialog = capture(emulator, directory, f"{name}-details")
+    assert_dialog_backdrop(directory, name, f"{name}-details")
     assert_message(dialog, "Sync details for Camera backups")
     assert_message(dialog, FAILURE_MESSAGES[scenario])
     close = find_action_button(dialog, "Close")
@@ -339,17 +371,18 @@ def capture_pending_upload(
     emulator: Emulator, directory: Path, name: str, hierarchy: ET.Element
 ) -> None:
     """Verify that only a changed pending upload offers the recovery action."""
-    action = find_action_button(hierarchy, "Resolve pending upload")
+    action = find_action_button(hierarchy, "Retry uploads")
     left, top, right, bottom = bounds(action)
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
     wait_for_message(emulator, "Resolve pending upload for Camera backups?")
     dialog = capture(emulator, directory, f"{name}-recovery")
+    assert_dialog_backdrop(directory, name, f"{name}-recovery")
     assert_message(dialog, "Resolve pending upload for Camera backups?")
     assert_message(dialog, PENDING_UPLOAD_MESSAGE)
     cancel = find_action_button(dialog, "Cancel")
-    find_action_button(dialog, "Resolve pending upload")
+    find_action_button(dialog, "Retry uploads")
     left, top, right, bottom = bounds(cancel)
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
@@ -720,8 +753,10 @@ def check_original_prompt(
 ) -> None:
     """Render the native recovery question and exercise both decisions."""
     emulator.scenario("running")
+    capture(emulator, directory, f"{name}-background")
     emulator.scenario("original-media-prompt")
     hierarchy = capture(emulator, directory, name)
+    assert_dialog_backdrop(directory, f"{name}-background", name)
     texts = [node.get("text", "") for node in hierarchy.iter("node")]
     if "Restore location data?" not in texts or not any(
         "300 cloud files" in text for text in texts

@@ -50,6 +50,7 @@ namespace Cotton.Mobile.Tests
         [InlineData("Cotton.Mobile.ViewModels.SyncSettingsSetupHandler")]
         [InlineData("Cotton.Mobile.ViewModels.SyncSettingsLoadingHandler")]
         [InlineData("Cotton.Mobile.ViewModels.SyncSettingsManagementHandler")]
+        [InlineData("Cotton.Mobile.ViewModels.MediaOriginalRestoreReviewHandler")]
         public void LoggerPersistsUploadScreenFailures(string category)
         {
             using FileSystemCottonDiagnosticJournal journal = new(_directory, TimeProvider.System);
@@ -78,6 +79,34 @@ namespace Cotton.Mobile.Tests
             }
 
             GC.SuppressFinalize(this);
+        }
+
+        [Fact]
+        public void OriginalMediaRecoveryPersistsScanAndConfirmedReplacements()
+        {
+            using FileSystemCottonDiagnosticJournal journal = new(_directory, TimeProvider.System);
+            using CottonDiagnosticLoggerProvider provider = new(journal);
+            ILogger scanner = provider.CreateLogger(typeof(CottonMediaOriginalRestoreService).FullName!);
+            ILogger executor = provider.CreateLogger(typeof(CottonMediaOriginalRestoreExecutor).FullName!);
+            Guid rootId = Guid.NewGuid();
+            Guid fileId = Guid.NewGuid();
+            Guid operationId = Guid.NewGuid();
+
+            CottonMediaRestoreLog.ScanCompleted(scanner, rootId, 2, 10, 1);
+            CottonMediaRestoreLog.FileStarted(executor, rootId, fileId, operationId);
+            CottonMediaRestoreLog.FileCompleted(executor, rootId, fileId, operationId);
+            CottonMediaRestoreLog.FileChanged(executor, rootId, fileId);
+
+            IReadOnlyList<string> records = journal.ReadAll();
+            Assert.Equal(4, records.Count);
+            for (int index = 0; index < records.Count; index++)
+            {
+                Assert.Contains($"\t{2301 + index}\t", records[index], StringComparison.Ordinal);
+                Assert.Contains(rootId.ToString(), records[index], StringComparison.Ordinal);
+            }
+
+            Assert.Contains(operationId.ToString(), records[2], StringComparison.Ordinal);
+            Assert.Contains(fileId.ToString(), records[2], StringComparison.Ordinal);
         }
 
         [Fact]

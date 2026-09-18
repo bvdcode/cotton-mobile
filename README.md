@@ -6,7 +6,7 @@ Cotton Mobile backs up new files from selected Android folders and photo/video a
 
 Folder sources are checked periodically and when the app opens. Media sources also trigger checks when Android reports new photos or videos. Background timing depends on Android scheduling, network availability, and battery restrictions; immediate upload is not guaranteed. Use Run all in the app to request a check now.
 
-The current app provides upload-only backup. It does not replace changed cloud files, download files, or provide two-way synchronization.
+The current app provides upload-only backup. It does not automatically replace changed cloud files, download files, or provide two-way synchronization. When a device file conflicts with a cloud file at the same path, an explicit recovery action can replace the cloud content while preserving its version history.
 
 ## Project Links
 

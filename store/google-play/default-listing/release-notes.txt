@@ -1,5 +1,5 @@
 Closed testing build for Cotton Cloud.
 
-After granting media access, you can restore verified cloud copies that Android previously uploaded without location data. Confirm once to queue the originals for upload.
+Adds a safe action for replacing a conflicting cloud file with the device copy while preserving version history.
 
-Fixes empty space after dismissing the media permission notice. Improves background task cancellation and retries after temporary network failures.
+Prevents overlapping scans and duplicate manual runs. Uses native source selection and bottom navigation controls. Removes the empty space and redundant message after media access is granted.

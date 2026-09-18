@@ -26,6 +26,9 @@ requires_android_release() {
     scripts/mobile/detect-android-release-changes.sh|scripts/mobile/resolve-android-release-policy.sh|scripts/mobile/upload-google-play.py)
       return 0
       ;;
+    store/google-play/default-listing/release-notes.txt)
+      return 0
+      ;;
     *)
       return 1
       ;;

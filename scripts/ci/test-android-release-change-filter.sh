@@ -46,9 +46,15 @@ docs_head="$(commit_all "docs")"
 output="$("$detect_script" "$base" "$docs_head")"
 assert_contains "$output" "Android release required: false"
 
+mkdir -p store/google-play/default-listing
+printf 'Release notes\n' > store/google-play/default-listing/release-notes.txt
+release_notes_head="$(commit_all "release notes")"
+output="$("$detect_script" "$docs_head" "$release_notes_head")"
+assert_contains "$output" "Android release required: true"
+
 printf 'name: Mobile Android\n' > .github/workflows/mobile-android.yml
 workflow_head="$(commit_all "workflow")"
-output="$("$detect_script" "$docs_head" "$workflow_head")"
+output="$("$detect_script" "$release_notes_head" "$workflow_head")"
 assert_contains "$output" "Android release required: true"
 
 printf 'name: Mobile Signed Release\n' > .github/workflows/mobile-release.yml

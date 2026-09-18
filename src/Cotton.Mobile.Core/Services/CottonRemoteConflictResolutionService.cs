@@ -42,7 +42,7 @@ namespace Cotton.Mobile.Services
                     localContent,
                     remoteContent,
                     uploadReceipts);
-                IReadOnlyList<(CottonDeviceToCloudLocalItemSnapshot Local, CottonDeviceToCloudRemoteItemSnapshot Remote)>
+                List<(CottonDeviceToCloudLocalItemSnapshot Local, CottonDeviceToCloudRemoteItemSnapshot Remote)>
                     conflicts = FindFileConflicts(
                     plan,
                     localContent,
@@ -125,7 +125,7 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private static IReadOnlyList<(
+        private static List<(
             CottonDeviceToCloudLocalItemSnapshot Local,
             CottonDeviceToCloudRemoteItemSnapshot Remote)> FindFileConflicts(
             CottonDeviceToCloudSyncPlanSnapshot plan,

@@ -190,25 +190,11 @@
                                             </Border>
 
                                             <Grid Grid.Column="1"
-                                                  RowDefinitions="Auto,Auto"
+                                                  RowDefinitions="Auto,Auto,Auto"
                                                   RowSpacing="3"
                                                   IsClippedToBounds="True"
-                                                  InputTransparent="True"
                                                   MinimumHeightRequest="{StaticResource AppTouchTargetSize}"
-                                                  SemanticProperties.Description="{Binding StatusActionText}"
                                                   VerticalOptions="Center">
-                                                <Grid.GestureRecognizers>
-                                                    <TapGestureRecognizer
-                                                        Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
-                                                        CommandParameter="{Binding StatusAction}" />
-                                                </Grid.GestureRecognizers>
-                                                <Grid.Triggers>
-                                                    <DataTrigger TargetType="Grid"
-                                                                 Binding="{Binding CanUseStatusAction}"
-                                                                 Value="True">
-                                                        <Setter Property="InputTransparent" Value="False" />
-                                                    </DataTrigger>
-                                                </Grid.Triggers>
                                                 <Label Text="{Binding DisplayPathText}"
                                                        FontAttributes="Bold"
                                                        Style="{StaticResource AppBodyText}"
@@ -219,15 +205,16 @@
                                                        Style="{StaticResource AppBodyText}"
                                                        LineBreakMode="WordWrap"
                                                        VerticalOptions="Center">
-                                                    <Label.Triggers>
-                                                        <DataTrigger TargetType="Label"
-                                                                     Binding="{Binding CanUseStatusAction}"
-                                                                     Value="True">
-                                                            <Setter Property="TextColor"
-                                                                    Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                                        </DataTrigger>
-                                                    </Label.Triggers>
                                                 </Label>
+                                                <Button Grid.Row="2"
+                                                        Text="{Binding StatusActionText}"
+                                                        Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                        CommandParameter="{Binding StatusAction}"
+                                                        IsVisible="{Binding CanUseStatusAction}"
+                                                        SemanticProperties.Description="{Binding StatusActionText}"
+                                                        HorizontalOptions="Start"
+                                                        Padding="0"
+                                                        StyleClass="TextButton, TouchTarget" />
                                             </Grid>
 
                                             <Button Grid.Column="2"

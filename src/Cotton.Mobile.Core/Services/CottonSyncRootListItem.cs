@@ -57,6 +57,9 @@ namespace Cotton.Mobile.Services
             ResolvePendingUploadAction = new CottonSyncRootActionRequest(
                 this,
                 CottonSyncRootAction.ResolvePendingUpload);
+            ReplaceCloudConflictAction = new CottonSyncRootActionRequest(
+                this,
+                CottonSyncRootAction.ReplaceCloudConflict);
             PrimaryAction = new CottonSyncRootActionRequest(
                 this,
                 CottonSyncRootAction.UsePrimaryAction);
@@ -93,6 +96,11 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncRootActionRequest ResolvePendingUploadAction { get; }
 
+        public bool CanReplaceCloudConflict =>
+            _failureKind == CottonAutomaticSyncFailureKind.RemotePathConflict && !IsRunning;
+
+        public CottonSyncRootActionRequest ReplaceCloudConflictAction { get; }
+
         public CottonSyncRootActionRequest? StatusAction
         {
             get
@@ -107,6 +115,11 @@ namespace Cotton.Mobile.Services
                     return ResolvePendingUploadAction;
                 }
 
+                if (CanReplaceCloudConflict)
+                {
+                    return ReplaceCloudConflictAction;
+                }
+
                 if (CanShowFailureDetails)
                 {
                     return FailureDetailsAction;
@@ -118,13 +131,28 @@ namespace Cotton.Mobile.Services
 
         public bool CanUseStatusAction => StatusAction is not null;
 
-        public string StatusActionText => CanShowFailureDetails
-            ? CanResolvePendingUpload
-                ? CoreResources.ResolvePendingUpload
-                : CoreResources.ShowFailureDetails
-            : CanReconnect
-                ? _reconnectActionText
-                : string.Empty;
+        public string StatusActionText
+        {
+            get
+            {
+                if (CanResolvePendingUpload)
+                {
+                    return CoreResources.ResolvePendingUpload;
+                }
+
+                if (CanReplaceCloudConflict)
+                {
+                    return CoreResources.ReplaceCloudConflict;
+                }
+
+                if (CanShowFailureDetails)
+                {
+                    return CoreResources.ShowFailureDetails;
+                }
+
+                return CanReconnect ? _reconnectActionText : string.Empty;
+            }
+        }
 
         public bool IsProgressDeterminate =>
             (_progress?.Stage == CottonSyncProgressStage.ApplyingChanges
@@ -278,6 +306,7 @@ namespace Cotton.Mobile.Services
                 OnPropertyChanged(nameof(CanUseStatusAction));
                 OnPropertyChanged(nameof(StatusActionText));
                 OnPropertyChanged(nameof(CanResolvePendingUpload));
+                OnPropertyChanged(nameof(CanReplaceCloudConflict));
             }
         }
 

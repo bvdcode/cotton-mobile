@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Services
     {
         ShowFailureDetails,
         ResolvePendingUpload,
+        ReplaceCloudConflict,
         UsePrimaryAction,
         Pause,
         Resume,

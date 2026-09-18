@@ -108,6 +108,11 @@ namespace Cotton.Mobile.Resources.Localization
         public static string ResolvePendingUploadMessage => GetString(nameof(ResolvePendingUploadMessage));
         public static string PendingUploadResolved => GetString(nameof(PendingUploadResolved));
         public static string PendingUploadResolveFailed => GetString(nameof(PendingUploadResolveFailed));
+        public static string ReplaceCloudConflict => GetString(nameof(ReplaceCloudConflict));
+        public static string ReplaceCloudConflictTitleFormat => GetString(nameof(ReplaceCloudConflictTitleFormat));
+        public static string ReplaceCloudConflictMessage => GetString(nameof(ReplaceCloudConflictMessage));
+        public static string CloudConflictReplaced => GetString(nameof(CloudConflictReplaced));
+        public static string CloudConflictReplaceFailed => GetString(nameof(CloudConflictReplaceFailed));
         public static string LocalFolderUnavailable => GetString(nameof(LocalFolderUnavailable));
         public static string MediaFoldersUnavailable => GetString(nameof(MediaFoldersUnavailable));
         public static string LocalSyncTargetUnsupported => GetString(nameof(LocalSyncTargetUnsupported));

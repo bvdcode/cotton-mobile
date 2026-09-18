@@ -47,26 +47,21 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void SyncStatusActionUsesTheSameAccessibleTextLayoutAsProgress()
+        public void SyncStatusActionUsesAnAccessibleButton()
         {
             XDocument document = XDocument.Parse(
                 RepositoryPath.ReadText($"{ViewDirectory}/SyncDashboardView.xaml"));
-            XElement gesture = document.Descendants().Single(element =>
-                element.Name.LocalName == "TapGestureRecognizer"
+            XElement button = document.Descendants().Single(element =>
+                element.Name.LocalName == "Button"
                 && GetAttribute(element, "CommandParameter")?.Value.Contains("StatusAction", StringComparison.Ordinal)
                     == true);
-            XElement container = gesture.Ancestors().First(element => element.Name.LocalName == "Grid");
-            XElement status = container.Descendants().Single(element =>
-                element.Name.LocalName == "Label"
-                && GetAttribute(element, "Text")?.Value.Contains("StatusText", StringComparison.Ordinal) == true);
 
-            Assert.Equal("{StaticResource AppTouchTargetSize}", GetAttribute(container, "MinimumHeightRequest")?.Value);
+            Assert.Equal("{Binding CanUseStatusAction}", GetAttribute(button, "IsVisible")?.Value);
+            Assert.Equal("TextButton, TouchTarget", GetAttribute(button, "StyleClass")?.Value);
             Assert.Contains(
                 "StatusActionText",
-                GetAttributeContaining(container, "Description")?.Value,
+                GetAttributeContaining(button, "Description")?.Value,
                 StringComparison.Ordinal);
-            Assert.Equal("Label", status.Name.LocalName);
-            Assert.DoesNotContain(container.Descendants(), element => element.Name.LocalName == "Button");
         }
 
         private static XAttribute? GetAttribute(XElement element, string localName)

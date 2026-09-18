@@ -23,6 +23,10 @@ namespace Cotton.Mobile.Services
         public static string ResolvePendingUploadMessage => CoreResources.ResolvePendingUploadMessage;
         public static string PendingUploadResolvedStatus => CoreResources.PendingUploadResolved;
         public static string PendingUploadResolveFailedStatus => CoreResources.PendingUploadResolveFailed;
+        public static string ReplaceCloudConflictAction => CoreResources.ReplaceCloudConflict;
+        public static string ReplaceCloudConflictMessage => CoreResources.ReplaceCloudConflictMessage;
+        public static string CloudConflictReplacedStatus => CoreResources.CloudConflictReplaced;
+        public static string CloudConflictReplaceFailedStatus => CoreResources.CloudConflictReplaceFailed;
 
         public static string CreateDeleteTitle(string folderName)
         {
@@ -40,6 +44,13 @@ namespace Cotton.Mobile.Services
         {
             return CoreResources.Format(
                 CoreResources.ResolvePendingUploadTitleFormat,
+                NormalizeFolderName(folderName));
+        }
+
+        public static string CreateReplaceCloudConflictTitle(string folderName)
+        {
+            return CoreResources.Format(
+                CoreResources.ReplaceCloudConflictTitleFormat,
                 NormalizeFolderName(folderName));
         }
 

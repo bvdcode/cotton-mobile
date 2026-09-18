@@ -102,6 +102,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonSyncRootAction.ShowFailureDetails => request.Item.CanShowFailureDetails,
                 CottonSyncRootAction.ResolvePendingUpload => request.Item.CanResolvePendingUpload,
+                CottonSyncRootAction.ReplaceCloudConflict => request.Item.CanReplaceCloudConflict,
                 CottonSyncRootAction.UsePrimaryAction => request.Item.CanUsePrimaryAction,
                 CottonSyncRootAction.Pause => request.Item.CanPauseSync,
                 CottonSyncRootAction.Resume => request.Item.CanResumeSync,
@@ -127,6 +128,14 @@ namespace Cotton.Mobile.ViewModels
 
                 case CottonSyncRootAction.ResolvePendingUpload:
                     if (await _managementHandler.ResolvePendingUploadAsync(this, item, cancellationToken))
+                    {
+                        await _executionHandler.ExecutePrimaryActionAsync(this, item, cancellationToken);
+                    }
+
+                    break;
+
+                case CottonSyncRootAction.ReplaceCloudConflict:
+                    if (await _managementHandler.ReplaceCloudConflictAsync(this, item, cancellationToken))
                     {
                         await _executionHandler.ExecutePrimaryActionAsync(this, item, cancellationToken);
                     }

@@ -66,6 +66,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<CottonMediaOriginalRestoreService>();
             services.AddSingleton<CottonMediaOriginalRestoreReview>();
             services.AddSingleton<CottonMediaOriginalRestoreExecutor>();
+            services.AddSingleton<CottonRemoteConflictResolutionService>();
             services.AddSingleton<ICottonDeviceToCloudSyncFileOperator, CottonDeviceToCloudSyncFileOperator>();
             services.AddSingleton(serviceProvider =>
                 new CottonUploadOnlySyncPlanExecutor(

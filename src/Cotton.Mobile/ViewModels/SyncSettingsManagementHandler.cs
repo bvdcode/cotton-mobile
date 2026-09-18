@@ -12,6 +12,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly SyncRootManager _rootManager;
         private readonly IUserDialogService _dialogService;
         private readonly ICottonUploadReceiptStore _uploadReceiptStore;
+        private readonly CottonRemoteConflictResolutionService _remoteConflictResolutionService;
         private readonly CottonSyncRootExecutionLock _executionLock;
         private readonly ILogger<SyncSettingsManagementHandler> _logger;
 
@@ -20,6 +21,7 @@ namespace Cotton.Mobile.ViewModels
             SyncRootManager rootManager,
             IUserDialogService dialogService,
             ICottonUploadReceiptStore uploadReceiptStore,
+            CottonRemoteConflictResolutionService remoteConflictResolutionService,
             CottonSyncRootExecutionLock executionLock,
             ILogger<SyncSettingsManagementHandler> logger)
         {
@@ -27,6 +29,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(rootManager);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(uploadReceiptStore);
+            ArgumentNullException.ThrowIfNull(remoteConflictResolutionService);
             ArgumentNullException.ThrowIfNull(executionLock);
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -34,6 +37,7 @@ namespace Cotton.Mobile.ViewModels
             _rootManager = rootManager;
             _dialogService = dialogService;
             _uploadReceiptStore = uploadReceiptStore;
+            _remoteConflictResolutionService = remoteConflictResolutionService;
             _executionLock = executionLock;
             _logger = logger;
         }
@@ -174,6 +178,78 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonLog.Warning(_logger, "Failed to resolve pending Cotton mobile uploads.", exception);
                 state.Status = CottonSyncRootManagementText.PendingUploadResolveFailedStatus;
+                return false;
+            }
+            finally
+            {
+                state.IsBusy = false;
+            }
+        }
+
+        public async Task<bool> ReplaceCloudConflictAsync(
+            ISyncSettingsViewState state,
+            CottonSyncRootListItem item,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(item);
+            Uri? instanceUri = state.InstanceUri;
+            if (instanceUri is null || !item.CanReplaceCloudConflict)
+            {
+                state.Status = CottonSyncRootManagementText.CloudConflictReplaceFailedStatus;
+                return false;
+            }
+
+            state.IsBusy = true;
+            try
+            {
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state, cancellationToken);
+                CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
+                if (root is null)
+                {
+                    state.ShowRoots(collection);
+                    state.Status = CottonSyncRootManagementText.RootMissingStatus;
+                    return false;
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+                bool confirmed = await _dialogService.ShowConfirmationAsync(
+                    CottonSyncRootManagementText.CreateReplaceCloudConflictTitle(root.CloudFolder.FolderName),
+                    CottonSyncRootManagementText.ReplaceCloudConflictMessage,
+                    CottonSyncRootManagementText.ReplaceCloudConflictAction,
+                    CottonSyncRootManagementText.CancelAction);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!confirmed)
+                {
+                    state.Status = null;
+                    return false;
+                }
+
+                int replacedCount = await _executionLock.ExecuteAsync(
+                    root,
+                    token => _remoteConflictResolutionService.ReplaceFileConflictsAsync(
+                        instanceUri,
+                        root,
+                        token),
+                    cancellationToken);
+                if (replacedCount == 0)
+                {
+                    state.Status = CottonSyncRootManagementText.CloudConflictReplaceFailedStatus;
+                    return false;
+                }
+
+                state.Status = CottonSyncRootManagementText.CloudConflictReplacedStatus;
+                return true;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                state.Status = null;
+                throw;
+            }
+            catch (Exception exception)
+            {
+                CottonLog.Warning(_logger, "Failed to replace conflicting Cotton cloud files.", exception);
+                state.Status = CottonSyncRootManagementText.CloudConflictReplaceFailedStatus;
                 return false;
             }
             finally

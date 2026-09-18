@@ -120,5 +120,31 @@ namespace Cotton.Mobile.Services
             int deletedCount,
             int skippedCount,
             int blockedCount);
+
+        [LoggerMessage(EventId = 2134, Level = LogLevel.Information, Message = "Cloud conflict resolution started for root {RootId}.")]
+        public static partial void ConflictResolutionStarted(ILogger logger, Guid rootId);
+
+        [LoggerMessage(EventId = 2135, Level = LogLevel.Information, Message = "Cloud conflict resolution for root {RootId} selected {ConflictCount} replaceable files.")]
+        public static partial void ConflictResolutionPlanned(ILogger logger, Guid rootId, int conflictCount);
+
+        [LoggerMessage(EventId = 2136, Level = LogLevel.Information, Message = "Replacing cloud conflict in root {RootId}, file {FileId}, operation {OperationId}.")]
+        public static partial void ConflictResolutionFileStarted(
+            ILogger logger,
+            Guid rootId,
+            Guid fileId,
+            Guid operationId);
+
+        [LoggerMessage(EventId = 2137, Level = LogLevel.Information, Message = "Cloud conflict replaced in root {RootId}, file {FileId}, operation {OperationId}.")]
+        public static partial void ConflictResolutionFileCompleted(
+            ILogger logger,
+            Guid rootId,
+            Guid fileId,
+            Guid operationId);
+
+        [LoggerMessage(EventId = 2138, Level = LogLevel.Information, Message = "Cloud conflict resolution completed for root {RootId}: {ReplacedCount} files replaced.")]
+        public static partial void ConflictResolutionCompleted(ILogger logger, Guid rootId, int replacedCount);
+
+        [LoggerMessage(EventId = 2139, Level = LogLevel.Warning, Message = "Cloud conflict update response was lost for root {RootId}, file {FileId}; the updated revision was confirmed from the cloud.")]
+        public static partial void ConflictResolutionResponseRecovered(ILogger logger, Guid rootId, Guid fileId);
     }
 }

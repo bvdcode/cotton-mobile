@@ -103,6 +103,7 @@ namespace Cotton.Mobile.Services
                 client,
                 content,
                 uploadSettings,
+                source.Snapshot.SizeBytes,
                 progress,
                 cancellationToken).ConfigureAwait(false);
             if (source.Snapshot.SizeBytes.HasValue
@@ -144,11 +145,12 @@ namespace Cotton.Mobile.Services
             ICottonCloudClient client,
             Stream content,
             CottonFileUploadSettings settings,
+            long? expectedSizeBytes,
             IProgress<long>? progress,
             CancellationToken cancellationToken)
         {
             List<string> chunkHashes = [];
-            byte[] buffer = new byte[settings.MaxChunkSizeBytes];
+            byte[] buffer = new byte[ResolveBufferSize(settings.MaxChunkSizeBytes, expectedSizeBytes)];
             long processedBytes = 0;
 
             using SHA256 contentHash = SHA256.Create();
@@ -193,6 +195,17 @@ namespace Cotton.Mobile.Services
                 chunkHashes,
                 CottonContentHash.FormatSha256(fileHash),
                 processedBytes);
+        }
+
+        private static int ResolveBufferSize(int maxChunkSizeBytes, long? expectedSizeBytes)
+        {
+            if (!expectedSizeBytes.HasValue)
+            {
+                return maxChunkSizeBytes;
+            }
+
+            long boundedSize = Math.Min(expectedSizeBytes.Value, maxChunkSizeBytes);
+            return checked((int)Math.Max(boundedSize, 1));
         }
 
         private static async Task<int> ReadChunkAsync(

@@ -81,6 +81,37 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task KnownSmallSourceDoesNotRequestMaximumChunkBuffer()
+        {
+            using UploadHttpMessageHandler handler = new();
+            using HttpClient httpClient = new(handler);
+            CottonFileUploadService service = new(new UploadTestClientFactory(httpClient));
+            byte[] bytes = CreateContent(123);
+            ReadRequestRecordingMemoryStream? openedStream = null;
+            CottonFileUploadSource source = new(
+                new CottonFileUploadSourceSnapshot(
+                    "photo.jpg",
+                    "image/jpeg",
+                    bytes.LongLength,
+                    contentHash: CottonContentHash.ComputeSha256(bytes)),
+                cancellationToken =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    openedStream = new ReadRequestRecordingMemoryStream(bytes);
+                    return Task.FromResult<Stream>(openedStream);
+                });
+
+            await service.UploadAsync(
+                Instance,
+                Destination,
+                source,
+                cancellationToken: TestContext.Current.CancellationToken);
+
+            Assert.NotNull(openedStream);
+            Assert.Equal(bytes.Length, openedStream.MaximumReadRequestLength);
+        }
+
+        [Fact]
         public async Task CancelledUploadDoesNotPublishIncompleteFile()
         {
             using CancellationTokenSource cancellation = CancellationTokenSource.CreateLinkedTokenSource(

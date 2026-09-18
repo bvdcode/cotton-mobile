@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Services
         private readonly HashSet<Guid> _pendingRootIds = [];
         private bool _disposed;
         private int _waiterCount;
+        private bool _isRunningAllRoots;
 
         public bool HasPendingRequest => PendingTrigger.HasValue || _pendingRootIds.Count > 0;
 
@@ -32,6 +33,12 @@ namespace Cotton.Mobile.Services
 
         public void Queue(CottonAutomaticSyncTrigger trigger)
         {
+            if (trigger == CottonAutomaticSyncTrigger.PeriodicReconciliation
+                && _isRunningAllRoots && !HasPendingRequest)
+            {
+                return;
+            }
+
             PendingTrigger = PendingTrigger.HasValue
                 ? Merge(PendingTrigger.Value, trigger)
                 : trigger;
@@ -60,6 +67,7 @@ namespace Cotton.Mobile.Services
             {
                 CottonAutomaticSyncTrigger trigger = PendingTrigger.Value;
                 PendingTrigger = null;
+                _isRunningAllRoots = true;
                 return CottonAutomaticSyncDispatchRequest.ForTrigger(trigger);
             }
 
@@ -71,6 +79,7 @@ namespace Cotton.Mobile.Services
             CottonAutomaticSyncDispatchRequest request =
                 CottonAutomaticSyncDispatchRequest.ForRoots(_pendingRootIds);
             _pendingRootIds.Clear();
+            _isRunningAllRoots = false;
             return request;
         }
 

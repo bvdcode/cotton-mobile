@@ -5,6 +5,49 @@ namespace Cotton.Mobile.Tests
 {
     public class AutomaticSyncDispatcherTests
     {
+        [Theory]
+        [InlineData(CottonAutomaticSyncTrigger.ApplicationResumed)]
+        [InlineData(CottonAutomaticSyncTrigger.MediaStoreChanged)]
+        [InlineData(CottonAutomaticSyncTrigger.PeriodicReconciliation)]
+        public async Task PeriodicRequestJoinsRunningFullScan(CottonAutomaticSyncTrigger firstTrigger)
+        {
+            using ControlledAutomaticSyncRunner runner = new();
+            CottonAutomaticSyncDispatcher dispatcher = new(runner);
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(
+                SyncTestRootFactory.SessionScope, firstTrigger, TestContext.Current.CancellationToken);
+            await runner.WaitForNextRunAsync();
+
+            Task<CottonAutomaticSyncRunResult> periodic = dispatcher.RunAsync(
+                SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation,
+                TestContext.Current.CancellationToken);
+            runner.ReleaseRun();
+            runner.ReleaseRun();
+            await Task.WhenAll(first, periodic);
+
+            Assert.Equal([firstTrigger], runner.Triggers);
+        }
+
+        [Fact]
+        public async Task PeriodicRequestAfterSelectedRootsStillScansAllRoots()
+        {
+            using ControlledAutomaticSyncRunner runner = new();
+            CottonAutomaticSyncDispatcher dispatcher = new(runner);
+            Guid rootId = Guid.NewGuid();
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunRootsAsync(
+                SyncTestRootFactory.SessionScope, [rootId], TestContext.Current.CancellationToken);
+            await runner.WaitForNextRunAsync();
+
+            Task<CottonAutomaticSyncRunResult> periodic = dispatcher.RunAsync(
+                SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation,
+                TestContext.Current.CancellationToken);
+            runner.ReleaseRun();
+            runner.ReleaseRun();
+            await Task.WhenAll(first, periodic);
+
+            Assert.Equal([rootId], Assert.Single(runner.RootSelections));
+            Assert.Equal([CottonAutomaticSyncTrigger.PeriodicReconciliation], runner.Triggers);
+        }
+
         [Fact]
         public async Task ConcurrentTriggersCollapseIntoOneFollowUpRun()
         {

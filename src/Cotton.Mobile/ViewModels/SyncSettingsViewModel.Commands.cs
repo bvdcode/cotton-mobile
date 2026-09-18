@@ -32,6 +32,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 PauseRootCommand.NotifyCanExecuteChanged();
                 RootActionCommand.NotifyCanExecuteChanged();
+                RunAllCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -68,7 +69,7 @@ namespace Cotton.Mobile.ViewModels
 
         private bool CanRunAll()
         {
-            return !IsBusy && _canRunAll;
+            return !IsBusy && _canRunAll && !Roots.Any(root => root.IsRunning);
         }
 
         private bool CanAddRoot()

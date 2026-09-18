@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Services
             List<string> parts = [];
             AddDeviceToCloudCounts(parts, summary);
             AddCount(parts, summary.CreatedFolderCount, CoreResources.FolderCreatedSingular, CoreResources.FolderCreatedPlural);
-            AddCount(parts, summary.BlockedItemCount, CoreResources.BlockedLabel);
+            AddCount(parts, summary.BlockedItemCount, CoreResources.ItemNeedsAttentionSingular, CoreResources.ItemNeedsAttentionPlural);
             AddRootCount(parts, summary.SkippedRootCount);
             AddCount(parts, failedRootCount, CoreResources.UploadFolderFailedSingular, CoreResources.UploadFolderFailedPlural);
 
@@ -36,7 +36,10 @@ namespace Cotton.Mobile.Services
                 return CoreResources.SyncCurrent;
             }
 
-            return CoreResources.Format(CoreResources.SyncCompletedFormat, string.Join(", ", parts));
+            string format = summary.HasBlockedItems || summary.HasSkippedRoots || failedRootCount > 0
+                ? CoreResources.SyncIncompleteFormat
+                : CoreResources.SyncCompletedFormat;
+            return CoreResources.Format(format, string.Join(", ", parts));
         }
 
         private static void AddDeviceToCloudCounts(

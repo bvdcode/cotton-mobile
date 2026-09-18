@@ -27,6 +27,9 @@ namespace Cotton.Mobile.Resources.Localization
         public static string NoSyncFolders => GetString(nameof(NoSyncFolders));
         public static string SyncCurrent => GetString(nameof(SyncCurrent));
         public static string SyncCompletedFormat => GetString(nameof(SyncCompletedFormat));
+        public static string SyncIncompleteFormat => GetString(nameof(SyncIncompleteFormat));
+        public static string ItemNeedsAttentionSingular => GetString(nameof(ItemNeedsAttentionSingular));
+        public static string ItemNeedsAttentionPlural => GetString(nameof(ItemNeedsAttentionPlural));
         public static string UploadNewFilesAction => GetString(nameof(UploadNewFilesAction));
         public static string UploadingFolderFormat => GetString(nameof(UploadingFolderFormat));
         public static string DeleteSyncAction => GetString(nameof(DeleteSyncAction));

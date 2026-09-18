@@ -19,6 +19,9 @@
   <data name="NoSyncFolders" xml:space="preserve"><value>No folders are set to sync.</value></data>
   <data name="SyncCurrent" xml:space="preserve"><value>Sync complete. Everything is up to date.</value></data>
   <data name="SyncCompletedFormat" xml:space="preserve"><value>Sync complete. {0}.</value></data>
+  <data name="SyncIncompleteFormat" xml:space="preserve"><value>Sync incomplete. {0}. Review the folders below.</value></data>
+  <data name="ItemNeedsAttentionSingular" xml:space="preserve"><value>item needs attention</value></data>
+  <data name="ItemNeedsAttentionPlural" xml:space="preserve"><value>items need attention</value></data>
   <data name="UploadNewFilesAction" xml:space="preserve"><value>Upload new files</value></data>
   <data name="UploadingFolderFormat" xml:space="preserve"><value>Uploading new files from {0}…</value></data>
   <data name="DeleteSyncAction" xml:space="preserve"><value>Delete sync</value></data>

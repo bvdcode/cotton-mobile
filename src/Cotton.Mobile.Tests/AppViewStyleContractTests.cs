@@ -38,8 +38,8 @@ namespace Cotton.Mobile.Tests
             XDocument document = XDocument.Parse(RepositoryPath.ReadText($"{ViewDirectory}/MainPage.xaml"));
             XElement tabView = document.Descendants().Single(element =>
                 element.Name.LocalName == "TabView");
-            IReadOnlyList<XElement> tabs = tabView.Elements().Where(element =>
-                element.Name.LocalName == "TabItem").ToList();
+            List<XElement> tabs = [.. tabView.Elements().Where(element =>
+                element.Name.LocalName == "TabItem")];
 
             Assert.Equal("Bottom", GetAttribute(tabView, "TabPlacement")?.Value);
             Assert.Equal(
@@ -71,8 +71,8 @@ namespace Cotton.Mobile.Tests
                 RepositoryPath.ReadText($"{ViewDirectory}/SyncRootSetupOptionsPage.xaml"));
             XElement group = document.Descendants().Single(element =>
                 GetAttributeContaining(element, "GroupName")?.Value == "SyncSource");
-            IReadOnlyList<XElement> options = group.Descendants().Where(element =>
-                element.Name.LocalName == "RadioButton").ToList();
+            List<XElement> options = [.. group.Descendants().Where(element =>
+                element.Name.LocalName == "RadioButton")];
 
             Assert.Equal(
                 "{Binding StorageKind, Mode=TwoWay}",

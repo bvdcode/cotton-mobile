@@ -59,6 +59,11 @@ PENDING_UPLOAD_MESSAGE = (
     "If an earlier request finishes later, Cotton will preserve the local file and "
     "report a cloud conflict."
 )
+REPLACE_CLOUD_CONFLICT_MESSAGE = (
+    "Cotton will replace cloud files that conflict with files on this device. "
+    "Existing cloud content remains available in version history. If a cloud file "
+    "changes before replacement, Cotton will stop without overwriting it."
+)
 OFFLINE_MESSAGES = {
     "offline-add": "Connect to the internet to add a sync folder.",
     "offline-run": "Offline. Sync needs internet.",
@@ -211,6 +216,32 @@ def assert_message(hierarchy: ET.Element, expected: str) -> None:
         )
 
 
+def find_action_button(hierarchy: ET.Element, text: str) -> ET.Element:
+    """Find one enabled native action button by its visible label."""
+    buttons = [
+        node
+        for node in hierarchy.iter("node")
+        if node.get("class") == "android.widget.Button"
+        and node.get("text") == text
+        and node.get("clickable") == "true"
+        and node.get("enabled") == "true"
+    ]
+    if len(buttons) != 1:
+        raise AssertionError(f"Expected one enabled action button: {text}")
+    return buttons[0]
+
+
+def wait_for_message(emulator: Emulator, expected: str) -> None:
+    """Wait until an asynchronous native dialog exposes its content."""
+    deadline = time.monotonic() + TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        hierarchy = emulator.hierarchy()
+        if expected in [node.get("text", "") for node in hierarchy.iter("node")]:
+            return
+        time.sleep(0.25)
+    raise AssertionError(f"Action feedback did not appear: {expected}")
+
+
 def bounds(node: ET.Element) -> tuple[int, int, int, int]:
     """Parse one accessibility node's screen bounds."""
     values = list(map(int, re.findall(r"\d+", node.attrib["bounds"])))
@@ -265,26 +296,40 @@ def capture_failure(
     emulator: Emulator, directory: Path, name: str, scenario: str, hierarchy: ET.Element
 ) -> None:
     """Open the status action and verify its complete explanation."""
-    status_prefix = FAILURE_STATUS_PREFIXES[scenario]
-    actions = [
-        node
-        for node in hierarchy.iter("node")
-        if node.get("text", "").startswith(status_prefix)
-        and node.get("enabled") == "true"
-    ]
-    if len(actions) != 1:
-        raise AssertionError("The upload status details action is missing.")
-    left, top, right, bottom = map(int, re.findall(r"\d+", actions[0].attrib["bounds"]))
+    action_text = (
+        "Replace cloud file"
+        if scenario == "cloud-path-conflict"
+        else "Show sync details"
+    )
+    action = find_action_button(hierarchy, action_text)
+    left, top, right, bottom = bounds(action)
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
+    if scenario == "cloud-path-conflict":
+        title = "Replace conflicting files in Camera backups?"
+        wait_for_message(emulator, title)
+        dialog = capture(emulator, directory, f"{name}-replacement")
+        assert_message(dialog, title)
+        assert_message(dialog, REPLACE_CLOUD_CONFLICT_MESSAGE)
+        find_action_button(dialog, "Replace cloud file")
+        cancel = find_action_button(dialog, "Cancel")
+        left, top, right, bottom = bounds(cancel)
+        emulator.run(
+            "shell",
+            "input",
+            "tap",
+            str((left + right) // 2),
+            str((top + bottom) // 2),
+        )
+        return
+
+    wait_for_message(emulator, "Sync details for Camera backups")
     dialog = capture(emulator, directory, f"{name}-details")
     assert_message(dialog, "Sync details for Camera backups")
     assert_message(dialog, FAILURE_MESSAGES[scenario])
-    close = [node for node in dialog.iter("node") if node.get("text") == "Close"]
-    if len(close) != 1 or close[0].get("enabled") != "true":
-        raise AssertionError("The failure dialog cannot be closed.")
-    left, top, right, bottom = bounds(close[0])
+    close = find_action_button(dialog, "Close")
+    left, top, right, bottom = bounds(close)
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
@@ -294,32 +339,18 @@ def capture_pending_upload(
     emulator: Emulator, directory: Path, name: str, hierarchy: ET.Element
 ) -> None:
     """Verify that only a changed pending upload offers the recovery action."""
-    actions = [
-        node
-        for node in hierarchy.iter("node")
-        if node.get("text", "").startswith(
-            FAILURE_STATUS_PREFIXES["pending-upload-changed"]
-        )
-        and node.get("enabled") == "true"
-    ]
-    if len(actions) != 1:
-        raise AssertionError("The pending upload recovery action is missing.")
-    left, top, right, bottom = bounds(actions[0])
+    action = find_action_button(hierarchy, "Resolve pending upload")
+    left, top, right, bottom = bounds(action)
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
+    wait_for_message(emulator, "Resolve pending upload for Camera backups?")
     dialog = capture(emulator, directory, f"{name}-recovery")
     assert_message(dialog, "Resolve pending upload for Camera backups?")
     assert_message(dialog, PENDING_UPLOAD_MESSAGE)
-    cancel = [node for node in dialog.iter("node") if node.get("text") == "Cancel"]
-    resolve = [
-        node
-        for node in dialog.iter("node")
-        if node.get("text") == "Resolve pending upload"
-    ]
-    if len(cancel) != 1 or len(resolve) != 1:
-        raise AssertionError("The pending upload recovery confirmation is incomplete.")
-    left, top, right, bottom = bounds(cancel[0])
+    cancel = find_action_button(dialog, "Cancel")
+    find_action_button(dialog, "Resolve pending upload")
+    left, top, right, bottom = bounds(cancel)
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )

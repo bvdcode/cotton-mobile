@@ -10,23 +10,7 @@ namespace Cotton.Mobile.Resources.Localization
     {
         private static readonly ResourceManager ResourceManagerInstance = new(typeof(SyncRootSetupResources));
 
-        public static string PageTitle => GetString(nameof(PageTitle));
-
-        public static string AppBarTitle => GetString(nameof(AppBarTitle));
-
         public static string ContinueDescription => GetString(nameof(ContinueDescription));
-
-        public static string Heading => GetString(nameof(Heading));
-
-        public static string SupportingText => GetString(nameof(SupportingText));
-
-        public static string FolderTitle => GetString(nameof(FolderTitle));
-
-        public static string FolderSupportingText => GetString(nameof(FolderSupportingText));
-
-        public static string MediaTitle => GetString(nameof(MediaTitle));
-
-        public static string MediaSupportingText => GetString(nameof(MediaSupportingText));
 
         public static string MediaAlbumPageTitle => GetString(nameof(MediaAlbumPageTitle));
 
@@ -79,18 +63,6 @@ namespace Cotton.Mobile.Resources.Localization
                 GetString(nameof(MediaAlbumsDisplayNameFormat)),
                 albumCount);
         }
-
-        public static string CreateSourceDescription(string title, bool isSelected)
-        {
-            string format = isSelected
-                ? GetString("SelectedSourceDescriptionFormat")
-                : GetString("AvailableSourceDescriptionFormat");
-            return string.Format(CultureInfo.CurrentCulture, format, title.Trim());
-        }
-
-        public static string DeleteOriginalsTitle => GetString(nameof(DeleteOriginalsTitle));
-
-        public static string DeleteOriginalsSupportingText => GetString(nameof(DeleteOriginalsSupportingText));
 
         public static string UnavailableMessage => GetString(nameof(UnavailableMessage));
 

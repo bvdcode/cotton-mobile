@@ -39,11 +39,37 @@ namespace Cotton.Mobile.ViewModels
             _logger = logger;
         }
 
-        public async Task AddRootAsync(
+        public Task AddPhotoBackupAsync(
             ISyncSettingsViewState state,
             CancellationToken cancellationToken = default)
         {
+            return AddRootAsync(
+                state,
+                new SyncRootSetupOptions(
+                    CottonSyncRootStorageKind.MediaStore,
+                    CottonUploadOriginalRetention.KeepOriginals),
+                cancellationToken);
+        }
+
+        public Task AddFolderBackupAsync(
+            ISyncSettingsViewState state,
+            CancellationToken cancellationToken = default)
+        {
+            return AddRootAsync(
+                state,
+                new SyncRootSetupOptions(
+                    CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                    CottonUploadOriginalRetention.KeepOriginals),
+                cancellationToken);
+        }
+
+        private async Task AddRootAsync(
+            ISyncSettingsViewState state,
+            SyncRootSetupOptions options,
+            CancellationToken cancellationToken)
+        {
             ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(options);
             Uri? instanceUri = state.InstanceUri;
             string? accountScopeKey = state.AccountScopeKey;
             if (instanceUri is null || string.IsNullOrWhiteSpace(accountScopeKey))
@@ -64,6 +90,7 @@ namespace Cotton.Mobile.ViewModels
                 SyncRootSetupResult result = await _rootSetupCoordinator.AddRootAsync(
                     instanceUri,
                     accountScopeKey,
+                    options,
                     cancellationToken);
                 if (result.Status == SyncRootSetupStatus.Cancelled)
                 {

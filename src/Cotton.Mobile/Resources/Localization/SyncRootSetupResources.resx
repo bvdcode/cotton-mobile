@@ -58,32 +58,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PageTitle" xml:space="preserve">
-    <value>Choose upload source</value>
-  </data>
-  <data name="AppBarTitle" xml:space="preserve">
-    <value>Upload</value>
-  </data>
   <data name="ContinueDescription" xml:space="preserve">
     <value>Continue sync setup</value>
-  </data>
-  <data name="Heading" xml:space="preserve">
-    <value>What should Cotton upload?</value>
-  </data>
-  <data name="SupportingText" xml:space="preserve">
-    <value>New photos and videos trigger a check. Other files are checked periodically. Android may delay background uploads.</value>
-  </data>
-  <data name="FolderTitle" xml:space="preserve">
-    <value>Selected folder</value>
-  </data>
-  <data name="FolderSupportingText" xml:space="preserve">
-    <value>All new files in a folder and its subfolders, including photos, videos and documents.</value>
-  </data>
-  <data name="MediaTitle" xml:space="preserve">
-    <value>Photos and videos</value>
-  </data>
-  <data name="MediaSupportingText" xml:space="preserve">
-    <value>Photos and videos from selected albums in your Android media library.</value>
   </data>
   <data name="MediaAlbumPageTitle" xml:space="preserve">
     <value>Choose media folders</value>
@@ -120,18 +96,6 @@
   </data>
   <data name="MediaAccessRequiredMessage" xml:space="preserve">
     <value>Automatic upload needs access to all photos or videos. Selected-only access cannot see media created later.</value>
-  </data>
-  <data name="SelectedSourceDescriptionFormat" xml:space="preserve">
-    <value>{0}, selected.</value>
-  </data>
-  <data name="AvailableSourceDescriptionFormat" xml:space="preserve">
-    <value>{0}, not selected. Double tap to select.</value>
-  </data>
-  <data name="DeleteOriginalsTitle" xml:space="preserve">
-    <value>Delete originals after upload</value>
-  </data>
-  <data name="DeleteOriginalsSupportingText" xml:space="preserve">
-    <value>Delete the device copy only after Cotton Cloud confirms the upload.</value>
   </data>
   <data name="UnavailableMessage" xml:space="preserve">
     <value>This sync source is not available on this device.</value>

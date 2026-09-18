@@ -36,14 +36,24 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private AsyncRelayCommand CreateAddRootCommand()
+        private AsyncRelayCommand CreateEnablePhotoBackupCommand()
         {
             return new AsyncRelayCommand(
                 cancellationToken => AsyncCommandExecution.RunAsync(
-                    token => _setupHandler.AddRootAsync(this, token),
+                    token => _setupHandler.AddPhotoBackupAsync(this, token),
                     LogUnhandledCommandException,
                     cancellationToken),
-                CanAddRoot);
+                CanEnablePhotoBackup);
+        }
+
+        private AsyncRelayCommand CreateAddFolderCommand()
+        {
+            return new AsyncRelayCommand(
+                cancellationToken => AsyncCommandExecution.RunAsync(
+                    token => _setupHandler.AddFolderBackupAsync(this, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
+                CanAddBackup);
         }
 
         private AsyncRelayCommand CreateRunAllCommand()
@@ -72,7 +82,12 @@ namespace Cotton.Mobile.ViewModels
             return !IsBusy && _canRunAll && !Roots.Any(root => root.IsRunning);
         }
 
-        private bool CanAddRoot()
+        private bool CanEnablePhotoBackup()
+        {
+            return CanAddBackup() && !IsPhotoBackupConfigured;
+        }
+
+        private bool CanAddBackup()
         {
             return !IsBusy && _instanceUri is not null && !string.IsNullOrWhiteSpace(_accountScopeKey);
         }

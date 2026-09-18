@@ -138,7 +138,7 @@ namespace Cotton.Mobile.Platforms.Android
             {
                 case "offline-add":
                     EnsureOffline(services);
-                    await viewModel.Sync.AddRootCommand.ExecuteAsync(null);
+                    await viewModel.Sync.EnablePhotoBackupCommand.ExecuteAsync(null);
                     EnsureStatus(viewModel.Sync, AppResources.SyncFolderAddOffline);
                     break;
                 case "offline-run":
@@ -164,10 +164,13 @@ namespace Cotton.Mobile.Platforms.Android
                     }
 
                     break;
-                case "source-folder":
-                case "source-media":
-                case "source-switch":
-                    await ShowSourceAsync(navigation, scenario, services);
+                case "dashboard-empty":
+                    break;
+                case "dashboard-folder-only":
+                    ShowRoot(state, storageKind: CottonSyncRootStorageKind.UserSelectedDocumentTree);
+                    break;
+                case "dashboard-media":
+                    ShowRoot(state);
                     break;
                 case "storage-full":
                     ShowRoot(state, CottonAutomaticSyncFailureKind.InsufficientStorage);
@@ -228,37 +231,33 @@ namespace Cotton.Mobile.Platforms.Android
             await AndroidWorkOperation.WaitAsync(enqueue, CancellationToken.None);
         }
 
-        private static async Task ShowSourceAsync(
-            INavigation navigation, string scenario, IServiceProvider services)
-        {
-            SyncRootSetupOptionsViewModel source = new(
-                _ => { }, services.GetRequiredService<MediaLocationAccessViewModel>());
-            switch (scenario)
-            {
-                case "source-folder":
-                    source.StorageKind = CottonSyncRootStorageKind.UserSelectedDocumentTree;
-                    break;
-                case "source-media":
-                    source.StorageKind = CottonSyncRootStorageKind.MediaStore;
-                    break;
-                case "source-switch":
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(scenario));
-            }
-
-            await navigation.PushModalAsync(new SyncRootSetupOptionsPage(source), animated: false);
-        }
-
         private static CottonSyncRootSnapshot ShowRoot(
             ISyncSettingsViewState state,
-            CottonAutomaticSyncFailureKind? failureKind = null)
+            CottonAutomaticSyncFailureKind? failureKind = null,
+            CottonSyncRootStorageKind storageKind = CottonSyncRootStorageKind.MediaStore)
         {
+            CottonSyncLocalRootSnapshot localRoot = storageKind switch
+            {
+                CottonSyncRootStorageKind.MediaStore => new CottonSyncLocalRootSnapshot(
+                    storageKind,
+                    "content://media/external/file",
+                    "Camera",
+                    CottonSyncRootPermissionStatus.Available,
+                    "buckets:1"),
+                CottonSyncRootStorageKind.UserSelectedDocumentTree => new CottonSyncLocalRootSnapshot(
+                    storageKind,
+                    "content://com.android.externalstorage.documents/tree/primary%3ADocuments",
+                    "Documents",
+                    CottonSyncRootPermissionStatus.Available),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(storageKind),
+                    storageKind,
+                    "UI scenario storage kind is not supported."),
+            };
             CottonSyncRootSnapshot root = new(RootId, InstanceUri, AccountScope,
                 new CottonUploadDestinationSnapshot(FolderId, "Camera backups",
                     "Files / Family archive / Camera backups with a long folder name"),
-                new CottonSyncLocalRootSnapshot(CottonSyncRootStorageKind.MediaStore,
-                    "content://media/external/file", "Camera", CottonSyncRootPermissionStatus.Available, "buckets:1"),
+                localRoot,
                 CottonSyncDirection.DeviceToCloud, CottonUploadOriginalRetention.KeepOriginals);
             Dictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses = [];
             if (failureKind.HasValue)

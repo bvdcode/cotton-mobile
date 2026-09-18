@@ -20,11 +20,11 @@
             <HorizontalStackLayout Grid.Column="1"
                                    Spacing="0"
                                    HorizontalOptions="End">
-                <Button Command="{Binding AddRootCommand}"
-                        IsVisible="{Binding ArePrimaryActionsVisible}"
+                <Button Command="{Binding AddFolderCommand}"
+                        IsVisible="{Binding IsAddFolderToolbarVisible}"
                         WidthRequest="{StaticResource AppTouchTargetSize}"
                         Padding="0"
-                        SemanticProperties.Description="{x:Static localization:AppResources.AddSyncFolderDescription}"
+                        SemanticProperties.Description="{x:Static localization:AppResources.AddFolderBackupDescription}"
                         StyleClass="TextButton, TouchTarget">
                     <Button.ImageSource>
                         <FontImageSource FontFamily="MaterialOutlined"
@@ -79,7 +79,7 @@
         </Grid>
 
         <Grid Grid.Row="1"
-              RowDefinitions="Auto,*"
+              RowDefinitions="Auto,Auto,*"
               Padding="{StaticResource AppPagePadding}"
               MaximumWidthRequest="{StaticResource AppContentMaximumWidth}"
               HorizontalOptions="Fill">
@@ -89,7 +89,33 @@
                    Margin="0,0,0,8"
                    Style="{StaticResource AppBodyText}" />
 
-            <VerticalStackLayout Grid.Row="1"
+            <Border Grid.Row="1"
+                    IsVisible="{Binding IsPhotoBackupCalloutVisible}"
+                    Style="{StaticResource AppStatusCard}"
+                    Padding="4,16"
+                    Margin="0,0,0,12">
+                <Grid ColumnDefinitions="Auto,*"
+                      ColumnSpacing="12">
+                    <Border Style="{StaticResource AppStatusIconFrame}">
+                        <Image Style="{StaticResource AppIcon}"
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}}" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1"
+                                         Spacing="6">
+                        <Label Text="{x:Static localization:AppResources.PhotoBackupTitle}"
+                               Style="{StaticResource AppSectionTitle}" />
+                        <Label Text="{x:Static localization:AppResources.PhotoBackupBody}"
+                               Style="{StaticResource AppBodyText}" />
+                        <Button Text="{x:Static localization:AppResources.EnablePhotoBackupText}"
+                                Command="{Binding EnablePhotoBackupCommand}"
+                                SemanticProperties.Description="{x:Static localization:AppResources.EnablePhotoBackupDescription}"
+                                HorizontalOptions="Start"
+                                StyleClass="TextButton, TouchTarget" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <VerticalStackLayout Grid.Row="2"
                                  Spacing="16"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center"
@@ -97,20 +123,27 @@
                 <Border Style="{StaticResource AppIconFrame}"
                         HorizontalOptions="Center">
                     <Image Style="{StaticResource AppIcon}"
-                           Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Folder}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                           Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
                 </Border>
-                <Label Text="{x:Static localization:AppResources.NoSyncFoldersTitle}"
+                <Label Text="{x:Static localization:AppResources.NoBackupsTitle}"
                        Style="{StaticResource AppSectionTitle}"
                        HorizontalTextAlignment="Center" />
-                <Label Text="{x:Static localization:AppResources.NoSyncFoldersBody}"
+                <Label Text="{x:Static localization:AppResources.NoBackupsBody}"
                        Style="{StaticResource AppBodyText}"
                        HorizontalTextAlignment="Center" />
-                <Button Text="{x:Static localization:AppResources.AddSyncFolderDescription}"
-                        Command="{Binding AddRootCommand}"
+                <Button Text="{x:Static localization:AppResources.EnablePhotoBackupText}"
+                        Command="{Binding EnablePhotoBackupCommand}"
+                        SemanticProperties.Description="{x:Static localization:AppResources.EnablePhotoBackupDescription}"
+                        HorizontalOptions="Fill"
                         StyleClass="FilledButton, TouchTarget" />
+                <Button Text="{x:Static localization:AppResources.AddFolderBackupText}"
+                        Command="{Binding AddFolderCommand}"
+                        SemanticProperties.Description="{x:Static localization:AppResources.AddFolderBackupDescription}"
+                        HorizontalOptions="Fill"
+                        StyleClass="TextButton, TouchTarget" />
             </VerticalStackLayout>
 
-            <CollectionView Grid.Row="1"
+            <CollectionView Grid.Row="2"
                             IsVisible="{Binding IsListVisible}"
                             ItemsSource="{Binding DashboardItems}"
                             ItemSizingStrategy="MeasureAllItems">
@@ -123,16 +156,42 @@
                         <local:SyncDashboardTemplateSelector.BackgroundRestrictionTemplate>
                             <DataTemplate x:DataType="viewModels:BackgroundSyncRestrictionViewModel">
                                 <Border Style="{StaticResource AppStatusCard}"
+                                        Padding="4,16"
                                         Margin="0,0,0,12">
-                                    <VerticalStackLayout Spacing="12">
-                                        <Label Text="{x:Static localization:AppResources.BackgroundSyncRestrictedMessage}"
-                                               Style="{StaticResource AppBodyText}" />
-                                        <Button Text="{x:Static localization:AppResources.BackgroundSyncSettingsText}"
-                                                Command="{Binding OpenSettingsCommand}"
-                                                SemanticProperties.Description="{x:Static localization:AppResources.OpenBackgroundSyncSettingsDescription}"
-                                                HorizontalOptions="Start"
-                                                StyleClass="TextButton, TouchTarget" />
-                                    </VerticalStackLayout>
+                                    <Grid ColumnDefinitions="Auto,*,Auto"
+                                          ColumnSpacing="12">
+                                        <Border Style="{StaticResource AppStatusIconFrame}"
+                                                VerticalOptions="Start">
+                                            <Image Style="{StaticResource AppIcon}"
+                                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Battery_alert}, Color={AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}}" />
+                                        </Border>
+                                        <VerticalStackLayout Grid.Column="1"
+                                                             Spacing="6">
+                                            <Label Text="{x:Static localization:AppResources.BackgroundSyncRestrictedTitle}"
+                                                   Style="{StaticResource AppSectionTitle}" />
+                                            <Label Text="{x:Static localization:AppResources.BackgroundSyncRestrictedMessage}"
+                                                   Style="{StaticResource AppBodyText}" />
+                                            <Button Text="{x:Static localization:AppResources.BackgroundSyncSettingsText}"
+                                                    Command="{Binding OpenSettingsCommand}"
+                                                    SemanticProperties.Description="{x:Static localization:AppResources.OpenBackgroundSyncSettingsDescription}"
+                                                    HorizontalOptions="Start"
+                                                    StyleClass="TextButton, TouchTarget" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="2"
+                                                Command="{Binding DismissCommand}"
+                                                WidthRequest="{StaticResource AppTouchTargetSize}"
+                                                Padding="0"
+                                                VerticalOptions="Start"
+                                                SemanticProperties.Description="{x:Static localization:AppResources.DismissBackgroundSyncRestrictionDescription}"
+                                                StyleClass="TextButton, TouchTarget">
+                                            <Button.ImageSource>
+                                                <FontImageSource FontFamily="MaterialOutlined"
+                                                                 Glyph="{x:Static symbols:MaterialOutlined.Close}"
+                                                                 Size="{StaticResource AppActionIconSize}"
+                                                                 Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                            </Button.ImageSource>
+                                        </Button>
+                                    </Grid>
                                 </Border>
                             </DataTemplate>
                         </local:SyncDashboardTemplateSelector.BackgroundRestrictionTemplate>

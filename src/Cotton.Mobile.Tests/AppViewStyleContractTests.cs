@@ -65,23 +65,19 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void SyncSourceChoiceUsesTheNativeRadioButtonGroup()
+        public void SyncDashboardSeparatesPhotoAndFolderBackupActions()
         {
             XDocument document = XDocument.Parse(
-                RepositoryPath.ReadText($"{ViewDirectory}/SyncRootSetupOptionsPage.xaml"));
-            XElement group = document.Descendants().Single(element =>
-                GetAttributeContaining(element, "GroupName")?.Value == "SyncSource");
-            List<XElement> options = [.. group.Descendants().Where(element =>
-                element.Name.LocalName == "RadioButton")];
+                RepositoryPath.ReadText($"{ViewDirectory}/SyncDashboardView.xaml"));
+            List<XElement> photoActions = [.. document.Descendants().Where(element =>
+                GetAttribute(element, "Command")?.Value == "{Binding EnablePhotoBackupCommand}")];
+            List<XElement> folderActions = [.. document.Descendants().Where(element =>
+                GetAttribute(element, "Command")?.Value == "{Binding AddFolderCommand}")];
 
-            Assert.Equal(
-                "{Binding StorageKind, Mode=TwoWay}",
-                GetAttributeContaining(group, "SelectedValue")?.Value);
-            Assert.Equal(2, options.Count);
+            Assert.Equal(2, photoActions.Count);
+            Assert.Equal(2, folderActions.Count);
             Assert.DoesNotContain(document.Descendants(), element =>
-                element.Name.LocalName == "RadioButtonGroupView");
-            Assert.DoesNotContain(document.Descendants(), element =>
-                element.Name.LocalName == "ButtonView");
+                element.Name.LocalName is "RadioButton" or "Switch");
         }
 
         [Fact]

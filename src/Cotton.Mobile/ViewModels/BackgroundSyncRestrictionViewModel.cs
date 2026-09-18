@@ -16,6 +16,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ILogger<BackgroundSyncRestrictionViewModel> _logger;
         private bool _isRestricted;
         private bool _isAutomaticSyncEnabled;
+        private bool _isDismissed;
 
         public BackgroundSyncRestrictionViewModel(
             IApplicationForegroundService foregroundService,
@@ -32,13 +33,16 @@ namespace Cotton.Mobile.ViewModels
                     _restrictionService.OpenSettingsAsync,
                     LogSettingsFailure,
                     cancellationToken));
+            DismissCommand = new RelayCommand(Dismiss);
             _foregroundService.Resumed += OnApplicationResumed;
             Refresh();
         }
 
         public IAsyncRelayCommand OpenSettingsCommand { get; }
 
-        public bool IsVisible => _isRestricted && _isAutomaticSyncEnabled;
+        public IRelayCommand DismissCommand { get; }
+
+        public bool IsVisible => _isRestricted && _isAutomaticSyncEnabled && !_isDismissed;
 
         public void SetAutomaticSyncEnabled(bool isEnabled)
         {
@@ -80,12 +84,27 @@ namespace Cotton.Mobile.ViewModels
 
         private void SetRestrictionState(bool isRestricted)
         {
-            if (_isRestricted == isRestricted)
+            bool wasVisible = IsVisible;
+            _isRestricted = isRestricted;
+            if (!isRestricted)
+            {
+                _isDismissed = false;
+            }
+
+            if (wasVisible != IsVisible)
+            {
+                OnPropertyChanged(nameof(IsVisible));
+            }
+        }
+
+        private void Dismiss()
+        {
+            if (_isDismissed)
             {
                 return;
             }
 
-            _isRestricted = isRestricted;
+            _isDismissed = true;
             OnPropertyChanged(nameof(IsVisible));
         }
 

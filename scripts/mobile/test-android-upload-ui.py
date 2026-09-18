@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exercise upload feedback and source selection on an Android emulator."""
+"""Exercise upload feedback and backup setup actions on an Android emulator."""
 
 import argparse
 import json
@@ -21,9 +21,9 @@ TIMEOUT_SECONDS = 40
 LOGGER = logging.getLogger(__name__)
 SCENARIOS = (
     "running",
-    "source-folder",
-    "source-media",
-    "source-switch",
+    "dashboard-empty",
+    "dashboard-folder-only",
+    "dashboard-media",
     "storage-full",
     "destination-missing",
     "review-required",
@@ -69,7 +69,7 @@ REPLACE_CLOUD_CONFLICT_MESSAGE = (
     "changes before replacement, Cotton will stop without overwriting it."
 )
 OFFLINE_MESSAGES = {
-    "offline-add": "Connect to the internet to add a sync folder.",
+    "offline-add": "Connect to the internet to set up backup.",
     "offline-run": "Offline. Sync needs internet.",
 }
 
@@ -244,6 +244,86 @@ def assert_dialog_backdrop(directory: Path, background: str, dialog: str) -> Non
                 )
 
 
+def icon_frame_near(hierarchy: ET.Element, reference: ET.Element) -> ET.Element:
+    """Find the icon frame vertically nearest to a reference label."""
+    parents = {child: parent for parent in hierarchy.iter() for child in parent}
+    frames = [
+        parents[node]
+        for node in hierarchy.iter("node")
+        if node.get("class") == "android.widget.ImageView"
+    ]
+    if not frames:
+        raise AssertionError("No icon frame is visible.")
+    _, top, _, bottom = bounds(reference)
+    reference_center = (top + bottom) // 2
+    return min(
+        frames,
+        key=lambda frame: abs(
+            (bounds(frame)[1] + bounds(frame)[3]) // 2 - reference_center
+        ),
+    )
+
+
+def assert_background_notice_geometry(
+    hierarchy: ET.Element, directory: Path, screenshot: str
+) -> None:
+    """Require the warning and sync row to share columns and visible contrast."""
+    title = next(
+        node
+        for node in hierarchy.iter("node")
+        if node.get("text") == "Background uploads are restricted"
+    )
+    sync_title = next(
+        node
+        for node in hierarchy.iter("node")
+        if node.get("text", "").startswith("Camera backups")
+    )
+    notice_frame = bounds(icon_frame_near(hierarchy, title))
+    sync_frame = bounds(icon_frame_near(hierarchy, sync_title))
+    if notice_frame[:1] + notice_frame[2:3] != sync_frame[:1] + sync_frame[2:3]:
+        raise AssertionError(
+            f"Warning icon column {notice_frame[0], notice_frame[2]} does not "
+            f"match sync icon column {sync_frame[0], sync_frame[2]}."
+        )
+    if bounds(title)[0] != bounds(sync_title)[0]:
+        raise AssertionError("Warning text does not align with sync text.")
+    dismiss = next(
+        node
+        for node in hierarchy.iter("node")
+        if node.get("content-desc") == "Dismiss background upload warning"
+    )
+    pause = next(
+        node for node in hierarchy.iter("node") if node.get("content-desc") == "Pause"
+    )
+    if bounds(dismiss)[2] != bounds(pause)[2]:
+        raise AssertionError("Warning dismiss action does not align with sync action.")
+
+    with Image.open(directory / f"{screenshot}.png") as image:
+        rgb = image.convert("RGB")
+        left, top, right, bottom = notice_frame
+        frame_color = rgb.getpixel(((left + right) // 2, top + 8))
+        card_color = rgb.getpixel((right + 12, (top + bottom) // 2))
+    if color_contrast(frame_color, card_color) < 3:
+        raise AssertionError(
+            f"Warning icon container lacks contrast: {frame_color} on {card_color}."
+        )
+
+
+def color_contrast(first: tuple[int, int, int], second: tuple[int, int, int]) -> float:
+    """Calculate WCAG contrast for two sRGB colors."""
+
+    def luminance(color: tuple[int, int, int]) -> float:
+        channels = [
+            value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4
+            for component in color
+            for value in [component / 255]
+        ]
+        return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+
+    lighter, darker = sorted((luminance(first), luminance(second)), reverse=True)
+    return (lighter + 0.05) / (darker + 0.05)
+
+
 def find_action_button(hierarchy: ET.Element, text: str) -> ET.Element:
     """Find one enabled native action button by its visible label."""
     buttons = [
@@ -270,6 +350,17 @@ def wait_for_message(emulator: Emulator, expected: str) -> None:
     raise AssertionError(f"Action feedback did not appear: {expected}")
 
 
+def wait_for_message_absence(emulator: Emulator, unexpected: str) -> None:
+    """Wait until an asynchronous UI update removes text from the hierarchy."""
+    deadline = time.monotonic() + TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        hierarchy = emulator.hierarchy()
+        if unexpected not in [node.get("text", "") for node in hierarchy.iter("node")]:
+            return
+        time.sleep(0.25)
+    raise AssertionError(f"Action feedback remained visible: {unexpected}")
+
+
 def bounds(node: ET.Element) -> tuple[int, int, int, int]:
     """Parse one accessibility node's screen bounds."""
     values = list(map(int, re.findall(r"\d+", node.attrib["bounds"])))
@@ -280,30 +371,6 @@ def bounds(node: ET.Element) -> tuple[int, int, int, int]:
     return values[0], values[1], values[2], values[3]
 
 
-def find_node_by_id(hierarchy: ET.Element, resource_id: str) -> ET.Element:
-    """Find one Android view by the stable MAUI automation id suffix."""
-    matches = [
-        node
-        for node in hierarchy.iter("node")
-        if node.get("resource-id", "").endswith(f":id/{resource_id}")
-    ]
-    if len(matches) != 1:
-        raise AssertionError(f"Expected one view with id {resource_id}.")
-    return matches[0]
-
-
-def radio_is_selected(node: ET.Element) -> bool:
-    """Read the selected state exposed by Android's native radio button."""
-    if node.get("class") != "android.widget.RadioButton":
-        raise AssertionError("Source selection is not a native Android radio button.")
-    if node.get("clickable") != "true" or node.get("enabled") != "true":
-        raise AssertionError("Source radio button is not accessible for activation.")
-    checked = node.get("checked")
-    if checked not in {"true", "false"}:
-        raise AssertionError("Source radio button does not expose its checked state.")
-    return checked == "true"
-
-
 def tap_node(emulator: Emulator, node: ET.Element) -> None:
     """Tap the center of one accessibility node."""
     left, top, right, bottom = bounds(node)
@@ -312,56 +379,25 @@ def tap_node(emulator: Emulator, node: ET.Element) -> None:
     )
 
 
-def wait_for_radio_selection(emulator: Emulator, selected_id: str) -> ET.Element:
-    """Wait until the ready radio group owns exactly one selection."""
-    option_ids = ("SourceFolderOption", "SourceMediaOption")
-    deadline = time.monotonic() + TIMEOUT_SECONDS
-    while time.monotonic() < deadline:
-        hierarchy = emulator.hierarchy()
-        selections = {
-            option_id: radio_is_selected(find_node_by_id(hierarchy, option_id))
-            for option_id in option_ids
-        }
-        if selections[selected_id] and sum(selections.values()) == 1:
-            return hierarchy
-        time.sleep(0.25)
-    raise AssertionError(f"Radio group did not select only {selected_id}.")
-
-
-def check_source_selection_sequence(
-    emulator: Emulator, directory: Path, name: str, initial: ET.Element
-) -> None:
-    """Exercise the real Photos, Folder, Photos selection sequence."""
-    option_ids = ("SourceFolderOption", "SourceMediaOption")
-    initial_nodes = {
-        option_id: find_node_by_id(initial, option_id) for option_id in option_ids
-    }
-    if any(radio_is_selected(node) for node in initial_nodes.values()):
-        raise AssertionError("Source selection must start without a default choice.")
-    initial_geometry = {
-        option_id: bounds(node) for option_id, node in initial_nodes.items()
-    }
-
-    steps = (
-        ("SourceMediaOption", "photos-first"),
-        ("SourceFolderOption", "folder"),
-        ("SourceMediaOption", "photos-again"),
+def background_app_op_mode(emulator: Emulator) -> str:
+    """Read the current Android background execution app-op mode."""
+    output = emulator.text(
+        "shell", "cmd", "appops", "get", PACKAGE, "RUN_ANY_IN_BACKGROUND"
     )
-    hierarchy = initial
-    for option_id, suffix in steps:
-        tap_node(emulator, find_node_by_id(hierarchy, option_id))
-        hierarchy = wait_for_radio_selection(emulator, option_id)
-        captured = capture(emulator, directory, f"{name}-{suffix}")
-        actual_geometry = {
-            current_id: bounds(find_node_by_id(captured, current_id))
-            for current_id in option_ids
-        }
-        if actual_geometry != initial_geometry:
-            raise AssertionError(
-                "Selecting a source changed the radio options' geometry: "
-                f"initial={initial_geometry}, actual={actual_geometry}"
-            )
-        hierarchy = captured
+    match = re.search(
+        r"(?:RUN_ANY_IN_BACKGROUND:|Default mode:)\s+(allow|deny|ignore|default)",
+        output,
+    )
+    if match is None:
+        raise AssertionError(f"Cannot read background app-op mode: {output}")
+    return match.group(1)
+
+
+def set_background_app_op_mode(emulator: Emulator, mode: str) -> None:
+    """Set the Android background execution app-op mode."""
+    emulator.run(
+        "shell", "cmd", "appops", "set", PACKAGE, "RUN_ANY_IN_BACKGROUND", mode
+    )
 
 
 def check_tab_navigation(
@@ -384,6 +420,35 @@ def check_tab_navigation(
 def assert_dashboard_layout(hierarchy: ET.Element, scenario: str) -> None:
     """Require stable text geometry and a card-width progress indicator."""
     nodes = list(hierarchy.iter("node"))
+    texts = [node.get("text", "") for node in nodes]
+    photo_actions = [text for text in texts if text == "Back up photos and videos"]
+    folder_actions = [text for text in texts if text == "Back up a folder"]
+    if scenario == "dashboard-empty":
+        assert_message(hierarchy, "Protect your photos")
+        if len(photo_actions) != 1 or len(folder_actions) != 1:
+            raise AssertionError(
+                "The empty dashboard does not expose both backup actions."
+            )
+    elif scenario == "dashboard-folder-only":
+        assert_message(hierarchy, "Photo and video backup")
+        if len(photo_actions) != 1:
+            raise AssertionError(
+                "The folder-only dashboard does not offer photo backup."
+            )
+        photo_title = next(
+            node for node in nodes if node.get("text") == "Photo and video backup"
+        )
+        sync_title = next(
+            node for node in nodes if node.get("text", "").startswith("Camera backups")
+        )
+        photo_frame = bounds(icon_frame_near(hierarchy, photo_title))
+        sync_frame = bounds(icon_frame_near(hierarchy, sync_title))
+        if (photo_frame[0], photo_frame[2]) != (sync_frame[0], sync_frame[2]) or bounds(
+            photo_title
+        )[0] != bounds(sync_title)[0]:
+            raise AssertionError("Photo backup callout does not align with sync rows.")
+    elif scenario == "dashboard-media" and photo_actions:
+        raise AssertionError("Photo backup is offered after it is already configured.")
     if scenario == "running":
         progress = [
             node for node in nodes if node.get("class") == "android.widget.ProgressBar"
@@ -490,21 +555,6 @@ def capture_pending_upload(
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
-
-
-def capture_source_end(emulator: Emulator, directory: Path, name: str) -> None:
-    """Verify source options remain reachable when they extend below the screen."""
-    emulator.scroll_to_end()
-    hierarchy = capture(emulator, directory, f"{name}-end")
-    if name.endswith("source-folder"):
-        assert_message(hierarchy, "Delete originals after upload")
-        switches = [
-            node
-            for node in hierarchy.iter("node")
-            if node.get("class") == "android.widget.Switch"
-        ]
-        if len(switches) != 1 or switches[0].get("checked") != "false":
-            raise AssertionError("Deleting originals must be off by default.")
 
 
 def wait_for_sign_in(emulator: Emulator) -> None:
@@ -647,82 +697,124 @@ def check_native_job_stop(emulator: Emulator) -> None:
 
 
 def check_background_restriction(emulator: Emulator) -> None:
-    """Read both Android battery modes and restore the emulator's initial mode."""
+    """Distinguish normal battery optimization from a real background restriction."""
     entries = emulator.text("shell", "cmd", "deviceidle", "whitelist").splitlines()
     originally_exempt = any(f",{PACKAGE}," in entry for entry in entries)
+    original_app_op_mode = background_app_op_mode(emulator)
     try:
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"-{PACKAGE}")
-        emulator.scenario("background-restricted")
-        emulator.run("shell", "cmd", "deviceidle", "whitelist", f"+{PACKAGE}")
+        set_background_app_op_mode(emulator, "allow")
         emulator.scenario("background-unrestricted")
-        LOGGER.info("Passed battery optimization and unrestricted detection")
+        set_background_app_op_mode(emulator, "deny")
+        emulator.scenario("background-restricted")
+        LOGGER.info("Passed optimized and restricted background mode detection")
     finally:
+        set_background_app_op_mode(emulator, original_app_op_mode)
         prefix = "+" if originally_exempt else "-"
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}")
 
 
 def check_background_notice(emulator: Emulator, directory: Path) -> None:
-    """Require battery permission changes to collapse the complete warning row."""
+    """Render, dismiss, restore, and resolve the background restriction warning."""
     entries = emulator.text("shell", "cmd", "deviceidle", "whitelist").splitlines()
     originally_exempt = any(f",{PACKAGE}," in entry for entry in entries)
+    original_app_op_mode = background_app_op_mode(emulator)
     activity = emulator.text(
         "shell", "cmd", "package", "resolve-activity", "--brief", PACKAGE
     ).splitlines()[-1]
-    positions: list[int] = []
-    notice_height = 0
     emulator.configure(VIEWPORTS[0], "no")
     try:
-        for exempt, name in ((False, "before"), (True, "after")):
-            prefix = "+" if exempt else "-"
-            emulator.run(
-                "shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}"
+        emulator.run("shell", "cmd", "deviceidle", "whitelist", f"-{PACKAGE}")
+        set_background_app_op_mode(emulator, "allow")
+        emulator.run("shell", "am", "force-stop", PACKAGE)
+        emulator.run("shell", "am", "start", "-W", "-n", activity)
+        wait_for_sign_in(emulator)
+        emulator.scenario("running")
+        wait_for_message(emulator, "Syncing 4 of 10 changes…")
+        optimized = capture(emulator, directory, "battery-notice-optimized")
+        if any(
+            node.get("text") == "Background uploads are restricted"
+            for node in optimized.iter("node")
+        ):
+            raise AssertionError("Normal optimized mode shows a restriction warning.")
+
+        set_background_app_op_mode(emulator, "deny")
+        emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
+        emulator.run("shell", "am", "start", "-W", "-n", activity)
+        emulator.scenario("running")
+        wait_for_message(emulator, "Syncing 4 of 10 changes…")
+        restricted = capture(emulator, directory, "battery-notice-restricted")
+        assert_message(restricted, "Background uploads are restricted")
+        assert_message(
+            restricted,
+            "Android is severely limiting Cotton in the background. "
+            "Automatic uploads may not start until you open the app.",
+        )
+        assert_message(restricted, "Settings")
+        dismiss = [
+            node
+            for node in restricted.iter("node")
+            if node.get("content-desc") == "Dismiss background upload warning"
+        ]
+        if len(dismiss) != 1:
+            raise AssertionError(
+                "The background restriction warning is not dismissible."
             )
-            emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
-            emulator.run("shell", "am", "start", "-W", "-n", activity)
-            emulator.scenario("running")
-            hierarchy = capture(emulator, directory, f"battery-notice-{name}")
-            notices = [
-                node
-                for node in hierarchy.iter("node")
-                if "battery optimization" in node.get("text", "").lower()
-            ]
-            permission_titles = [
-                node
-                for node in hierarchy.iter("node")
-                if node.get("text") == "Preserve location data"
-            ]
-            if len(permission_titles) == 1:
-                following = permission_titles[0]
-            elif not permission_titles:
-                pause_buttons = [
-                    node
-                    for node in hierarchy.iter("node")
-                    if node.get("content-desc") == "Pause"
-                ]
-                if len(pause_buttons) != 1:
-                    raise AssertionError(
-                        "No stable content followed the battery optimization notice."
-                    )
-                following = pause_buttons[0]
-            else:
-                raise AssertionError("Multiple media permission notices are visible.")
-            positions.append(bounds(following)[1])
-            if exempt:
-                if notices:
-                    raise AssertionError(
-                        "Battery warning remained after granting access."
-                    )
-            else:
-                if len(notices) != 1:
-                    raise AssertionError(
-                        "Battery warning is missing for optimized mode."
-                    )
-                notice_bounds = bounds(notices[0])
-                notice_height = notice_bounds[3] - notice_bounds[1]
-        if positions[1] > positions[0] - notice_height:
-            raise AssertionError("Battery warning disappeared but left its row space.")
-        LOGGER.info("Passed battery warning collapse after Android settings change")
+        assert_background_notice_geometry(
+            restricted, directory, "battery-notice-restricted"
+        )
+        tap_node(emulator, dismiss[0])
+        wait_for_message_absence(emulator, "Background uploads are restricted")
+        dismissed = capture(emulator, directory, "battery-notice-dismissed")
+        if any(
+            node.get("text") == "Background uploads are restricted"
+            for node in dismissed.iter("node")
+        ):
+            raise AssertionError(
+                "Dismissed background restriction warning remained visible."
+            )
+
+        emulator.run("shell", "am", "force-stop", PACKAGE)
+        emulator.run("shell", "am", "start", "-W", "-n", activity)
+        wait_for_sign_in(emulator)
+        emulator.scenario("running")
+        wait_for_message(emulator, "Background uploads are restricted")
+        restored = capture(emulator, directory, "battery-notice-restored")
+        assert_message(restored, "Background uploads are restricted")
+
+        set_background_app_op_mode(emulator, "allow")
+        emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
+        emulator.run("shell", "am", "start", "-W", "-n", activity)
+        emulator.scenario("running")
+        wait_for_message(emulator, "Syncing 4 of 10 changes…")
+        wait_for_message_absence(emulator, "Background uploads are restricted")
+        resolved = capture(emulator, directory, "battery-notice-resolved")
+        if any(
+            node.get("text") == "Background uploads are restricted"
+            for node in resolved.iter("node")
+        ):
+            raise AssertionError(
+                "Resolved background restriction warning remained visible."
+            )
+
+        emulator.configure(VIEWPORTS[-1], "yes")
+        set_background_app_op_mode(emulator, "deny")
+        emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
+        emulator.run("shell", "am", "start", "-W", "-n", activity)
+        emulator.scenario("running")
+        wait_for_message(emulator, "Background uploads are restricted")
+        large_text = capture(emulator, directory, "battery-notice-large-text-dark")
+        assert_message(large_text, "Settings")
+        if not any(
+            node.get("content-desc") == "Dismiss background upload warning"
+            for node in large_text.iter("node")
+        ):
+            raise AssertionError(
+                "The large-text background restriction warning lost its dismiss action."
+            )
+        LOGGER.info("Passed background restriction warning lifecycle")
     finally:
+        set_background_app_op_mode(emulator, original_app_op_mode)
         prefix = "+" if originally_exempt else "-"
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}")
         emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
@@ -925,7 +1017,13 @@ def run_checks(
     check_background_notice(emulator, directory)
     completed: list[str] = []
     viewports = VIEWPORTS if full else VIEWPORTS[:1]
-    display_scenarios = ("running",) if dashboard_only else SCENARIOS
+    dashboard_scenarios = (
+        "running",
+        "dashboard-empty",
+        "dashboard-folder-only",
+        "dashboard-media",
+    )
+    display_scenarios = dashboard_scenarios if dashboard_only else SCENARIOS
     for viewport in viewports:
         for theme in ("no", "yes"):
             theme_name = "light" if theme == "no" else "dark"
@@ -967,12 +1065,6 @@ def run_checks(
                         )
                     assert_message(hierarchy, "Syncing 4 of 10 changes…")
                     check_tab_navigation(emulator, directory, name, hierarchy)
-                if scenario == "source-switch":
-                    check_source_selection_sequence(
-                        emulator, directory, name, hierarchy
-                    )
-                if scenario.startswith("source-"):
-                    capture_source_end(emulator, directory, name)
                 if scenario in FAILURE_MESSAGES:
                     capture_failure(emulator, directory, name, scenario, hierarchy)
                 if scenario == "pending-upload-changed":

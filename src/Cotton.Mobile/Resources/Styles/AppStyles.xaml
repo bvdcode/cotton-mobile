@@ -130,6 +130,13 @@
         </Setter>
     </Style>
 
+    <Style x:Key="AppStatusIconFrame"
+           TargetType="Border"
+           BasedOn="{StaticResource AppIconFrame}">
+        <Setter Property="BackgroundColor"
+                Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+    </Style>
+
     <!-- Same footprint as AppIconFrame, but full-bleed and round so a photo fills it. -->
     <Style x:Key="AppAvatarFrame" TargetType="Border" BasedOn="{StaticResource AppIconFrame}">
         <Setter Property="Padding" Value="0" />

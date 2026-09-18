@@ -23,18 +23,25 @@
   <data name="WaitingForBrowserApproval" xml:space="preserve"><value>Waiting for browser approval</value></data>
   <data name="CancelBrowserApprovalDescription" xml:space="preserve"><value>Cancel browser approval</value></data>
   <data name="BackDescription" xml:space="preserve"><value>Back</value></data>
-  <data name="AddSyncFolderDescription" xml:space="preserve"><value>Add sync folder</value></data>
+  <data name="EnablePhotoBackupText" xml:space="preserve"><value>Back up photos and videos</value></data>
+  <data name="EnablePhotoBackupDescription" xml:space="preserve"><value>Set up automatic photo and video backup</value></data>
+  <data name="AddFolderBackupText" xml:space="preserve"><value>Back up a folder</value></data>
+  <data name="AddFolderBackupDescription" xml:space="preserve"><value>Choose a device folder to back up</value></data>
   <data name="RunAllSyncFoldersDescription" xml:space="preserve"><value>Run all sync folders</value></data>
   <data name="OpenSyncDescription" xml:space="preserve"><value>Open sync</value></data>
   <data name="EditSyncsModeTitle" xml:space="preserve"><value>Manage syncs</value></data>
   <data name="EnterEditSyncsModeDescription" xml:space="preserve"><value>Manage syncs</value></data>
   <data name="ExitEditSyncsModeDescription" xml:space="preserve"><value>Close sync management</value></data>
-  <data name="BackgroundSyncRestrictedMessage" xml:space="preserve"><value>Battery optimization can delay uploads. Allow unrestricted battery use in Android settings.</value></data>
-  <data name="BackgroundSyncSettingsText" xml:space="preserve"><value>Review</value></data>
+  <data name="BackgroundSyncRestrictedTitle" xml:space="preserve"><value>Background uploads are restricted</value></data>
+  <data name="BackgroundSyncRestrictedMessage" xml:space="preserve"><value>Android is severely limiting Cotton in the background. Automatic uploads may not start until you open the app.</value></data>
+  <data name="BackgroundSyncSettingsText" xml:space="preserve"><value>Settings</value></data>
   <data name="OpenBackgroundSyncSettingsDescription" xml:space="preserve"><value>Review Android background activity settings</value></data>
+  <data name="DismissBackgroundSyncRestrictionDescription" xml:space="preserve"><value>Dismiss background upload warning</value></data>
   <data name="SyncTitle" xml:space="preserve"><value>Sync</value></data>
-  <data name="NoSyncFoldersTitle" xml:space="preserve"><value>No sync folders</value></data>
-  <data name="NoSyncFoldersBody" xml:space="preserve"><value>Choose a cloud folder and a folder on this device.</value></data>
+  <data name="NoBackupsTitle" xml:space="preserve"><value>Protect your photos</value></data>
+  <data name="NoBackupsBody" xml:space="preserve"><value>Choose albums to upload automatically. New photos and videos are backed up in the background.</value></data>
+  <data name="PhotoBackupTitle" xml:space="preserve"><value>Photo and video backup</value></data>
+  <data name="PhotoBackupBody" xml:space="preserve"><value>Automatically upload new items from the albums you choose.</value></data>
   <data name="ConnectText" xml:space="preserve"><value>Connect</value></data>
   <data name="ChangeServerText" xml:space="preserve"><value>Change server</value></data>
   <data name="CottonCloudAddressHint" xml:space="preserve"><value>Cotton Cloud address</value></data>
@@ -51,8 +58,8 @@
   <data name="SyncSettingsUpdateFailed" xml:space="preserve"><value>Could not update sync settings.</value></data>
   <data name="SyncFoldersInspectFailed" xml:space="preserve"><value>Could not inspect sync folders.</value></data>
   <data name="SyncFolderAccountUnavailable" xml:space="preserve"><value>Could not add a sync folder for this account.</value></data>
-  <data name="SyncFolderAddOffline" xml:space="preserve"><value>Connect to the internet to add a sync folder.</value></data>
-  <data name="SyncFolderAddFailed" xml:space="preserve"><value>Could not add this sync folder.</value></data>
+  <data name="SyncFolderAddOffline" xml:space="preserve"><value>Connect to the internet to set up backup.</value></data>
+  <data name="SyncFolderAddFailed" xml:space="preserve"><value>Could not set up this backup.</value></data>
   <data name="SyncInitialRunFailed" xml:space="preserve"><value>Automatic upload could not start. It will retry in the background.</value></data>
   <data name="LocalFolderReconnectFailed" xml:space="preserve"><value>Could not reconnect this local folder.</value></data>
   <data name="LocalFolderAccessAvailable" xml:space="preserve"><value>Local folder access is already available.</value></data>

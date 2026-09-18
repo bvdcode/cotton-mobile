@@ -55,7 +55,8 @@ namespace Cotton.Mobile.ViewModels
             BackgroundRestriction.PropertyChanged += OnDashboardNoticeChanged;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _statusObserver.Attach(this);
-            AddRootCommand = CreateAddRootCommand();
+            EnablePhotoBackupCommand = CreateEnablePhotoBackupCommand();
+            AddFolderCommand = CreateAddFolderCommand();
             RunAllCommand = CreateRunAllCommand();
             RootActionCommand = CreateRootActionCommand();
             PauseRootCommand = CreatePauseRootCommand();
@@ -63,7 +64,9 @@ namespace Cotton.Mobile.ViewModels
             ExitEditModeCommand = new RelayCommand(ExitEditMode, CanExitEditMode);
         }
 
-        public IAsyncRelayCommand AddRootCommand { get; }
+        public IAsyncRelayCommand EnablePhotoBackupCommand { get; }
+
+        public IAsyncRelayCommand AddFolderCommand { get; }
 
         public IAsyncRelayCommand RunAllCommand { get; }
 
@@ -90,7 +93,8 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isBusy, value))
                 {
-                    AddRootCommand.NotifyCanExecuteChanged();
+                    EnablePhotoBackupCommand.NotifyCanExecuteChanged();
+                    AddFolderCommand.NotifyCanExecuteChanged();
                     RunAllCommand.NotifyCanExecuteChanged();
                     RootActionCommand.NotifyCanExecuteChanged();
                     PauseRootCommand.NotifyCanExecuteChanged();
@@ -123,6 +127,8 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isEmptyVisible, value))
                 {
                     OnPropertyChanged(nameof(IsListVisible));
+                    OnPropertyChanged(nameof(IsPhotoBackupCalloutVisible));
+                    OnPropertyChanged(nameof(IsAddFolderToolbarVisible));
                     OnPropertyChanged(nameof(IsEditModeAvailable));
                     EnterEditModeCommand.NotifyCanExecuteChanged();
                 }
@@ -130,6 +136,13 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsListVisible => !IsEmptyVisible;
+
+        public bool IsPhotoBackupConfigured => Roots.Any(root => root.UsesMediaStore);
+
+        public bool IsPhotoBackupCalloutVisible =>
+            IsListVisible && !IsPhotoBackupConfigured && !IsEditMode;
+
+        public bool IsAddFolderToolbarVisible => IsListVisible && !IsEditMode;
 
         public bool IsRunAllVisible => _canRunAll && !IsEditMode;
 
@@ -151,6 +164,8 @@ namespace Cotton.Mobile.ViewModels
                 OnPropertyChanged(nameof(ArePrimaryActionsVisible));
                 OnPropertyChanged(nameof(IsEditModeAvailable));
                 OnPropertyChanged(nameof(IsRunAllVisible));
+                OnPropertyChanged(nameof(IsPhotoBackupCalloutVisible));
+                OnPropertyChanged(nameof(IsAddFolderToolbarVisible));
                 EnterEditModeCommand.NotifyCanExecuteChanged();
                 ExitEditModeCommand.NotifyCanExecuteChanged();
             }
@@ -167,7 +182,8 @@ namespace Cotton.Mobile.ViewModels
 
             _instanceUri = instanceUri;
             _accountScopeKey = accountScopeKey.Trim();
-            AddRootCommand.NotifyCanExecuteChanged();
+            EnablePhotoBackupCommand.NotifyCanExecuteChanged();
+            AddFolderCommand.NotifyCanExecuteChanged();
         }
 
         public async Task LoadForInstanceAsync(
@@ -194,7 +210,8 @@ namespace Cotton.Mobile.ViewModels
             BackgroundRestriction.SetAutomaticSyncEnabled(isEnabled: false);
             OnPropertyChanged(nameof(IsRunAllVisible));
             RunAllCommand.NotifyCanExecuteChanged();
-            AddRootCommand.NotifyCanExecuteChanged();
+            EnablePhotoBackupCommand.NotifyCanExecuteChanged();
+            AddFolderCommand.NotifyCanExecuteChanged();
         }
 
         private void ShowRoots(SyncRootCollectionSnapshot collection)
@@ -230,6 +247,9 @@ namespace Cotton.Mobile.ViewModels
             }
 
             Roots.ReplaceWith(items);
+            OnPropertyChanged(nameof(IsPhotoBackupConfigured));
+            OnPropertyChanged(nameof(IsPhotoBackupCalloutVisible));
+            EnablePhotoBackupCommand.NotifyCanExecuteChanged();
             RefreshDashboardItems();
             foreach (CottonSyncRootListItem item in Roots)
             {

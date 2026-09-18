@@ -7,7 +7,6 @@ namespace Cotton.Mobile.Services
 {
     public class SyncRootSetupCoordinator
     {
-        private readonly ISyncRootSetupOptionsPickerService _optionsPicker;
         private readonly ICloudFolderPickerService _cloudFolderPicker;
         private readonly ICottonSyncLocalRootPickerService _localRootPicker;
         private readonly CottonSyncRootConfigurationService _configurationService;
@@ -16,7 +15,6 @@ namespace Cotton.Mobile.Services
         private readonly ICottonSyncRootStore _rootStore;
 
         public SyncRootSetupCoordinator(
-            ISyncRootSetupOptionsPickerService optionsPicker,
             ICloudFolderPickerService cloudFolderPicker,
             ICottonSyncLocalRootPickerService localRootPicker,
             CottonSyncRootConfigurationService configurationService,
@@ -24,7 +22,6 @@ namespace Cotton.Mobile.Services
             ICottonSyncRootSetupDraftStore draftStore,
             ICottonSyncRootStore rootStore)
         {
-            ArgumentNullException.ThrowIfNull(optionsPicker);
             ArgumentNullException.ThrowIfNull(cloudFolderPicker);
             ArgumentNullException.ThrowIfNull(localRootPicker);
             ArgumentNullException.ThrowIfNull(configurationService);
@@ -32,7 +29,6 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(draftStore);
             ArgumentNullException.ThrowIfNull(rootStore);
 
-            _optionsPicker = optionsPicker;
             _cloudFolderPicker = cloudFolderPicker;
             _localRootPicker = localRootPicker;
             _configurationService = configurationService;
@@ -44,10 +40,12 @@ namespace Cotton.Mobile.Services
         public async Task<SyncRootSetupResult> AddRootAsync(
             Uri instanceUri,
             string accountScopeKey,
+            SyncRootSetupOptions options,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
+            ArgumentNullException.ThrowIfNull(options);
 
             if (!_localRootPicker.IsAvailable)
             {
@@ -56,15 +54,6 @@ namespace Cotton.Mobile.Services
                     SyncRootSetupResources.UnavailableMessage,
                     null);
             }
-
-            await using SyncRootSetupOptionsSession? optionsSession = await _optionsPicker
-                .PickAsync(cancellationToken);
-            if (optionsSession is null)
-            {
-                return Cancelled();
-            }
-
-            SyncRootSetupOptions options = optionsSession.Options;
 
             CottonUploadDestinationSnapshot? cloudFolder = await _cloudFolderPicker
                 .PickAsync(instanceUri, cancellationToken)

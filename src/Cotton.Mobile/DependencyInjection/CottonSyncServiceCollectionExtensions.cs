@@ -53,7 +53,6 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
             services.AddSingleton<ICloudFolderPickerService, CloudFolderPickerService>();
             services.AddSingleton<ICottonMediaAlbumPickerService, CottonMediaAlbumPickerService>();
-            services.AddSingleton<ISyncRootSetupOptionsPickerService, SyncRootSetupOptionsPickerService>();
             services.AddSingleton<ICottonSyncRootSetupDraftStore, PreferencesCottonSyncRootSetupDraftStore>();
             services.AddSingleton<SyncRootSetupCoordinator>();
             services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserRemoteFolderContentSource>();

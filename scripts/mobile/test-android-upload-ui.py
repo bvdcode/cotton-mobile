@@ -424,6 +424,8 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
         ]
         if budget:
             expected_results.append("window-ended:retry")
+        else:
+            expected_results.append("stop-log-released")
         for expected in expected_results:
             deadline = time.monotonic() + TIMEOUT_SECONDS
             while time.monotonic() < deadline:
@@ -457,6 +459,11 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
                 raise AssertionError("Android stopped the job before its own window.")
             logging.info("Passed worker execution window and deferred retry")
         else:
+            returned = re.search(r"stop-callback-returned:milliseconds=(\d+)", output)
+            if returned is None or int(returned.group(1)) >= 500:
+                raise AssertionError(f"Worker stop waited for diagnostic I/O: {output}")
+            if output.index("operation-stopped:") > output.index("stop-log-released"):
+                raise AssertionError(f"Diagnostic I/O delayed cancellation: {output}")
             logging.info("Passed Android worker stop and operation cancellation")
     finally:
         emulator.scenario("worker-cancellation-cleanup")
@@ -465,6 +472,42 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
     ).splitlines()[-1]
     emulator.run("shell", "am", "start", "-W", "-n", activity)
     wait_for_sign_in(emulator)
+
+
+def check_native_job_stop(emulator: Emulator) -> None:
+    """Require the native stop callback to return while diagnostic I/O is blocked."""
+    if int(emulator.text("shell", "getprop", "ro.build.version.sdk")) < 31:
+        return
+    tag = "CottonCancellationProbe"
+    emulator.scenario("native-stop-start")
+    emulator.run("logcat", "-c")
+    try:
+        emulator.run("shell", "cmd", "jobscheduler", "run", "-f", PACKAGE, "1129598210")
+        for expected in ("native-job-started", "stop-log-released"):
+            deadline = time.monotonic() + TIMEOUT_SECONDS
+            while time.monotonic() < deadline:
+                output = emulator.text("logcat", "-d", "-s", f"{tag}:I", "*:S")
+                if expected in output:
+                    break
+                time.sleep(0.1)
+            else:
+                raise AssertionError(f"Native stop probe missed {expected}: {output}")
+            if expected == "native-job-started":
+                emulator.run(
+                    "shell", "cmd", "jobscheduler", "timeout", PACKAGE, "1129598210"
+                )
+        returned = re.search(
+            r"native-stop-returned:milliseconds=(\d+):main=True", output
+        )
+        if returned is None or int(returned.group(1)) >= 500:
+            raise AssertionError(f"Native stop blocked the main thread: {output}")
+        if "stop-log-blocked:main=False" not in output:
+            raise AssertionError(f"Native stop logged on the main thread: {output}")
+        if output.index("native-stop-returned:") > output.index("stop-log-released"):
+            raise AssertionError(f"Native stop waited for diagnostic I/O: {output}")
+        logging.info("Passed native job stop with blocked diagnostic I/O")
+    finally:
+        emulator.scenario("native-stop-cleanup")
 
 
 def check_review_cancellation(emulator: Emulator) -> None:
@@ -644,6 +687,7 @@ def run_checks(
     check_sign_in_notification(emulator)
     check_worker_cancellation(emulator)
     check_worker_cancellation(emulator, budget=True)
+    check_native_job_stop(emulator)
     check_review_cancellation(emulator)
     completed: list[str] = []
     viewports = VIEWPORTS if full else VIEWPORTS[:1]

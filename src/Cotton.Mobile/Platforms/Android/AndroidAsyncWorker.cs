@@ -49,14 +49,27 @@ namespace Cotton.Mobile.Platforms.Android
 
         public override void OnStopped()
         {
-            ILogger? logger = GetLogger();
-            if (logger is not null)
-            {
-                AndroidAutomaticSyncDiagnosticLog.WorkerStopped(logger, StopReason, RunAttemptCount);
-            }
-
             RequestStop();
+            int stopReason = StopReason;
+            int runAttemptCount = RunAttemptCount;
+            _ = Task.Run(() => ReportStopped(stopReason, runAttemptCount));
             base.OnStopped();
+        }
+
+        private void ReportStopped(int stopReason, int runAttemptCount)
+        {
+            try
+            {
+                ILogger? logger = GetLogger();
+                if (logger is not null)
+                {
+                    AndroidAutomaticSyncDiagnosticLog.WorkerStopped(logger, stopReason, runAttemptCount);
+                }
+            }
+            catch (Exception exception)
+            {
+                _ = Log.Warn(LogTag, exception.ToString());
+            }
         }
 
         private void RequestStop()

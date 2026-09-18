@@ -6,6 +6,9 @@ using Android.Content;
 using Android.Runtime;
 using AndroidX.Work;
 using Cotton.Mobile.Services;
+using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Platforms.Android
 {
@@ -18,11 +21,16 @@ namespace Cotton.Mobile.Platforms.Android
         public override void OnStopped()
         {
             _ = global::Android.Util.Log.Info(AndroidCancellationProbeRunner.LogTag, $"system-stopped:reason={StopReason}");
+            Stopwatch stopwatch = Stopwatch.StartNew();
             base.OnStopped();
+            _ = global::Android.Util.Log.Info(AndroidCancellationProbeRunner.LogTag,
+                $"stop-callback-returned:milliseconds={stopwatch.ElapsedMilliseconds}");
         }
 
         protected override async Task<ListenableWorker.Result> ExecuteAsync(CancellationToken cancellationToken)
         {
+            ILoggerFactory factory = IPlatformApplication.Current!.Services.GetRequiredService<ILoggerFactory>();
+            factory.AddProvider(new AndroidSlowStopLogger());
             CottonAutomaticSyncDispatcher dispatcher = new(new AndroidCancellationProbeRunner());
             await dispatcher.RunAsync(
                 new CottonAuthenticatedSessionScope(new Uri("https://cancellation-test.invalid"), "cancellation-test"),

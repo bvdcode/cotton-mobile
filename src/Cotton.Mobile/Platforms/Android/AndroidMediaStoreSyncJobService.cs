@@ -50,13 +50,6 @@ namespace Cotton.Mobile.Platforms.Android
 
         public override bool OnStopJob(JobParameters? @params)
         {
-            ILogger<AndroidMediaStoreSyncJobService>? logger = IPlatformApplication.Current?.Services
-                .GetService<ILogger<AndroidMediaStoreSyncJobService>>();
-            if (logger is not null && @params is not null && OperatingSystem.IsAndroidVersionAtLeast(31))
-            {
-                AndroidAutomaticSyncDiagnosticLog.MediaStoreStopped(logger, (int)@params.StopReason);
-            }
-
             AndroidJobExecution? cancellation;
             lock (_executionGate)
             {
@@ -69,7 +62,30 @@ namespace Cotton.Mobile.Platforms.Android
                 _ = StopAsync(cancellation);
             }
 
+            if (@params is not null && OperatingSystem.IsAndroidVersionAtLeast(31))
+            {
+                int stopReason = (int)@params.StopReason;
+                _ = Task.Run(() => ReportStopped(stopReason));
+            }
+
             return true;
+        }
+
+        private static void ReportStopped(int stopReason)
+        {
+            try
+            {
+                ILogger<AndroidMediaStoreSyncJobService>? logger = IPlatformApplication.Current?.Services
+                    .GetService<ILogger<AndroidMediaStoreSyncJobService>>();
+                if (logger is not null)
+                {
+                    AndroidAutomaticSyncDiagnosticLog.MediaStoreStopped(logger, stopReason);
+                }
+            }
+            catch (Exception exception)
+            {
+                _ = Log.Error(LogTag, exception.ToString());
+            }
         }
 
         private static async Task StopAsync(AndroidJobExecution cancellation)

@@ -68,6 +68,12 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static async Task ShowAsync(IServiceProvider services, string scenario)
         {
+            if (scenario is "native-stop-start" or "native-stop-cleanup")
+            {
+                AndroidStopProbeJobService.Configure(scenario == "native-stop-cleanup");
+                return;
+            }
+
             if (scenario == "original-media-review-cancellation")
             {
                 _ = AndroidOriginalMediaChecks.CheckCancellationAsync(services);

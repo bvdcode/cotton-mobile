@@ -407,6 +407,29 @@ def background_app_op_mode(emulator: Emulator) -> str:
     return match.group(1)
 
 
+def media_access_permissions(emulator: Emulator) -> tuple[str, ...]:
+    """Return the permissions required to read original media on this device."""
+    api = int(emulator.text("shell", "getprop", "ro.build.version.sdk"))
+    read_permissions = (
+        (
+            "android.permission.READ_MEDIA_IMAGES",
+            "android.permission.READ_MEDIA_VIDEO",
+        )
+        if api >= 33
+        else ("android.permission.READ_EXTERNAL_STORAGE",)
+    )
+    return (*read_permissions, "android.permission.ACCESS_MEDIA_LOCATION")
+
+
+def set_media_access(emulator: Emulator, granted: bool) -> None:
+    """Grant or revoke complete media access for an isolated UI scenario."""
+    action = "grant" if granted else "revoke"
+    permissions = media_access_permissions(emulator)
+    ordered_permissions = permissions if granted else tuple(reversed(permissions))
+    for permission in ordered_permissions:
+        emulator.run("shell", "pm", action, PACKAGE, permission)
+
+
 def set_background_app_op_mode(emulator: Emulator, mode: str) -> None:
     """Set the Android background execution app-op mode."""
     emulator.run(
@@ -738,6 +761,7 @@ def check_background_notice(emulator: Emulator, directory: Path) -> None:
     ).splitlines()[-1]
     emulator.configure(VIEWPORTS[0], "no")
     try:
+        set_media_access(emulator, granted=True)
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"-{PACKAGE}")
         set_background_app_op_mode(emulator, "allow")
         emulator.run("shell", "am", "force-stop", PACKAGE)
@@ -828,6 +852,7 @@ def check_background_notice(emulator: Emulator, directory: Path) -> None:
             )
         LOGGER.info("Passed background restriction warning lifecycle")
     finally:
+        set_media_access(emulator, granted=False)
         set_background_app_op_mode(emulator, original_app_op_mode)
         prefix = "+" if originally_exempt else "-"
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}")

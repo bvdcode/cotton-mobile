@@ -881,7 +881,7 @@ def check_background_notice(emulator: Emulator, directory: Path) -> None:
         set_background_app_op_mode(emulator, original_app_op_mode)
         prefix = "+" if originally_exempt else "-"
         emulator.run("shell", "cmd", "deviceidle", "whitelist", f"{prefix}{PACKAGE}")
-        emulator.run("shell", "input", "keyevent", "KEYCODE_HOME")
+        emulator.run("shell", "am", "force-stop", PACKAGE)
         emulator.run("shell", "am", "start", "-W", "-n", activity)
 
 

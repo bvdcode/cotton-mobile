@@ -301,12 +301,26 @@ def assert_background_notice_geometry(
     with Image.open(directory / f"{screenshot}.png") as image:
         rgb = image.convert("RGB")
         left, top, right, bottom = notice_frame
-        frame_color = rgb.getpixel(((left + right) // 2, top + 8))
-        card_color = rgb.getpixel((right + 12, (top + bottom) // 2))
+        frame_color = read_rgb_pixel(rgb, ((left + right) // 2, top + 8))
+        card_color = read_rgb_pixel(rgb, (right + 12, (top + bottom) // 2))
     if color_contrast(frame_color, card_color) < 3:
         raise AssertionError(
             f"Warning icon container lacks contrast: {frame_color} on {card_color}."
         )
+
+
+def read_rgb_pixel(
+    image: Image.Image,
+    point: tuple[int, int],
+) -> tuple[int, int, int]:
+    """Read one pixel from an image converted to RGB mode."""
+
+    pixel = image.getpixel(point)
+    if not isinstance(pixel, tuple) or len(pixel) != 3:
+        raise AssertionError(f"Expected an RGB pixel at {point}, received {pixel!r}.")
+
+    red, green, blue = pixel
+    return red, green, blue
 
 
 def color_contrast(first: tuple[int, int, int], second: tuple[int, int, int]) -> float:

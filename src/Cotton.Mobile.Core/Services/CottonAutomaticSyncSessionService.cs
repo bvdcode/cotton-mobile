@@ -13,7 +13,6 @@ namespace Cotton.Mobile.Services
         ICottonAutomaticSyncSessionService,
         IDisposable
     {
-        private readonly Lock _initializationGate = new();
         private readonly SemaphoreSlim _lifecycleGate = new(1, 1);
         private readonly IApplicationForegroundService _foregroundService =
             foregroundService ?? throw new ArgumentNullException(nameof(foregroundService));
@@ -25,21 +24,6 @@ namespace Cotton.Mobile.Services
             logger ?? throw new ArgumentNullException(nameof(logger));
 
         private CottonAuthenticatedSessionScope? _sessionScope;
-        private bool _initialized;
-
-        public void Initialize()
-        {
-            lock (_initializationGate)
-            {
-                if (_initialized)
-                {
-                    return;
-                }
-
-                _foregroundService.Resumed += OnApplicationResumed;
-                _initialized = true;
-            }
-        }
 
         public async Task SetSessionAsync(
             CottonAuthenticatedSessionScope? sessionScope,
@@ -66,7 +50,7 @@ namespace Cotton.Mobile.Services
                 {
                     _ = RunBestEffortAsync(
                         sessionScope,
-                        CottonAutomaticSyncTrigger.ApplicationResumed,
+                        CottonAutomaticSyncTrigger.ForegroundSessionStarted,
                         CancellationToken.None);
                 }
             }
@@ -78,7 +62,6 @@ namespace Cotton.Mobile.Services
 
         public void Dispose()
         {
-            _foregroundService.Resumed -= OnApplicationResumed;
             if (_sessionScope is not null)
             {
                 _dispatcher.Cancel(_sessionScope);
@@ -86,37 +69,6 @@ namespace Cotton.Mobile.Services
 
             _lifecycleGate.Dispose();
             GC.SuppressFinalize(this);
-        }
-
-        private void OnApplicationResumed(object? sender, EventArgs eventArgs)
-        {
-            _ = ResumeSafelyAsync();
-        }
-
-        private async Task ResumeSafelyAsync()
-        {
-            try
-            {
-                await _lifecycleGate.WaitAsync().ConfigureAwait(false);
-                try
-                {
-                    if (_sessionScope is not null)
-                    {
-                        _ = RunBestEffortAsync(
-                            _sessionScope,
-                            CottonAutomaticSyncTrigger.ApplicationResumed,
-                            CancellationToken.None);
-                    }
-                }
-                finally
-                {
-                    _lifecycleGate.Release();
-                }
-            }
-            catch (Exception exception)
-            {
-                CottonAutomaticSyncLog.ResumeFailed(_logger, exception);
-            }
         }
 
         private async Task RunBestEffortAsync(

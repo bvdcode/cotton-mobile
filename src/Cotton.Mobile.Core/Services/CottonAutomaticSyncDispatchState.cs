@@ -33,7 +33,8 @@ namespace Cotton.Mobile.Services
 
         public void Queue(CottonAutomaticSyncTrigger trigger)
         {
-            if (trigger == CottonAutomaticSyncTrigger.PeriodicReconciliation
+            if ((trigger is CottonAutomaticSyncTrigger.ForegroundSessionStarted
+                    or CottonAutomaticSyncTrigger.PeriodicReconciliation)
                 && _isRunningAllRoots && !HasPendingRequest)
             {
                 return;
@@ -114,20 +115,20 @@ namespace Cotton.Mobile.Services
         {
             return (current, next) switch
             {
-                (CottonAutomaticSyncTrigger.ApplicationResumed, CottonAutomaticSyncTrigger.ApplicationResumed) =>
-                    CottonAutomaticSyncTrigger.ApplicationResumed,
-                (CottonAutomaticSyncTrigger.ApplicationResumed, CottonAutomaticSyncTrigger.PeriodicReconciliation) =>
+                (CottonAutomaticSyncTrigger.ForegroundSessionStarted, CottonAutomaticSyncTrigger.ForegroundSessionStarted) =>
+                    CottonAutomaticSyncTrigger.ForegroundSessionStarted,
+                (CottonAutomaticSyncTrigger.ForegroundSessionStarted, CottonAutomaticSyncTrigger.PeriodicReconciliation) =>
                     CottonAutomaticSyncTrigger.PeriodicReconciliation,
-                (CottonAutomaticSyncTrigger.ApplicationResumed, CottonAutomaticSyncTrigger.MediaStoreChanged) =>
-                    CottonAutomaticSyncTrigger.ApplicationResumed,
-                (CottonAutomaticSyncTrigger.PeriodicReconciliation, CottonAutomaticSyncTrigger.ApplicationResumed) =>
+                (CottonAutomaticSyncTrigger.ForegroundSessionStarted, CottonAutomaticSyncTrigger.MediaStoreChanged) =>
+                    CottonAutomaticSyncTrigger.ForegroundSessionStarted,
+                (CottonAutomaticSyncTrigger.PeriodicReconciliation, CottonAutomaticSyncTrigger.ForegroundSessionStarted) =>
                     CottonAutomaticSyncTrigger.PeriodicReconciliation,
                 (CottonAutomaticSyncTrigger.PeriodicReconciliation, CottonAutomaticSyncTrigger.PeriodicReconciliation) =>
                     CottonAutomaticSyncTrigger.PeriodicReconciliation,
                 (CottonAutomaticSyncTrigger.PeriodicReconciliation, CottonAutomaticSyncTrigger.MediaStoreChanged) =>
                     CottonAutomaticSyncTrigger.PeriodicReconciliation,
-                (CottonAutomaticSyncTrigger.MediaStoreChanged, CottonAutomaticSyncTrigger.ApplicationResumed) =>
-                    CottonAutomaticSyncTrigger.ApplicationResumed,
+                (CottonAutomaticSyncTrigger.MediaStoreChanged, CottonAutomaticSyncTrigger.ForegroundSessionStarted) =>
+                    CottonAutomaticSyncTrigger.ForegroundSessionStarted,
                 (CottonAutomaticSyncTrigger.MediaStoreChanged, CottonAutomaticSyncTrigger.PeriodicReconciliation) =>
                     CottonAutomaticSyncTrigger.PeriodicReconciliation,
                 (CottonAutomaticSyncTrigger.MediaStoreChanged, CottonAutomaticSyncTrigger.MediaStoreChanged) =>

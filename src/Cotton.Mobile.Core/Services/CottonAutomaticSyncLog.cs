@@ -10,9 +10,6 @@ namespace Cotton.Mobile.Services
         [LoggerMessage(EventId = 1101, Level = LogLevel.Warning, Message = "Automatic sync failed for root {RootId}.")]
         public static partial void RootFailed(ILogger logger, Guid rootId, Exception exception);
 
-        [LoggerMessage(EventId = 1102, Level = LogLevel.Warning, Message = "Automatic sync resume failed.")]
-        public static partial void ResumeFailed(ILogger logger, Exception exception);
-
         [LoggerMessage(EventId = 1103, Level = LogLevel.Warning, Message = "Automatic sync run failed.")]
         public static partial void RunFailed(ILogger logger, Exception exception);
 

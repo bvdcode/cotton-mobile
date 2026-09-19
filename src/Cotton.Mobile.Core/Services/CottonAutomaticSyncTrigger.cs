@@ -5,7 +5,7 @@ namespace Cotton.Mobile.Services
 {
     public enum CottonAutomaticSyncTrigger
     {
-        ApplicationResumed,
+        ForegroundSessionStarted,
         PeriodicReconciliation,
         MediaStoreChanged,
     }

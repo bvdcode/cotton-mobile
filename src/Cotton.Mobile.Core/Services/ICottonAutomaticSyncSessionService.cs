@@ -5,8 +5,6 @@ namespace Cotton.Mobile.Services
 {
     public interface ICottonAutomaticSyncSessionService
     {
-        void Initialize();
-
         Task SetSessionAsync(
             CottonAuthenticatedSessionScope? sessionScope,
             CancellationToken cancellationToken = default);

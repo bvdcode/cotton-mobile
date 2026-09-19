@@ -18,15 +18,39 @@ namespace Cotton.Mobile.Tests
                 scheduler,
                 dispatcher,
                 NullLogger<CottonAutomaticSyncSessionService>.Instance);
-            sessionService.Initialize();
-
             Task setSession = sessionService.SetSessionAsync(SyncTestRootFactory.SessionScope, TestContext.Current.CancellationToken);
 
             await setSession.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
             Assert.Equal(1, scheduler.ScheduleCount);
             Assert.False(setSession.IsFaulted);
+            Assert.Equal(
+                [CottonAutomaticSyncTrigger.ForegroundSessionStarted],
+                runner.Triggers);
             runner.ReleaseRun();
+        }
+
+        [Fact]
+        public async Task ResumeDoesNotStartFullSynchronization()
+        {
+            TestApplicationForegroundService foregroundService = new();
+            RecordingAutomaticSyncBackgroundScheduler scheduler = new();
+            using ControlledAutomaticSyncRunner runner = new();
+            CottonAutomaticSyncDispatcher dispatcher = new(runner);
+            using CottonAutomaticSyncSessionService sessionService = new(
+                foregroundService,
+                scheduler,
+                dispatcher,
+                NullLogger<CottonAutomaticSyncSessionService>.Instance);
+            await sessionService.SetSessionAsync(
+                SyncTestRootFactory.SessionScope,
+                TestContext.Current.CancellationToken);
+
+            foregroundService.NotifyResumed();
+
+            Assert.Equal(1, scheduler.ScheduleCount);
+            Assert.Empty(runner.Triggers);
+            Assert.Empty(runner.ExecutionTokens);
         }
 
         [Fact]
@@ -42,7 +66,6 @@ namespace Cotton.Mobile.Tests
                 scheduler,
                 dispatcher,
                 NullLogger<CottonAutomaticSyncSessionService>.Instance);
-            sessionService.Initialize();
             await sessionService.SetSessionAsync(SyncTestRootFactory.SessionScope, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
@@ -64,7 +87,6 @@ namespace Cotton.Mobile.Tests
                 scheduler,
                 dispatcher,
                 NullLogger<CottonAutomaticSyncSessionService>.Instance);
-            sessionService.Initialize();
             await sessionService.SetSessionAsync(SyncTestRootFactory.SessionScope, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
             CottonAuthenticatedSessionScope otherAccountScope = new(
@@ -100,8 +122,6 @@ namespace Cotton.Mobile.Tests
                 scheduler,
                 dispatcher,
                 NullLogger<CottonAutomaticSyncSessionService>.Instance);
-            sessionService.Initialize();
-
             await sessionService.SetSessionAsync(SyncTestRootFactory.SessionScope, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
             runner.ReleaseRun();

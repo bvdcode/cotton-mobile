@@ -6,10 +6,27 @@ namespace Cotton.Mobile.Tests
     public class AutomaticSyncDispatcherTests
     {
         [Theory]
-        [InlineData(CottonAutomaticSyncTrigger.ApplicationResumed)]
-        [InlineData(CottonAutomaticSyncTrigger.MediaStoreChanged)]
-        [InlineData(CottonAutomaticSyncTrigger.PeriodicReconciliation)]
-        public async Task PeriodicRequestJoinsRunningFullScan(CottonAutomaticSyncTrigger firstTrigger)
+        [InlineData(
+            CottonAutomaticSyncTrigger.ForegroundSessionStarted,
+            CottonAutomaticSyncTrigger.PeriodicReconciliation)]
+        [InlineData(
+            CottonAutomaticSyncTrigger.MediaStoreChanged,
+            CottonAutomaticSyncTrigger.PeriodicReconciliation)]
+        [InlineData(
+            CottonAutomaticSyncTrigger.PeriodicReconciliation,
+            CottonAutomaticSyncTrigger.PeriodicReconciliation)]
+        [InlineData(
+            CottonAutomaticSyncTrigger.ForegroundSessionStarted,
+            CottonAutomaticSyncTrigger.ForegroundSessionStarted)]
+        [InlineData(
+            CottonAutomaticSyncTrigger.MediaStoreChanged,
+            CottonAutomaticSyncTrigger.ForegroundSessionStarted)]
+        [InlineData(
+            CottonAutomaticSyncTrigger.PeriodicReconciliation,
+            CottonAutomaticSyncTrigger.ForegroundSessionStarted)]
+        public async Task ReconciliationRequestJoinsRunningFullScan(
+            CottonAutomaticSyncTrigger firstTrigger,
+            CottonAutomaticSyncTrigger joiningTrigger)
         {
             using ControlledAutomaticSyncRunner runner = new();
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
@@ -17,12 +34,12 @@ namespace Cotton.Mobile.Tests
                 SyncTestRootFactory.SessionScope, firstTrigger, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
-            Task<CottonAutomaticSyncRunResult> periodic = dispatcher.RunAsync(
-                SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.PeriodicReconciliation,
+            Task<CottonAutomaticSyncRunResult> joining = dispatcher.RunAsync(
+                SyncTestRootFactory.SessionScope, joiningTrigger,
                 TestContext.Current.CancellationToken);
             runner.ReleaseRun();
             runner.ReleaseRun();
-            await Task.WhenAll(first, periodic);
+            await Task.WhenAll(first, joining);
 
             Assert.Equal([firstTrigger], runner.Triggers);
         }
@@ -53,7 +70,7 @@ namespace Cotton.Mobile.Tests
         {
             using ControlledAutomaticSyncRunner runner = new();
             CottonAutomaticSyncDispatcher dispatcher = new(runner);
-            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.ApplicationResumed, TestContext.Current.CancellationToken);
+            Task<CottonAutomaticSyncRunResult> first = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.ForegroundSessionStarted, TestContext.Current.CancellationToken);
             await runner.WaitForNextRunAsync();
 
             Task<CottonAutomaticSyncRunResult> second = dispatcher.RunAsync(SyncTestRootFactory.SessionScope, CottonAutomaticSyncTrigger.MediaStoreChanged, TestContext.Current.CancellationToken);

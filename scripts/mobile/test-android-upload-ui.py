@@ -176,29 +176,48 @@ class Emulator:
             if serialized == previous:
                 return
             previous = serialized
-            scrollable_bounds = [
-                bounds(node)
-                for node in hierarchy.iter("node")
-                if node.get("scrollable") == "true"
-            ]
-            if not scrollable_bounds:
+            if not self._scroll_forward(hierarchy):
                 return
-            left, top, right, bottom = max(
-                scrollable_bounds,
-                key=lambda area: (area[2] - area[0]) * (area[3] - area[1]),
-            )
-            x = str((left + right) // 2)
-            inset = (bottom - top) // 5
-            self.run(
-                "shell",
-                "input",
-                "swipe",
-                x,
-                str(bottom - inset),
-                x,
-                str(top + inset),
-                "150",
-            )
+
+    def scroll_until_message(self, expected: str) -> None:
+        """Reveal one message in the current scrollable viewport."""
+        previous = b""
+        for _ in range(6):
+            hierarchy = self.hierarchy()
+            if expected in [node.get("text", "") for node in hierarchy.iter("node")]:
+                return
+            serialized = ET.tostring(hierarchy)
+            if serialized == previous or not self._scroll_forward(hierarchy):
+                break
+            previous = serialized
+        raise AssertionError(f"Scrollable content did not reveal: {expected}")
+
+    def _scroll_forward(self, hierarchy: ET.Element) -> bool:
+        """Move the largest visible scrollable container forward once."""
+        scrollable_bounds = [
+            bounds(node)
+            for node in hierarchy.iter("node")
+            if node.get("scrollable") == "true"
+        ]
+        if not scrollable_bounds:
+            return False
+        left, top, right, bottom = max(
+            scrollable_bounds,
+            key=lambda area: (area[2] - area[0]) * (area[3] - area[1]),
+        )
+        x = str((left + right) // 2)
+        inset = (bottom - top) // 5
+        self.run(
+            "shell",
+            "input",
+            "swipe",
+            x,
+            str(bottom - inset),
+            x,
+            str(top + inset),
+            "150",
+        )
+        return True
 
 
 def capture(emulator: Emulator, directory: Path, name: str) -> ET.Element:
@@ -841,15 +860,21 @@ def check_background_notice(emulator: Emulator, directory: Path) -> None:
         emulator.run("shell", "am", "start", "-W", "-n", activity)
         emulator.scenario("dashboard-folder-only")
         wait_for_message(emulator, "Background uploads are restricted")
-        large_text = capture(emulator, directory, "battery-notice-large-text-dark")
-        assert_message(large_text, "Settings")
+        large_text_top = capture(
+            emulator, directory, "battery-notice-large-text-dark-top"
+        )
         if not any(
             node.get("content-desc") == "Dismiss background upload warning"
-            for node in large_text.iter("node")
+            for node in large_text_top.iter("node")
         ):
             raise AssertionError(
                 "The large-text background restriction warning lost its dismiss action."
             )
+        emulator.scroll_until_message("Settings")
+        large_text_action = capture(
+            emulator, directory, "battery-notice-large-text-dark-action"
+        )
+        assert_message(large_text_action, "Settings")
         LOGGER.info("Passed background restriction warning lifecycle")
     finally:
         set_media_access(emulator, granted=False)

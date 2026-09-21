@@ -36,9 +36,12 @@ namespace Cotton.Mobile.Tests
             Service = new CottonMediaOriginalRestoreService(
                 this, new CottonRecursiveRemoteContentLoader(this), this, RestoreStore, ExecutionLock,
                 NullLogger<CottonMediaOriginalRestoreService>.Instance);
+            Replacement = new CottonCloudFileReplacement(
+                new CottonFileUploadService(new UploadTestClientFactory(_httpClient)), this,
+                new CottonSyncFileUploadSourceFactory(this), Receipts, TimeProvider.System,
+                NullLogger<CottonCloudFileReplacement>.Instance);
             Executor = new CottonMediaOriginalRestoreExecutor(RestoreStore, this,
-                new CottonFileUploadService(new UploadTestClientFactory(_httpClient)),
-                new CottonSyncFileUploadSourceFactory(this), Receipts, new CottonSyncProgressHub(), TimeProvider.System,
+                Replacement, new CottonSyncProgressHub(), TimeProvider.System,
                 NullLogger<CottonMediaOriginalRestoreExecutor>.Instance);
         }
 
@@ -70,6 +73,7 @@ namespace Cotton.Mobile.Tests
         public FileSystemCottonMediaOriginalRestoreStore RestoreStore { get; }
 
         public CottonMediaOriginalRestoreExecutor Executor { get; }
+        public CottonCloudFileReplacement Replacement { get; }
 
         public CottonSyncRootExecutionLock ExecutionLock { get; } = new();
 

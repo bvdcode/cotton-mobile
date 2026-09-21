@@ -13,9 +13,7 @@ namespace Cotton.Mobile.Tests
         {
             using RemoteConflictResolutionTestEnvironment environment = new();
 
-            int replaced = await environment.Service.ReplaceFileConflictsAsync(
-                environment.Root.InstanceUri,
-                environment.Root,
+            int replaced = await environment.ApproveAndApplyAsync(
                 TestContext.Current.CancellationToken);
 
             Assert.Equal(1, replaced);
@@ -37,9 +35,7 @@ namespace Cotton.Mobile.Tests
             using RemoteConflictResolutionTestEnvironment environment = new();
             environment.UseFolderConflict();
 
-            int replaced = await environment.Service.ReplaceFileConflictsAsync(
-                environment.Root.InstanceUri,
-                environment.Root,
+            int replaced = await environment.ApproveAndApplyAsync(
                 TestContext.Current.CancellationToken);
 
             Assert.Equal(0, replaced);
@@ -58,9 +54,7 @@ namespace Cotton.Mobile.Tests
                 LoseUpdateResponse = true,
             };
 
-            int replaced = await environment.Service.ReplaceFileConflictsAsync(
-                environment.Root.InstanceUri,
-                environment.Root,
+            int replaced = await environment.ApproveAndApplyAsync(
                 TestContext.Current.CancellationToken);
 
             Assert.Equal(1, replaced);

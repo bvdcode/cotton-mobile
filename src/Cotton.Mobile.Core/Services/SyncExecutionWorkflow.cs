@@ -61,7 +61,10 @@ namespace Cotton.Mobile.Services
                 DateTime completedAt = _timeProvider.GetUtcNow().UtcDateTime;
                 CottonAutomaticSyncRootStatusSnapshot status = summary.HasBlockedItems
                     ? CottonAutomaticSyncRootStatusSnapshot.Failed(
-                        root.Id, completedAt, CottonAutomaticSyncFailureClassifier.ClassifyBlocked(summary))
+                        root.Id, completedAt, CottonAutomaticSyncFailureClassifier.ClassifyBlocked(summary),
+                        summary.RootResults.Sum(result => result.Plan?.Items.Count(item =>
+                            item.Action is CottonDeviceToCloudSyncActionKind.RemotePathConflict
+                                or CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged) ?? 0))
                     : CottonAutomaticSyncRootStatusSnapshot.Succeeded(root.Id, completedAt);
                 await SaveStatusAsync(instanceUri, status, cancellationToken).ConfigureAwait(false);
             }

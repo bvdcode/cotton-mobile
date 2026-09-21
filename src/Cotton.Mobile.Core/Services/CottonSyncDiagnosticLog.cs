@@ -7,6 +7,15 @@ namespace Cotton.Mobile.Services
 {
     public static partial class CottonSyncDiagnosticLog
     {
+        [LoggerMessage(EventId = 2140, Level = LogLevel.Warning, Message = "Cloud replacement failed; checking its destination revision.")]
+        public static partial void ReplacementFailed(ILogger logger, Exception exception);
+
+        [LoggerMessage(EventId = 2141, Level = LogLevel.Warning, Message = "Selected upload replacement in root {RootId} changed and requires review.")]
+        public static partial void ReplacementChanged(ILogger logger, Guid rootId);
+
+        [LoggerMessage(EventId = 2142, Level = LogLevel.Information, Message = "Sync root {RootId} reused its completed comparison: {UnchangedCount} unchanged, {ConflictCount} conflicts; no cloud scan.")]
+        public static partial void ComparisonReused(ILogger logger, Guid rootId, int unchangedCount, int conflictCount);
+
         [LoggerMessage(EventId = 2101, Level = LogLevel.Information, Message = "Manual sync started for root {RootId}.")]
         public static partial void ManualRootStarted(ILogger logger, Guid rootId);
 

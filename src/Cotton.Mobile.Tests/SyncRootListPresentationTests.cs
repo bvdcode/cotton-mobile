@@ -139,24 +139,25 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Retry uploads", item.StatusActionText);
         }
 
-        [Fact]
-        public void RemotePathConflictOffersCloudReplacement()
+        [Theory]
+        [InlineData(CottonAutomaticSyncFailureKind.RemotePathConflict)]
+        [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged)]
+        public void ReviewableFileDifferencesOfferComparison(CottonAutomaticSyncFailureKind kind)
         {
             CottonSyncRootSnapshot root = SyncTestRootFactory.CreateDocumentTreeRoot();
             CottonAutomaticSyncRootStatusSnapshot status = CottonAutomaticSyncRootStatusSnapshot.Failed(
                 root.Id,
                 new DateTime(2026, 8, 16, 12, 0, 0, DateTimeKind.Utc),
-                CottonAutomaticSyncFailureKind.RemotePathConflict);
+                kind);
             CottonSyncRootListItem item = new(root, automaticStatus: status);
 
             Assert.True(item.CanReplaceCloudConflict);
             Assert.Equal(CottonSyncRootAction.ReplaceCloudConflict, item.StatusAction?.Action);
-            Assert.Equal("Replace cloud file", item.StatusActionText);
+            Assert.Equal("Review file differences", item.StatusActionText);
         }
 
         [Theory]
         [InlineData(CottonAutomaticSyncFailureKind.ActionRequired)]
-        [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged)]
         [InlineData(CottonAutomaticSyncFailureKind.RemoteRevisionChanged)]
         [InlineData(CottonAutomaticSyncFailureKind.InvalidLocalItemName)]
         [InlineData(CottonAutomaticSyncFailureKind.LocalSourceUnavailable)]

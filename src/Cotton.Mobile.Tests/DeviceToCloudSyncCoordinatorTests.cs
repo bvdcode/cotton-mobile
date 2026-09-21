@@ -18,6 +18,7 @@ namespace Cotton.Mobile.Tests
         private readonly CottonSyncRootExecutionLock _executionLock = new();
         private readonly MediaOriginalRestoreTestEnvironment _originalRestore = new();
         private readonly CottonDeviceToCloudSyncCoordinator _coordinator;
+        private readonly FileSystemCottonSyncReviewStore _reviewStore;
         private readonly FileSystemCottonDiagnosticJournal _journal;
         private readonly LoggerFactory _loggerFactory;
 
@@ -47,6 +48,11 @@ namespace Cotton.Mobile.Tests
                 _progressHub,
                 NullLogger<CottonUploadOnlySyncPlanExecutor>.Instance,
                 new FixedTimeProvider(SyncedAt));
+            _reviewStore = new FileSystemCottonSyncReviewStore(new ScopedUploadReceiptPathProvider(_directory));
+            CottonRemoteConflictResolutionService conflicts = new(
+                _localTreeReader, new CottonRecursiveRemoteContentLoader(_remoteFolderContentSource),
+                _uploadReceiptStore, _reviewStore, _originalRestore.Replacement, _executionLock,
+                _progressHub, TimeProvider.System, NullLogger<CottonRemoteConflictResolutionService>.Instance);
             _coordinator = new CottonDeviceToCloudSyncCoordinator(
                 _rootStore,
                 _pauseStore,
@@ -56,6 +62,8 @@ namespace Cotton.Mobile.Tests
                 executor,
                 _executionLock,
                 _originalRestore.Executor,
+                conflicts,
+                _reviewStore,
                 _progressHub,
                 _loggerFactory.CreateLogger<CottonDeviceToCloudSyncCoordinator>());
         }
@@ -289,39 +297,5 @@ namespace Cotton.Mobile.Tests
                 () => _coordinator.RunRootAsync(InstanceUri, root, TestContext.Current.CancellationToken));
         }
 
-        public void Dispose()
-        {
-            _originalRestore.Dispose();
-            _loggerFactory.Dispose();
-            _journal.Dispose();
-            if (Directory.Exists(_directory))
-            {
-                Directory.Delete(_directory, recursive: true);
-            }
-
-            GC.SuppressFinalize(this);
-        }
-
-        private static void AssertProgress(
-            CottonSyncProgressSnapshot? progress,
-            int completedItemCount,
-            int totalItemCount)
-        {
-            Assert.NotNull(progress);
-            Assert.Equal(CottonSyncProgressStage.ApplyingChanges, progress.Stage);
-            Assert.Equal(completedItemCount, progress.CompletedItemCount);
-            Assert.Equal(totalItemCount, progress.TotalItemCount);
-        }
-
-        private static void AssertUploadProgress(
-            CottonSyncProgressSnapshot? progress,
-            long transferredBytes)
-        {
-            Assert.NotNull(progress);
-            Assert.Equal(CottonSyncProgressStage.UploadingFile, progress.Stage);
-            Assert.Equal("alpha.txt", progress.Transfer?.ItemName);
-            Assert.Equal(transferredBytes, progress.Transfer?.TransferredBytes);
-            Assert.Equal(42, progress.Transfer?.TotalBytes);
-        }
     }
 }

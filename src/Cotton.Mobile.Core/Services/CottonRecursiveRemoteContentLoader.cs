@@ -12,10 +12,29 @@ namespace Cotton.Mobile.Services
         public async Task<CottonDeviceToCloudRemoteContentSnapshot> LoadAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            IReadOnlySet<string>? selectedFilePaths = null)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(root);
+            if (selectedFilePaths?.Count == 0)
+            {
+                return new CottonDeviceToCloudRemoteContentSnapshot(
+                    root.CloudFolder.FolderId, root.CloudFolder.FolderName, []);
+            }
+
+            HashSet<string>? selectedFolders = null;
+            if (selectedFilePaths is not null)
+            {
+                selectedFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (string path in selectedFilePaths)
+                {
+                    for (int slash = path.IndexOf('/'); slash >= 0; slash = path.IndexOf('/', slash + 1))
+                    {
+                        selectedFolders.Add(path[..slash]);
+                    }
+                }
+            }
 
             List<CottonDeviceToCloudRemoteItemSnapshot> items = [];
             Queue<(CottonFolderHandle Folder, string RelativePath, int Depth)> folders = [];
@@ -39,7 +58,8 @@ namespace Cotton.Mobile.Services
                     traversalGuard.RecordItem();
                     string relativePath = CreateRelativePath(folderRelativePath, entry);
                     items.Add(new CottonDeviceToCloudRemoteItemSnapshot(entry, relativePath));
-                    if (entry.Type == CottonFileBrowserEntryType.Folder)
+                    if (entry.Type == CottonFileBrowserEntryType.Folder
+                        && (selectedFolders is null || selectedFolders.Contains(relativePath)))
                     {
                         folders.Enqueue((new CottonFolderHandle(entry.Id, entry.Name), relativePath, depth + 1));
                     }

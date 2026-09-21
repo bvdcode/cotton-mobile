@@ -9,6 +9,7 @@ import subprocess
 import time
 import uuid
 import xml.etree.ElementTree as ET
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -55,18 +56,13 @@ FAILURE_STATUS_PREFIXES = {
     "storage-full": "Last upload failed",
     "destination-missing": "Last upload failed",
     "review-required": "Uploaded file changed",
-    "cloud-path-conflict": "Cloud path conflict",
+    "cloud-path-conflict": "File differences need review",
     "pending-upload-changed": "Pending upload changed",
 }
 PENDING_UPLOAD_MESSAGE = (
     "Cotton will abandon incomplete upload attempts and retry the current local files. "
     "If an earlier request finishes later, Cotton will preserve the local file and "
     "report a cloud conflict."
-)
-REPLACE_CLOUD_CONFLICT_MESSAGE = (
-    "Cotton will replace cloud files that conflict with files on this device. "
-    "Existing cloud content remains available in version history. If a cloud file "
-    "changes before replacement, Cotton will stop without overwriting it."
 )
 OFFLINE_MESSAGES = {
     "offline-add": "Connect to the internet to set up backup.",
@@ -220,9 +216,15 @@ class Emulator:
         return True
 
 
-def capture(emulator: Emulator, directory: Path, name: str) -> ET.Element:
+def capture(
+    emulator: Emulator,
+    directory: Path,
+    name: str,
+    hierarchy: ET.Element | None = None,
+) -> ET.Element:
     """Save a screenshot and matching accessibility hierarchy."""
-    hierarchy = emulator.hierarchy()
+    if hierarchy is None:
+        hierarchy = emulator.hierarchy()
     ET.ElementTree(hierarchy).write(directory / f"{name}.xml", encoding="utf-8")
     (directory / f"{name}.png").write_bytes(emulator.run("exec-out", "screencap", "-p"))
     if not any(node.get("package") == PACKAGE for node in hierarchy.iter("node")):
@@ -372,24 +374,24 @@ def find_action_button(hierarchy: ET.Element, text: str) -> ET.Element:
     return buttons[0]
 
 
-def wait_for_message(emulator: Emulator, expected: str) -> None:
+def wait_for_message(emulator: Emulator, expected: str) -> ET.Element:
     """Wait until an asynchronous native dialog exposes its content."""
     deadline = time.monotonic() + TIMEOUT_SECONDS
     while time.monotonic() < deadline:
         hierarchy = emulator.hierarchy()
         if expected in [node.get("text", "") for node in hierarchy.iter("node")]:
-            return
+            return hierarchy
         time.sleep(0.25)
     raise AssertionError(f"Action feedback did not appear: {expected}")
 
 
-def wait_for_message_absence(emulator: Emulator, unexpected: str) -> None:
+def wait_for_message_absence(emulator: Emulator, unexpected: str) -> ET.Element:
     """Wait until an asynchronous UI update removes text from the hierarchy."""
     deadline = time.monotonic() + TIMEOUT_SECONDS
     while time.monotonic() < deadline:
         hierarchy = emulator.hierarchy()
         if unexpected not in [node.get("text", "") for node in hierarchy.iter("node")]:
-            return
+            return hierarchy
         time.sleep(0.25)
     raise AssertionError(f"Action feedback remained visible: {unexpected}")
 
@@ -546,37 +548,18 @@ def capture_failure(
     emulator: Emulator, directory: Path, name: str, scenario: str, hierarchy: ET.Element
 ) -> None:
     """Open the status action and verify its complete explanation."""
-    action_text = (
-        "Replace cloud file"
-        if scenario == "cloud-path-conflict"
-        else "Show sync details"
-    )
+    review = scenario in ("cloud-path-conflict", "review-required")
+    action_text = "Review file differences" if review else "Show sync details"
     action = find_action_button(hierarchy, action_text)
     left, top, right, bottom = bounds(action)
     emulator.run(
         "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
     )
-    if scenario == "cloud-path-conflict":
-        assert_message(
-            hierarchy,
-            "Sync incomplete. 3 items need attention. Review the folders below.",
-        )
-        title = "Replace conflicting files in Camera backups?"
-        wait_for_message(emulator, title)
-        dialog = capture(emulator, directory, f"{name}-replacement")
-        assert_dialog_backdrop(directory, name, f"{name}-replacement")
-        assert_message(dialog, title)
-        assert_message(dialog, REPLACE_CLOUD_CONFLICT_MESSAGE)
-        find_action_button(dialog, "Replace cloud file")
-        cancel = find_action_button(dialog, "Cancel")
-        left, top, right, bottom = bounds(cancel)
-        emulator.run(
-            "shell",
-            "input",
-            "tap",
-            str((left + right) // 2),
-            str((top + bottom) // 2),
-        )
+    if review:
+        wait_for_message(emulator, "File differences")
+        capture(emulator, directory, f"{name}-review")
+        tap_id(emulator, "ConflictBack")
+        wait_for_message_absence(emulator, "File differences")
         return
 
     wait_for_message(emulator, "Sync details for Camera backups")
@@ -1056,6 +1039,127 @@ def check_original_prompt(
     raise AssertionError(f"The native question did not report its decision: {output}")
 
 
+def assert_review_button_contrast(
+    hierarchy: ET.Element, directory: Path, name: str
+) -> None:
+    """Require readable action text, including the disabled state in dark mode."""
+    button = next(
+        node
+        for node in hierarchy.iter("node")
+        if node.get("resource-id") == f"{PACKAGE}:id/ConflictReplace"
+    )
+    left, top, right, bottom = bounds(button)
+    width, height = right - left, bottom - top
+    with Image.open(directory / f"{name}.png") as screenshot:
+        rgb = screenshot.convert("RGB")
+        colors = Counter(
+            read_rgb_pixel(rgb, (x, y))
+            for x in range(left + width // 4, right - width // 4, 2)
+            for y in range(top + height // 3, bottom - height // 3, 2)
+        )
+    common = colors.most_common(5)
+    background = common[0][0]
+    if max(color_contrast(background, color) for color, _ in common) < 4.5:
+        raise AssertionError("File comparison action text lacks visible contrast.")
+
+
+def tap_id(
+    emulator: Emulator, automation_id: str, hierarchy: ET.Element | None = None
+) -> None:
+    """Tap an enabled control identified by its stable automation identifier."""
+    if hierarchy is None:
+        hierarchy = emulator.hierarchy()
+    nodes = [
+        node
+        for node in hierarchy.iter("node")
+        if node.get("resource-id") == f"{PACKAGE}:id/{automation_id}"
+        and node.get("enabled") == "true"
+    ]
+    if len(nodes) != 1:
+        raise AssertionError(f"Expected one enabled control: {automation_id}")
+    left, top, right, bottom = bounds(nodes[0])
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+
+
+def tap_text(
+    emulator: Emulator, text: str, hierarchy: ET.Element | None = None
+) -> None:
+    """Tap one enabled native button by its text."""
+    if hierarchy is None:
+        hierarchy = emulator.hierarchy()
+    left, top, right, bottom = bounds(find_action_button(hierarchy, text))
+    emulator.run(
+        "shell", "input", "tap", str((left + right) // 2), str((top + bottom) // 2)
+    )
+
+
+def check_conflict_review(emulator: Emulator, directory: Path, name: str) -> None:
+    """Review concrete differences, cancel once, then save and reload the queue."""
+    emulator.scenario("conflict-review")
+    wait_for_message(emulator, "File differences")
+    hierarchy = wait_for_message_absence(emulator, "Checking phone and cloud copies…")
+    capture(emulator, directory, name, hierarchy)
+    assert_review_button_contrast(hierarchy, directory, name)
+    tap_id(emulator, "ConflictSelectAll", hierarchy)
+    hierarchy = wait_for_message(emulator, "Use phone files (3)")
+    capture(emulator, directory, f"{name}-selected", hierarchy)
+    assert_review_button_contrast(hierarchy, directory, f"{name}-selected")
+    tap_id(emulator, "ConflictReplace", hierarchy)
+    hierarchy = wait_for_message(emulator, "Replace 3 cloud copies?")
+    capture(emulator, directory, f"{name}-confirmation", hierarchy)
+    assert_dialog_backdrop(directory, name, f"{name}-confirmation")
+    tap_text(emulator, "Cancel", hierarchy)
+    hierarchy = wait_for_message(emulator, "Use phone files (3)")
+    tap_id(emulator, "ConflictReplace", hierarchy)
+    hierarchy = wait_for_message(emulator, "Replace 3 cloud copies?")
+    tap_text(emulator, "Replace", hierarchy)
+    hierarchy = wait_for_message(emulator, "Sync queued files")
+    capture(emulator, directory, f"{name}-queued", hierarchy)
+    tap_id(emulator, "ConflictRefresh", hierarchy)
+    wait_for_message(emulator, "Sync queued files")
+    wait_for_message_absence(emulator, "Checking phone and cloud copies…")
+    emulator.scroll_until_message("Queued for replacement")
+    hierarchy = capture(emulator, directory, f"{name}-reloaded")
+    assert_message(hierarchy, "Queued for replacement")
+    checkboxes = [
+        node
+        for node in hierarchy.iter("node")
+        if node.get("class") == "android.widget.CheckBox"
+    ]
+    if not checkboxes or any(node.get("enabled") == "true" for node in checkboxes):
+        raise AssertionError("Queued replacements can be selected a second time.")
+    emulator.scroll_to_end()
+    hierarchy = capture(emulator, directory, f"{name}-last-file")
+    tap_id(emulator, "ConflictBack", hierarchy)
+    wait_for_message_absence(emulator, "File differences")
+
+
+def run_conflict_checks(emulator: Emulator, directory: Path, full: bool) -> None:
+    """Run the file comparison matrix without unrelated dashboard scenarios."""
+    directory.mkdir(parents=True, exist_ok=True)
+    emulator.run("shell", "am", "force-stop", PACKAGE)
+    activity = emulator.text(
+        "shell", "cmd", "package", "resolve-activity", "--brief", PACKAGE
+    ).splitlines()[-1]
+    if not activity.startswith(f"{PACKAGE}/"):
+        raise RuntimeError(f"Upload test application is not installed: {activity}")
+    emulator.run("shell", "am", "start", "-W", "-n", activity)
+    completed: list[str] = []
+    for viewport in VIEWPORTS if full else VIEWPORTS[:1]:
+        for theme in ("no", "yes"):
+            emulator.configure(viewport, theme)
+            theme_name = "light" if theme == "no" else "dark"
+            name = f"{viewport.name}-{theme_name}-conflict-review"
+            check_conflict_review(emulator, directory, name)
+            completed.append(name)
+            LOGGER.info("Passed %s", name)
+    (directory / "results.json").write_text(
+        json.dumps({"passed": completed}, indent=2) + "\n", encoding="utf-8"
+    )
+
+
 def run_checks(
     emulator: Emulator, directory: Path, full: bool, dashboard_only: bool
 ) -> None:
@@ -1092,6 +1196,10 @@ def run_checks(
         for theme in ("no", "yes"):
             theme_name = "light" if theme == "no" else "dark"
             emulator.configure(viewport, theme)
+            review_case = f"{viewport.name}-{theme_name}-conflict-review"
+            check_conflict_review(emulator, directory, review_case)
+            completed.append(review_case)
+            LOGGER.info("Passed %s", review_case)
             permission_case = f"{viewport.name}-{theme_name}-permission-transition"
             check_permission_transition(emulator, directory, permission_case)
             completed.append(permission_case)
@@ -1148,11 +1256,17 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--full", action="store_true")
     parser.add_argument("--dashboard-only", action="store_true")
+    parser.add_argument("--conflict-review-only", action="store_true")
     arguments = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     emulator = Emulator(arguments.serial, arguments.adb)
     try:
-        run_checks(emulator, arguments.output, arguments.full, arguments.dashboard_only)
+        if arguments.conflict_review_only:
+            run_conflict_checks(emulator, arguments.output, arguments.full)
+        else:
+            run_checks(
+                emulator, arguments.output, arguments.full, arguments.dashboard_only
+            )
     finally:
         emulator.run("shell", "am", "force-stop", PACKAGE)
         emulator.run("shell", "wm", "size", "reset")

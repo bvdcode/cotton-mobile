@@ -12,5 +12,6 @@ namespace Cotton.Mobile.Services
         public CottonAutomaticSyncFailureKind FailureKind { get; set; }
 
         public DateTime CompletedAtUtc { get; set; }
+        public int? FileDifferenceCount { get; set; }
     }
 }

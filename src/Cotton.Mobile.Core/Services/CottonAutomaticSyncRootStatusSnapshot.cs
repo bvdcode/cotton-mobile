@@ -9,7 +9,8 @@ namespace Cotton.Mobile.Services
             Guid rootId,
             CottonAutomaticSyncOutcome outcome,
             DateTime completedAtUtc,
-            CottonAutomaticSyncFailureKind failureKind)
+            CottonAutomaticSyncFailureKind failureKind,
+            int? fileDifferenceCount = null)
         {
             if (rootId == Guid.Empty)
             {
@@ -45,12 +46,18 @@ namespace Cotton.Mobile.Services
             }
 
             RootId = rootId;
+            if (fileDifferenceCount is < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fileDifferenceCount));
+            }
+            FileDifferenceCount = fileDifferenceCount;
             Outcome = outcome;
             CompletedAtUtc = completedAtUtc;
             FailureKind = failureKind;
         }
 
         public Guid RootId { get; }
+        public int? FileDifferenceCount { get; }
 
         public CottonAutomaticSyncOutcome Outcome { get; }
 
@@ -72,13 +79,15 @@ namespace Cotton.Mobile.Services
         public static CottonAutomaticSyncRootStatusSnapshot Failed(
             Guid rootId,
             DateTime completedAtUtc,
-            CottonAutomaticSyncFailureKind failureKind)
+            CottonAutomaticSyncFailureKind failureKind,
+            int? fileDifferenceCount = null)
         {
             return new CottonAutomaticSyncRootStatusSnapshot(
                 rootId,
                 CottonAutomaticSyncOutcome.Failed,
                 completedAtUtc,
-                failureKind);
+                failureKind,
+                fileDifferenceCount);
         }
     }
 }

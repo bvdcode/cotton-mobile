@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonDeviceToCloudSyncCoordinator : ICottonDeviceToCloudSyncCoordinator
+    public partial class CottonDeviceToCloudSyncCoordinator : ICottonDeviceToCloudSyncCoordinator
     {
         private const int MaximumConflictSamples = 3;
 
@@ -17,6 +17,8 @@ namespace Cotton.Mobile.Services
         private readonly CottonUploadOnlySyncPlanExecutor _planExecutor;
         private readonly CottonSyncRootExecutionLock _executionLock;
         private readonly CottonMediaOriginalRestoreExecutor _originalRestore;
+        private readonly CottonRemoteConflictResolutionService _conflicts;
+        private readonly FileSystemCottonSyncReviewStore _reviewStore;
         private readonly CottonSyncProgressHub _progressHub;
         private readonly ILogger<CottonDeviceToCloudSyncCoordinator> _logger;
 
@@ -29,6 +31,8 @@ namespace Cotton.Mobile.Services
             CottonUploadOnlySyncPlanExecutor planExecutor,
             CottonSyncRootExecutionLock executionLock,
             CottonMediaOriginalRestoreExecutor originalRestore,
+            CottonRemoteConflictResolutionService conflicts,
+            FileSystemCottonSyncReviewStore reviewStore,
             CottonSyncProgressHub progressHub,
             ILogger<CottonDeviceToCloudSyncCoordinator> logger)
         {
@@ -50,6 +54,8 @@ namespace Cotton.Mobile.Services
             _planExecutor = planExecutor;
             _executionLock = executionLock;
             _originalRestore = originalRestore ?? throw new ArgumentNullException(nameof(originalRestore));
+            _conflicts = conflicts ?? throw new ArgumentNullException(nameof(conflicts));
+            _reviewStore = reviewStore ?? throw new ArgumentNullException(nameof(reviewStore));
             _progressHub = progressHub;
             _logger = logger;
         }
@@ -172,9 +178,29 @@ namespace Cotton.Mobile.Services
                     root.Id,
                     localContent.Items.Count,
                     localContent.Problems.Count);
+                CottonDeviceToCloudSyncRootRunResult? unchanged = await TryReuseComparisonAsync(
+                    root, localContent, cancellationToken).ConfigureAwait(false);
+                if (unchanged is not null)
+                {
+                    return unchanged;
+                }
+
+                await _reviewStore.InvalidateAsync(root, cancellationToken).ConfigureAwait(false);
+                IReadOnlyList<CottonUploadReceiptSnapshot> uploadReceipts = await _uploadReceiptStore
+                    .LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+                HashSet<string> verifiedSources = await GetVerifiedSourcesAsync(
+                    root, localContent, uploadReceipts, cancellationToken).ConfigureAwait(false);
+                HashSet<string>? selectedPaths = null;
+                if (verifiedSources.Count > 0)
+                {
+                    selectedPaths = localContent.Items
+                        .Where(item => item.ItemType == CottonFileBrowserEntryType.File
+                            && (item.LocalSourceId is null || !verifiedSources.Contains(item.LocalSourceId)))
+                        .Select(item => item.RelativePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                }
                 _progressHub.Report(CottonSyncProgressSnapshot.CheckingCloud(root.Id));
                 CottonDeviceToCloudRemoteContentSnapshot remoteContent = await _remoteContentLoader
-                    .LoadAsync(instanceUri, root, cancellationToken)
+                    .LoadAsync(instanceUri, root, cancellationToken, selectedPaths)
                     .ConfigureAwait(false);
                 CottonSyncDiagnosticLog.CloudScanCompleted(_logger, root.Id, remoteContent.Items.Count);
                 int restored = await _originalRestore.ApplyAsync(root, localContent, remoteContent, cancellationToken)
@@ -185,12 +211,25 @@ namespace Cotton.Mobile.Services
                         .ConfigureAwait(false);
                 }
 
-                IReadOnlyList<CottonUploadReceiptSnapshot> uploadReceipts = await _uploadReceiptStore
-                    .LoadAsync(instanceUri, root, cancellationToken)
+                int replaced = await _conflicts.ApplyAsync(root, localContent, remoteContent, cancellationToken)
                     .ConfigureAwait(false);
+                if (replaced > 0)
+                {
+                    remoteContent = await _remoteContentLoader.LoadAsync(instanceUri, root, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+
+                restored += replaced;
+                if (restored > 0)
+                {
+                    uploadReceipts = await _uploadReceiptStore.LoadAsync(instanceUri, root, cancellationToken)
+                        .ConfigureAwait(false);
+                }
                 CottonSyncDiagnosticLog.ReceiptsLoaded(_logger, root.Id, uploadReceipts.Count);
                 CottonDeviceToCloudSyncPlanSnapshot plan =
-                    CottonDeviceToCloudSyncPlanner.Create(root, localContent, remoteContent, uploadReceipts);
+                    CottonDeviceToCloudSyncPlanner.Create(root, localContent, remoteContent, uploadReceipts, verifiedSources);
+                await _conflicts.CaptureAsync(root, localContent, remoteContent, plan, cancellationToken)
+                    .ConfigureAwait(false);
                 LogRemotePathConflicts(root.Id, plan, remoteContent);
                 CottonSyncDiagnosticLog.PlanCreated(
                     _logger,
@@ -221,6 +260,8 @@ namespace Cotton.Mobile.Services
                     executionResult.DeletedLocalFileCount,
                     executionResult.SkippedCount,
                     executionResult.BlockedCount);
+                await SaveComparisonAsync(root, localContent, plan, executionResult, cancellationToken)
+                    .ConfigureAwait(false);
                 return CottonDeviceToCloudSyncRootRunResult.Completed(root, plan, executionResult);
             }
             finally

@@ -11,6 +11,10 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(status);
             DateTime completedAt = status.CompletedAtUtc.ToLocalTime();
+            if (status.FileDifferenceCount is > 0)
+            {
+                return CoreResources.Format(CoreResources.FileDifferenceCountFormat, status.FileDifferenceCount.Value);
+            }
             return status.Outcome switch
             {
                 CottonAutomaticSyncOutcome.Succeeded =>

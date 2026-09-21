@@ -45,8 +45,10 @@ namespace Cotton.Mobile.Tests
             IReadOnlyList<string> records = _journal.ReadAll();
             Assert.Contains(records, record => record.Contains("First upload completed.", StringComparison.Ordinal));
             Assert.Contains(records, record => record.Contains("First worker stopped.", StringComparison.Ordinal));
-            Assert.Equal(dailyPasses * roots.Length, records.Count(record => record.Contains("\t2127\t", StringComparison.Ordinal)));
-            Assert.Equal(dailyPasses * roots.Length * 3, records.Count(record => record.Contains("\t2126\t", StringComparison.Ordinal)));
+            Assert.Equal(roots.Length, records.Count(record => record.Contains("\t2127\t", StringComparison.Ordinal)));
+            Assert.Equal(roots.Length * 3, records.Count(record => record.Contains("\t2126\t", StringComparison.Ordinal)));
+            Assert.Equal((dailyPasses - 1) * roots.Length, records.Count(record => record.Contains("\t2142\t", StringComparison.Ordinal)));
+            Assert.Equal(roots.Length, _remoteFolderContentSource.RequestedFolderIds.Count);
             Assert.Contains(records, record => record.Contains(TestContentHashes.First, StringComparison.Ordinal)
                 && record.Contains(TestContentHashes.Second, StringComparison.Ordinal));
             Assert.Empty(_fileOperator.UploadedItems);

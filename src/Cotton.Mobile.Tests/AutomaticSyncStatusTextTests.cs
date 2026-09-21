@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonAutomaticSyncFailureKind.ActionRequired, "Needs review")]
         [InlineData(CottonAutomaticSyncFailureKind.UploadedFileChanged, "Uploaded file changed")]
         [InlineData(CottonAutomaticSyncFailureKind.PendingUploadChanged, "Pending upload changed")]
-        [InlineData(CottonAutomaticSyncFailureKind.RemotePathConflict, "Cloud path conflict")]
+        [InlineData(CottonAutomaticSyncFailureKind.RemotePathConflict, "File differences need review")]
         [InlineData(CottonAutomaticSyncFailureKind.RemoteRevisionChanged, "Cloud file changed")]
         [InlineData(CottonAutomaticSyncFailureKind.InvalidLocalItemName, "Invalid local name")]
         [InlineData(CottonAutomaticSyncFailureKind.LocalSourceUnavailable, "Local source unavailable")]

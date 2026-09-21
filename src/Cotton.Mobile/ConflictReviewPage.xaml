@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+             x:Class="Cotton.Mobile.ConflictReviewPage"
+             x:DataType="viewModels:ConflictReviewViewModel"
+             Shell.NavBarIsVisible="False"
+             Title="{x:Static localization:ConflictReviewResources.Title}">
+    <Grid RowDefinitions="Auto,*" Style="{StaticResource AppScreen}">
+        <Grid ColumnDefinitions="Auto,*,Auto" Style="{StaticResource AppTopBar}">
+            <Button Command="{Binding CloseCommand}" AutomationId="ConflictBack"
+                    WidthRequest="{StaticResource AppTouchTargetSize}" Padding="0"
+                    SemanticProperties.Description="{x:Static localization:AppResources.BackDescription}"
+                    StyleClass="TextButton, TouchTarget">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Size="{StaticResource AppActionIconSize}"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Arrow_back}"
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                </Button.ImageSource>
+            </Button>
+            <Label Grid.Column="1" Text="{x:Static localization:ConflictReviewResources.Title}"
+                   Style="{StaticResource AppTopBarTitle}" LineBreakMode="WordWrap" />
+            <Button Grid.Column="2" Command="{Binding RefreshCommand}" AutomationId="ConflictRefresh"
+                    WidthRequest="{StaticResource AppTouchTargetSize}" Padding="0"
+                    SemanticProperties.Description="{x:Static localization:ConflictReviewResources.Refresh}"
+                    StyleClass="TextButton, TouchTarget">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Size="{StaticResource AppActionIconSize}"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Refresh}"
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                </Button.ImageSource>
+            </Button>
+        </Grid>
+        <Grid Grid.Row="1" RowDefinitions="*,Auto" RowSpacing="8"
+              Padding="{StaticResource AppPagePadding}"
+              MaximumWidthRequest="{StaticResource AppContentMaximumWidth}" HorizontalOptions="Center">
+            <CollectionView ItemsSource="{Binding Items}" ItemSizingStrategy="MeasureAllItems"
+                            AutomationId="ConflictList">
+                <CollectionView.Header>
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="{Binding FolderName}" Style="{StaticResource AppSectionTitle}" />
+                        <Label Text="{x:Static localization:ConflictReviewResources.Description}" Style="{StaticResource AppBodyText}" />
+                        <Button Text="{Binding SelectAllText}" Command="{Binding SelectAllCommand}"
+                                AutomationId="ConflictSelectAll" HorizontalOptions="Start" StyleClass="TextButton, TouchTarget" />
+                    </VerticalStackLayout>
+                </CollectionView.Header>
+                <CollectionView.EmptyView>
+                    <Label Text="{x:Static localization:ConflictReviewResources.Empty}" IsVisible="{Binding IsEmpty}"
+                           Style="{StaticResource AppBodyText}" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:ConflictReviewListItem">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" Padding="4,12">
+                            <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding CanSelect}" VerticalOptions="Start"
+                                      Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                      SemanticProperties.Description="{Binding Name}" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                <Label Text="{Binding Name}" FontAttributes="Bold" LineBreakMode="WordWrap" />
+                                <Label Text="{Binding Path}" IsVisible="{Binding IsPathVisible}"
+                                       Style="{StaticResource AppCaptionText}" LineBreakMode="WordWrap" />
+                                <Label Text="{Binding Difference}" Style="{StaticResource AppBodyText}" />
+                                <Label Text="{Binding PhoneSize}" Style="{StaticResource AppBodyText}" />
+                                <Label Text="{Binding CloudSize}" Style="{StaticResource AppBodyText}" />
+                                <Label Text="{Binding PhoneDate}" Style="{StaticResource AppCaptionText}" />
+                                <Label Text="{Binding CloudDate}" Style="{StaticResource AppCaptionText}" />
+                                <Label Text="{x:Static localization:ConflictReviewResources.Queued}" IsVisible="{Binding IsQueued}"
+                                       Style="{StaticResource AppBodyText}" FontAttributes="Bold" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <VerticalStackLayout Grid.Row="1" Spacing="8">
+                <ActivityIndicator IsRunning="{Binding IsWorking}" IsVisible="{Binding IsWorking}"
+                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                <Label Text="{Binding Status}" IsVisible="{Binding IsStatusVisible}"
+                       Style="{StaticResource AppBodyText}" AutomationId="ConflictStatus" />
+                <Button Text="{Binding ReplaceText}" Command="{Binding ReplaceCommand}" AutomationId="ConflictReplace"
+                        StyleClass="FilledButton, TouchTarget">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup Name="CommonStates">
+                            <VisualState Name="Normal" />
+                            <VisualState Name="Disabled">
+                                <VisualState.Setters>
+                                    <Setter Property="TextColor"
+                                            Value="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                    <Setter Property="BackgroundColor"
+                                            Value="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                </Button>
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

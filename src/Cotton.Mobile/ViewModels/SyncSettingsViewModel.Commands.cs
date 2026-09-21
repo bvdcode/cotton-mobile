@@ -151,11 +151,7 @@ namespace Cotton.Mobile.ViewModels
                     break;
 
                 case CottonSyncRootAction.ReplaceCloudConflict:
-                    if (await _managementHandler.ReplaceCloudConflictAsync(this, item, cancellationToken))
-                    {
-                        await _executionHandler.ExecutePrimaryActionAsync(this, item, cancellationToken);
-                    }
-
+                    await _managementHandler.ShowConflictReviewAsync(this, item, cancellationToken);
                     break;
 
                 case CottonSyncRootAction.UsePrimaryAction when item.CanReconnect:

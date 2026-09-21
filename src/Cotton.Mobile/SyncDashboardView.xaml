@@ -252,6 +252,10 @@
                                                        Style="{StaticResource AppBodyText}"
                                                        LineBreakMode="WordWrap"
                                                        VerticalOptions="Center">
+                                                    <Label.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                                              CommandParameter="{Binding StatusAction}" />
+                                                    </Label.GestureRecognizers>
                                                 </Label>
                                                 <Button Grid.Row="2"
                                                         Text="{Binding StatusActionText}"

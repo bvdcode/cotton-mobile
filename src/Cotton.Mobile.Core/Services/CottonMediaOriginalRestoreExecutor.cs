@@ -8,13 +8,17 @@ namespace Cotton.Mobile.Services
     public class CottonMediaOriginalRestoreExecutor(
         ICottonMediaOriginalRestoreStore restoreStore,
         ICottonRedactedMediaHashSource redactedHashSource,
-        ICottonFileUploadService uploadService,
-        CottonSyncFileUploadSourceFactory sourceFactory,
-        ICottonRestoredUploadReceiptStore receiptStore,
+        CottonCloudFileReplacement replacement,
         CottonSyncProgressHub progressHub,
         TimeProvider timeProvider,
         ILogger<CottonMediaOriginalRestoreExecutor> logger)
     {
+        internal async Task<bool> HasPendingAsync(CottonSyncRootSnapshot root, CancellationToken cancellationToken)
+        {
+            CottonMediaOriginalRestoreState state = await restoreStore.LoadAsync(root, cancellationToken).ConfigureAwait(false);
+            return state.Approvals.Count > 0;
+        }
+
         internal async Task<int> ApplyAsync(
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudLocalContentSnapshot localContent,
@@ -53,13 +57,8 @@ namespace Cotton.Mobile.Services
                     && (remote.Entry.ContentHash == local.ContentHash
                         || (remote.Entry.ContentHash == approval.RedactedHash && remote.Entry.ETag == approval.ExpectedETag)))
                 {
-                    CottonFileBrowserEntry result = await RestoreFileAsync(root, approval, local, remote.Entry,
+                    await RestoreFileAsync(root, approval, local, remote.Entry,
                         folders, restored, state.Approvals.Count, cancellationToken).ConfigureAwait(false);
-                    CottonUploadReceiptSnapshot receipt = new(local.LocalSourceId!, local.RelativePath,
-                        local.LocalUpdatedAtUtc, local.SizeBytes, local.ContentType, approval.OperationId,
-                        CottonUploadReceiptStatus.Uploaded, timeProvider.GetUtcNow().UtcDateTime,
-                        result.Id, result.ETag, local.ContentHash);
-                    await receiptStore.SaveRestoredAsync(root, receipt, cancellationToken).ConfigureAwait(false);
                     restored++;
                     CottonMediaRestoreLog.FileCompleted(logger, root.Id, approval.FileId, approval.OperationId);
                 }
@@ -87,30 +86,15 @@ namespace Cotton.Mobile.Services
             int total,
             CancellationToken cancellationToken)
         {
-            if (remote.ContentHash == local.ContentHash)
-            {
-                return remote;
-            }
-
             CottonMediaRestoreLog.FileStarted(logger, root.Id, approval.FileId, approval.OperationId);
             CottonDeviceToCloudSyncPlanItem upload = CottonDeviceToCloudSyncPlanItemFactory.CreateLocal(
                 CottonDeviceToCloudSyncActionKind.UploadNewFile, local, approval.FileId, approval.ExpectedETag)
                 .WithUploadOperationId(approval.OperationId);
-            CottonFileUploadSource source = sourceFactory.Create(root.InstanceUri, root, upload);
             CottonSyncUploadProgressReporter progress = new(root.Id, upload.DisplayName,
                 completed + 1, total, completed, total, upload.SizeBytes, progressHub, timeProvider);
             progress.Report(0);
-            CottonFileBrowserEntry updated = await uploadService.UpdateContentAsync(
-                root.InstanceUri, approval.FileId, folders.ResolveParent(upload), approval.ExpectedETag,
-                source, progress, cancellationToken).ConfigureAwait(false);
-            if (updated.Id != approval.FileId || updated.Type != CottonFileBrowserEntryType.File
-                || updated.Name != local.DisplayName || updated.SizeBytes != local.SizeBytes
-                || updated.ContentHash != local.ContentHash || string.IsNullOrWhiteSpace(updated.ETag))
-            {
-                throw new InvalidDataException("Original media update returned a different cloud file revision.");
-            }
-
-            return updated;
+            return await replacement.ExecuteAsync(root, local, remote, folders.ResolveParent(upload),
+                approval.ExpectedETag, approval.OperationId, progress, cancellationToken).ConfigureAwait(false);
         }
     }
 }

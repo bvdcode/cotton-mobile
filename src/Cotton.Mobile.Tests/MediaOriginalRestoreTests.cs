@@ -120,10 +120,8 @@ namespace Cotton.Mobile.Tests
             CottonMediaOriginalRestorePreview preview = await environment.Service.ScanAsync(environment.Root, cancellationToken: TestContext.Current.CancellationToken);
             environment.Transport.LoseUpdateResponse = true;
 
-            await Assert.ThrowsAsync<HttpRequestException>(() => environment.RestoreAsync(preview, TestContext.Current.CancellationToken));
-
-            Assert.Single((await environment.RestoreStore.LoadAsync(environment.Root, TestContext.Current.CancellationToken)).Approvals);
-            Assert.Equal(1, await environment.ExecuteAsync(TestContext.Current.CancellationToken));
+            Assert.Equal(1, await environment.RestoreAsync(preview, TestContext.Current.CancellationToken));
+            Assert.Equal(0, await environment.ExecuteAsync(TestContext.Current.CancellationToken));
             CottonUploadReceiptSnapshot receipt = Assert.Single(await environment.Receipts.LoadAsync(
                 environment.Root.InstanceUri, environment.Root, TestContext.Current.CancellationToken));
             Assert.True(receipt.IsUploaded);

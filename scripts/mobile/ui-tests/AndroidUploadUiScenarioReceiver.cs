@@ -37,6 +37,15 @@ namespace Cotton.Mobile.Platforms.Android
                     ?? throw new InvalidDataException("UI scenario is required.");
                 IServiceProvider services = IPlatformApplication.Current?.Services
                     ?? throw new InvalidOperationException("Application services are unavailable.");
+                if (scenario == "conflict-review")
+                {
+                    await MainThread.InvokeOnMainThreadAsync(() =>
+                    {
+                        _ = ConflictReviewUiScenario.ShowAsync(services);
+                    });
+                    _ = global::Android.Util.Log.Info(LogTag, $"{requestId}:passed:{scenario}");
+                    return;
+                }
                 if (scenario == "media-access-pick")
                 {
                     await MainThread.InvokeOnMainThreadAsync(() =>
@@ -179,7 +188,7 @@ namespace Cotton.Mobile.Platforms.Android
                     ShowRoot(state, CottonAutomaticSyncFailureKind.RemoteContentUnavailable);
                     break;
                 case "review-required":
-                    ShowRoot(state, CottonAutomaticSyncFailureKind.UploadedFileChanged);
+                    await ShowStoredRootAsync(state, services, CottonAutomaticSyncFailureKind.UploadedFileChanged);
                     break;
                 case "cloud-path-conflict":
                     await ShowStoredRootAsync(

@@ -96,8 +96,11 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncRootActionRequest ResolvePendingUploadAction { get; }
 
+        private int? _fileDifferenceCount;
+
         public bool CanReplaceCloudConflict =>
-            _failureKind == CottonAutomaticSyncFailureKind.RemotePathConflict && !IsRunning;
+            (_failureKind is CottonAutomaticSyncFailureKind.RemotePathConflict or CottonAutomaticSyncFailureKind.UploadedFileChanged
+                || _fileDifferenceCount is > 0) && !IsRunning;
 
         public CottonSyncRootActionRequest ReplaceCloudConflictAction { get; }
 
@@ -110,14 +113,14 @@ namespace Cotton.Mobile.Services
                     return null;
                 }
 
-                if (CanResolvePendingUpload)
-                {
-                    return ResolvePendingUploadAction;
-                }
-
                 if (CanReplaceCloudConflict)
                 {
                     return ReplaceCloudConflictAction;
+                }
+
+                if (CanResolvePendingUpload)
+                {
+                    return ResolvePendingUploadAction;
                 }
 
                 if (CanShowFailureDetails)
@@ -135,14 +138,14 @@ namespace Cotton.Mobile.Services
         {
             get
             {
-                if (CanResolvePendingUpload)
-                {
-                    return CoreResources.ResolvePendingUpload;
-                }
-
                 if (CanReplaceCloudConflict)
                 {
                     return CoreResources.ReplaceCloudConflict;
+                }
+
+                if (CanResolvePendingUpload)
+                {
+                    return CoreResources.ResolvePendingUpload;
                 }
 
                 if (CanShowFailureDetails)
@@ -283,7 +286,7 @@ namespace Cotton.Mobile.Services
                 : CottonAutomaticSyncFailureKind.None;
             bool statusChanged = !string.Equals(_lastSyncStatusText, statusText, StringComparison.Ordinal);
             bool failureChanged = !string.Equals(_failureDetails, failureDetails, StringComparison.Ordinal);
-            bool failureKindChanged = _failureKind != failureKind;
+            bool failureKindChanged = _failureKind != failureKind || _fileDifferenceCount != status?.FileDifferenceCount;
             if (!statusChanged && !failureChanged && !failureKindChanged)
             {
                 return;
@@ -292,6 +295,7 @@ namespace Cotton.Mobile.Services
             _lastSyncStatusText = statusText;
             _failureDetails = failureDetails;
             _failureKind = failureKind;
+            _fileDifferenceCount = status?.FileDifferenceCount;
             if (statusChanged && !IsRunning)
             {
                 OnPropertyChanged(nameof(StatusText));

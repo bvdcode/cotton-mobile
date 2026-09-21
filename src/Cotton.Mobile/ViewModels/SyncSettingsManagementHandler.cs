@@ -12,7 +12,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly SyncRootManager _rootManager;
         private readonly IUserDialogService _dialogService;
         private readonly ICottonUploadReceiptStore _uploadReceiptStore;
-        private readonly CottonRemoteConflictResolutionService _remoteConflictResolutionService;
+        private readonly ConflictReviewNavigation _conflictReviewNavigation;
         private readonly CottonSyncRootExecutionLock _executionLock;
         private readonly ILogger<SyncSettingsManagementHandler> _logger;
 
@@ -21,7 +21,7 @@ namespace Cotton.Mobile.ViewModels
             SyncRootManager rootManager,
             IUserDialogService dialogService,
             ICottonUploadReceiptStore uploadReceiptStore,
-            CottonRemoteConflictResolutionService remoteConflictResolutionService,
+            ConflictReviewNavigation conflictReviewNavigation,
             CottonSyncRootExecutionLock executionLock,
             ILogger<SyncSettingsManagementHandler> logger)
         {
@@ -29,7 +29,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(rootManager);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(uploadReceiptStore);
-            ArgumentNullException.ThrowIfNull(remoteConflictResolutionService);
+            ArgumentNullException.ThrowIfNull(conflictReviewNavigation);
             ArgumentNullException.ThrowIfNull(executionLock);
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -37,7 +37,7 @@ namespace Cotton.Mobile.ViewModels
             _rootManager = rootManager;
             _dialogService = dialogService;
             _uploadReceiptStore = uploadReceiptStore;
-            _remoteConflictResolutionService = remoteConflictResolutionService;
+            _conflictReviewNavigation = conflictReviewNavigation;
             _executionLock = executionLock;
             _logger = logger;
         }
@@ -186,7 +186,7 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        public async Task<bool> ReplaceCloudConflictAsync(
+        public async Task ShowConflictReviewAsync(
             ISyncSettingsViewState state,
             CottonSyncRootListItem item,
             CancellationToken cancellationToken = default)
@@ -197,7 +197,7 @@ namespace Cotton.Mobile.ViewModels
             if (instanceUri is null || !item.CanReplaceCloudConflict)
             {
                 state.Status = CottonSyncRootManagementText.CloudConflictReplaceFailedStatus;
-                return false;
+                return;
             }
 
             state.IsBusy = true;
@@ -209,37 +209,10 @@ namespace Cotton.Mobile.ViewModels
                 {
                     state.ShowRoots(collection);
                     state.Status = CottonSyncRootManagementText.RootMissingStatus;
-                    return false;
+                    return;
                 }
 
-                cancellationToken.ThrowIfCancellationRequested();
-                bool confirmed = await _dialogService.ShowConfirmationAsync(
-                    CottonSyncRootManagementText.CreateReplaceCloudConflictTitle(root.CloudFolder.FolderName),
-                    CottonSyncRootManagementText.ReplaceCloudConflictMessage,
-                    CottonSyncRootManagementText.ReplaceCloudConflictAction,
-                    CottonSyncRootManagementText.CancelAction);
-                cancellationToken.ThrowIfCancellationRequested();
-                if (!confirmed)
-                {
-                    state.Status = null;
-                    return false;
-                }
-
-                int replacedCount = await _executionLock.ExecuteAsync(
-                    root,
-                    token => _remoteConflictResolutionService.ReplaceFileConflictsAsync(
-                        instanceUri,
-                        root,
-                        token),
-                    cancellationToken);
-                if (replacedCount == 0)
-                {
-                    state.Status = CottonSyncRootManagementText.CloudConflictReplaceFailedStatus;
-                    return false;
-                }
-
-                state.Status = CottonSyncRootManagementText.CloudConflictReplacedStatus;
-                return true;
+                await _conflictReviewNavigation.ShowAsync(root, cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -248,9 +221,8 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                CottonLog.Warning(_logger, "Failed to replace conflicting Cotton cloud files.", exception);
+                CottonLog.Warning(_logger, "Failed to open Cotton file comparison.", exception);
                 state.Status = CottonSyncRootManagementText.CloudConflictReplaceFailedStatus;
-                return false;
             }
             finally
             {

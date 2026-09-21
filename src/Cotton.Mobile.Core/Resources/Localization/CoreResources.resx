@@ -70,7 +70,7 @@
   <data name="LastSyncNeedsReviewFormat" xml:space="preserve"><value>Needs review · {0:g}.</value></data>
   <data name="LastSyncUploadedFileChangedFormat" xml:space="preserve"><value>Uploaded file changed · {0:g}.</value></data>
   <data name="LastSyncPendingUploadChangedFormat" xml:space="preserve"><value>Pending upload changed · {0:g}.</value></data>
-  <data name="LastSyncRemotePathConflictFormat" xml:space="preserve"><value>Cloud path conflict · {0:g}.</value></data>
+  <data name="LastSyncRemotePathConflictFormat" xml:space="preserve"><value>File differences need review · {0:g}.</value></data>
   <data name="LastSyncRemoteRevisionChangedFormat" xml:space="preserve"><value>Cloud file changed · {0:g}.</value></data>
   <data name="LastSyncInvalidLocalItemNameFormat" xml:space="preserve"><value>Invalid local name · {0:g}.</value></data>
   <data name="LastSyncLocalSourceUnavailableFormat" xml:space="preserve"><value>Local source unavailable · {0:g}.</value></data>
@@ -105,11 +105,8 @@
   <data name="ResolvePendingUploadMessage" xml:space="preserve"><value>Cotton will abandon incomplete upload attempts and retry the current local files. If an earlier request finishes later, Cotton will preserve the local file and report a cloud conflict.</value></data>
   <data name="PendingUploadResolved" xml:space="preserve"><value>Incomplete upload attempts were cleared. Syncing the current files now.</value></data>
   <data name="PendingUploadResolveFailed" xml:space="preserve"><value>Could not resolve the incomplete upload attempts.</value></data>
-  <data name="ReplaceCloudConflict" xml:space="preserve"><value>Replace cloud file</value></data>
-  <data name="ReplaceCloudConflictTitleFormat" xml:space="preserve"><value>Replace conflicting files in {0}?</value></data>
-  <data name="ReplaceCloudConflictMessage" xml:space="preserve"><value>Cotton will replace cloud files that conflict with files on this device. Existing cloud content remains available in version history. If a cloud file changes before replacement, Cotton will stop without overwriting it.</value></data>
-  <data name="CloudConflictReplaced" xml:space="preserve"><value>Conflicting cloud files were replaced with the device copies.</value></data>
-  <data name="CloudConflictReplaceFailed" xml:space="preserve"><value>Could not replace the conflicting cloud files.</value></data>
+  <data name="ReplaceCloudConflict" xml:space="preserve"><value>Review file differences</value></data>
+  <data name="CloudConflictReplaceFailed" xml:space="preserve"><value>Could not open the file comparison. Try again.</value></data>
   <data name="LocalFolderUnavailable" xml:space="preserve"><value>Local folder unavailable</value></data>
   <data name="MediaFoldersUnavailable" xml:space="preserve"><value>Media folders unavailable</value></data>
   <data name="LocalSyncTargetUnsupported" xml:space="preserve"><value>Local sync target unsupported</value></data>
@@ -181,4 +178,5 @@
   <data name="VideoBadge" xml:space="preserve"><value>VID</value></data>
   <data name="AudioBadge" xml:space="preserve"><value>AUD</value></data>
   <data name="TextBadge" xml:space="preserve"><value>TXT</value></data>
+  <data name="FileDifferenceCountFormat" xml:space="preserve"><value>Files to review: {0}</value></data>
 </root>

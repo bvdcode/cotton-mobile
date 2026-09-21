@@ -32,6 +32,7 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<ICottonUploadReceiptStore>(provider => provider.GetRequiredService<FileSystemCottonUploadReceiptStore>());
             services.AddSingleton<ICottonRestoredUploadReceiptStore>(provider => provider.GetRequiredService<FileSystemCottonUploadReceiptStore>());
             services.AddSingleton<ICottonMediaOriginalRestoreStore, FileSystemCottonMediaOriginalRestoreStore>();
+            services.AddSingleton<FileSystemCottonSyncReviewStore>();
             services.AddSingleton<CottonSyncProgressHub>();
             services.AddSingleton<SyncRootManager>();
             services.AddSingleton<CottonSyncRootConfigurationService>();
@@ -66,6 +67,8 @@ namespace Cotton.Mobile.DependencyInjection
             services.AddSingleton<CottonMediaOriginalRestoreReview>();
             services.AddSingleton<CottonMediaOriginalRestoreExecutor>();
             services.AddSingleton<CottonRemoteConflictResolutionService>();
+            services.AddSingleton<CottonCloudFileReplacement>();
+            services.AddSingleton<ConflictReviewNavigation>();
             services.AddSingleton<ICottonDeviceToCloudSyncFileOperator, CottonDeviceToCloudSyncFileOperator>();
             services.AddSingleton(serviceProvider =>
                 new CottonUploadOnlySyncPlanExecutor(

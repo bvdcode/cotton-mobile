@@ -200,7 +200,8 @@ namespace Cotton.Mobile.Services
             if (item is null
                 || item.RootId == Guid.Empty
                 || !Enum.IsDefined(item.Outcome)
-                || item.CompletedAtUtc.Kind != DateTimeKind.Utc)
+                || item.CompletedAtUtc.Kind != DateTimeKind.Utc
+                || item.FileDifferenceCount is < 0)
             {
                 return null;
             }
@@ -213,7 +214,8 @@ namespace Cotton.Mobile.Services
                 CottonAutomaticSyncOutcome.Failed => CottonAutomaticSyncRootStatusSnapshot.Failed(
                     item.RootId,
                     item.CompletedAtUtc,
-                    ResolveFailureKind(item.FailureKind)),
+                    ResolveFailureKind(item.FailureKind),
+                    item.FileDifferenceCount),
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(item),
                     item.Outcome,
@@ -230,6 +232,7 @@ namespace Cotton.Mobile.Services
                 Outcome = status.Outcome,
                 FailureKind = status.FailureKind,
                 CompletedAtUtc = status.CompletedAtUtc,
+                FileDifferenceCount = status.FileDifferenceCount,
             };
         }
 

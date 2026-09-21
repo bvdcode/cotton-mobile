@@ -63,6 +63,23 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task FileDifferenceCountSurvivesReloadAndClearsAfterSuccess()
+        {
+            DateTime attempt = new(2026, 9, 20, 17, 0, 0, DateTimeKind.Utc);
+            await _store.UpdateAsync(SyncTestRootFactory.InstanceUri, new HashSet<Guid> { FirstRootId },
+                [CottonAutomaticSyncRootStatusSnapshot.Failed(FirstRootId, attempt,
+                    CottonAutomaticSyncFailureKind.RemotePathConflict, fileDifferenceCount: 3)],
+                TestContext.Current.CancellationToken);
+            Assert.Equal(3, (await _store.LoadAsync(SyncTestRootFactory.InstanceUri,
+                TestContext.Current.CancellationToken))[FirstRootId].FileDifferenceCount);
+            await _store.UpdateAsync(SyncTestRootFactory.InstanceUri, new HashSet<Guid> { FirstRootId },
+                [CottonAutomaticSyncRootStatusSnapshot.Succeeded(FirstRootId, attempt.AddMinutes(1))],
+                TestContext.Current.CancellationToken);
+            Assert.Null((await _store.LoadAsync(SyncTestRootFactory.InstanceUri,
+                TestContext.Current.CancellationToken))[FirstRootId].FileDifferenceCount);
+        }
+
+        [Fact]
         public async Task UpdateRemovesStatusesForDeletedRoots()
         {
             DateTime attempt = new(2026, 8, 14, 17, 0, 0, DateTimeKind.Utc);

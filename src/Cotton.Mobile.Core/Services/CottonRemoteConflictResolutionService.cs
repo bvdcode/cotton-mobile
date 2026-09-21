@@ -9,222 +9,183 @@ namespace Cotton.Mobile.Services
         ICottonDeviceToCloudLocalTreeReader localTreeReader,
         CottonRecursiveRemoteContentLoader remoteContentLoader,
         ICottonUploadReceiptStore uploadReceiptStore,
-        ICottonFileUploadService uploadService,
-        CottonSyncFileUploadSourceFactory sourceFactory,
+        FileSystemCottonSyncReviewStore reviewStore,
+        CottonCloudFileReplacement replacement,
+        CottonSyncRootExecutionLock executionLock,
         CottonSyncProgressHub progressHub,
         TimeProvider timeProvider,
         ILogger<CottonRemoteConflictResolutionService> logger)
     {
-        public async Task<int> ReplaceFileConflictsAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CancellationToken cancellationToken = default)
+        public Task<CottonSyncReviewState> LoadAsync(CottonSyncRootSnapshot root, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(root);
-
-            try
-            {
-                CottonSyncDiagnosticLog.ConflictResolutionStarted(logger, root.Id);
-                progressHub.Report(CottonSyncProgressSnapshot.ScanningDevice(root.Id));
-                CottonDeviceToCloudLocalContentSnapshot localContent = await localTreeReader
-                    .ReadAsync(instanceUri, root, cancellationToken)
-                    .ConfigureAwait(false);
-                progressHub.Report(CottonSyncProgressSnapshot.CheckingCloud(root.Id));
-                CottonDeviceToCloudRemoteContentSnapshot remoteContent = await remoteContentLoader
-                    .LoadAsync(instanceUri, root, cancellationToken)
-                    .ConfigureAwait(false);
-                IReadOnlyList<CottonUploadReceiptSnapshot> uploadReceipts = await uploadReceiptStore
-                    .LoadAsync(instanceUri, root, cancellationToken)
-                    .ConfigureAwait(false);
-                CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                    root,
-                    localContent,
-                    remoteContent,
-                    uploadReceipts);
-                List<(CottonDeviceToCloudLocalItemSnapshot Local, CottonDeviceToCloudRemoteItemSnapshot Remote)>
-                    conflicts = FindFileConflicts(
-                    plan,
-                    localContent,
-                    remoteContent);
-                CottonSyncDiagnosticLog.ConflictResolutionPlanned(logger, root.Id, conflicts.Count);
-                CottonDeviceToCloudRemoteFolderIndex folders = new(root, remoteContent);
-                int replacedCount = 0;
-                foreach ((CottonDeviceToCloudLocalItemSnapshot Local, CottonDeviceToCloudRemoteItemSnapshot Remote)
-                    conflict in conflicts)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    Guid operationId = Guid.NewGuid();
-                    CottonSyncDiagnosticLog.ConflictResolutionFileStarted(
-                        logger,
-                        root.Id,
-                        conflict.Remote.Entry.Id,
-                        operationId);
-                    CottonDeviceToCloudSyncPlanItem upload = CottonDeviceToCloudSyncPlanItemFactory
-                        .CreateLocal(
-                            CottonDeviceToCloudSyncActionKind.UploadNewFile,
-                            conflict.Local,
-                            conflict.Remote.Entry.Id,
-                            conflict.Remote.Entry.ETag)
-                        .WithUploadOperationId(operationId);
-                    CottonFileUploadSource source = sourceFactory.Create(instanceUri, root, upload);
-                    CottonSyncUploadProgressReporter progress = new(
-                        root.Id,
-                        upload.DisplayName,
-                        replacedCount + 1,
-                        conflicts.Count,
-                        replacedCount,
-                        conflicts.Count,
-                        upload.SizeBytes,
-                        progressHub,
-                        timeProvider);
-                    CottonUploadReceiptSnapshot pendingReceipt = CottonUploadReceiptSnapshot.CreatePending(
-                        upload,
-                        operationId,
-                        timeProvider.GetUtcNow().UtcDateTime);
-                    await uploadReceiptStore.SaveAsync(instanceUri, root, pendingReceipt, cancellationToken)
-                        .ConfigureAwait(false);
-                    progress.Report(0);
-                    CottonFileBrowserEntry updated = await UpdateOrConfirmAsync(
-                        instanceUri,
-                        root,
-                        conflict,
-                        folders.ResolveParent(upload),
-                        source,
-                        progress,
-                        cancellationToken).ConfigureAwait(false);
-                    ValidateUpdatedFile(conflict.Local, conflict.Remote.Entry.Id, updated);
-                    CottonUploadReceiptSnapshot uploadedReceipt = new(
-                        conflict.Local.LocalSourceId!,
-                        conflict.Local.RelativePath,
-                        conflict.Local.LocalUpdatedAtUtc,
-                        conflict.Local.SizeBytes,
-                        conflict.Local.ContentType,
-                        operationId,
-                        CottonUploadReceiptStatus.Uploaded,
-                        timeProvider.GetUtcNow().UtcDateTime,
-                        updated.Id,
-                        updated.ETag,
-                        conflict.Local.ContentHash);
-                    await uploadReceiptStore.SaveAsync(instanceUri, root, uploadedReceipt, cancellationToken)
-                        .ConfigureAwait(false);
-                    replacedCount++;
-                    CottonSyncDiagnosticLog.ConflictResolutionFileCompleted(
-                        logger,
-                        root.Id,
-                        updated.Id,
-                        operationId);
-                }
-
-                CottonSyncDiagnosticLog.ConflictResolutionCompleted(logger, root.Id, replacedCount);
-                return replacedCount;
-            }
-            finally
-            {
-                progressHub.Complete(root.Id);
-            }
+            return reviewStore.LoadAsync(root, cancellationToken);
         }
 
-        private static List<(
-            CottonDeviceToCloudLocalItemSnapshot Local,
-            CottonDeviceToCloudRemoteItemSnapshot Remote)> FindFileConflicts(
-            CottonDeviceToCloudSyncPlanSnapshot plan,
-            CottonDeviceToCloudLocalContentSnapshot localContent,
-            CottonDeviceToCloudRemoteContentSnapshot remoteContent)
+        public Task<CottonSyncReviewState> ScanAsync(
+            CottonSyncRootSnapshot root, CancellationToken cancellationToken = default)
         {
-            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> localBySource = localContent.Items
-                .Where(item => item.ItemType == CottonFileBrowserEntryType.File
-                    && item.LocalSourceId is not null)
-                .ToDictionary(item => item.LocalSourceId!, StringComparer.Ordinal);
-            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> remoteByPath = remoteContent.Items
-                .ToDictionary(item => item.RelativePath, StringComparer.OrdinalIgnoreCase);
-            List<(CottonDeviceToCloudLocalItemSnapshot Local, CottonDeviceToCloudRemoteItemSnapshot Remote)> conflicts = [];
-            foreach (CottonDeviceToCloudSyncPlanItem item in plan.Items.Where(item =>
-                item.Action == CottonDeviceToCloudSyncActionKind.RemotePathConflict
-                && item.TargetType == CottonFileBrowserEntryType.File
-                && item.LocalSourceId is not null
-                && item.CloudItemId.HasValue
-                && !string.IsNullOrWhiteSpace(item.ExpectedRemoteETag)))
+            return executionLock.ExecuteAsync(root, async token =>
             {
-                if (!localBySource.TryGetValue(item.LocalSourceId!, out CottonDeviceToCloudLocalItemSnapshot? local)
-                    || !string.Equals(local.RelativePath, item.RelativePath, StringComparison.Ordinal)
-                    || local.ContentHash != item.ContentHash
-                    || !remoteByPath.TryGetValue(item.RelativePath, out CottonDeviceToCloudRemoteItemSnapshot? remote)
-                    || remote.Entry.Type != CottonFileBrowserEntryType.File
-                    || remote.Entry.Id != item.CloudItemId
-                    || !string.Equals(remote.Entry.ETag, item.ExpectedRemoteETag, StringComparison.Ordinal))
+                await reviewStore.InvalidateAsync(root, token).ConfigureAwait(false);
+                CottonDeviceToCloudLocalContentSnapshot local = await localTreeReader
+                    .ReadAsync(root.InstanceUri, root, token).ConfigureAwait(false);
+                CottonDeviceToCloudRemoteContentSnapshot remote = await remoteContentLoader
+                    .LoadAsync(root.InstanceUri, root, token).ConfigureAwait(false);
+                IReadOnlyList<CottonUploadReceiptSnapshot> receipts = await uploadReceiptStore
+                    .LoadAsync(root.InstanceUri, root, token).ConfigureAwait(false);
+                CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(root, local, remote, receipts);
+                return await CaptureAsync(root, local, remote, plan, token).ConfigureAwait(false);
+            }, cancellationToken);
+        }
+
+        public Task ApproveAsync(
+            CottonSyncRootSnapshot root,
+            IReadOnlyList<CottonSyncConflictSnapshot> selected,
+            CancellationToken cancellationToken = default)
+        {
+            return executionLock.ExecuteAsync(root, async token =>
+            {
+                await reviewStore.UpdateAsync(root, state =>
+                {
+                    Dictionary<string, CottonSyncConflictSnapshot> currentConflicts = state.Conflicts
+                        .ToDictionary(item => item.LocalFile.LocalSourceId!, StringComparer.Ordinal);
+                    Dictionary<string, CottonSyncReplacementApproval> approvals = state.Approvals
+                        .ToDictionary(item => item.Conflict.LocalFile.LocalSourceId!, StringComparer.Ordinal);
+                    foreach (CottonSyncConflictSnapshot item in selected)
+                    {
+                        if (!item.CanReplace
+                            || !currentConflicts.TryGetValue(item.LocalFile.LocalSourceId!, out CottonSyncConflictSnapshot? current)
+                            || !current.Matches(item))
+                        {
+                            throw new InvalidOperationException("The selected conflict has changed. Refresh the comparison.");
+                        }
+
+                        string source = item.LocalFile.LocalSourceId!;
+                        if (approvals.TryGetValue(source, out CottonSyncReplacementApproval? approval)
+                            && approval.Conflict.Matches(item))
+                        {
+                            continue;
+                        }
+
+                        approvals[source] = new CottonSyncReplacementApproval(item, Guid.NewGuid());
+                    }
+
+                    return new CottonSyncReviewState(root.StableKey, null, 0, state.Conflicts, [.. approvals.Values], state.VerifiedFiles);
+                }, token).ConfigureAwait(false);
+                return true;
+            }, cancellationToken);
+        }
+
+        public Task<CottonSyncReviewState> CaptureAsync(
+            CottonSyncRootSnapshot root,
+            CottonDeviceToCloudLocalContentSnapshot local,
+            CottonDeviceToCloudRemoteContentSnapshot remote,
+            CottonDeviceToCloudSyncPlanSnapshot plan,
+            CancellationToken cancellationToken)
+        {
+            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> localBySource = local.Items
+                .Where(item => item.ItemType == CottonFileBrowserEntryType.File && item.LocalSourceId is not null)
+                .ToDictionary(item => item.LocalSourceId!, StringComparer.Ordinal);
+            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> remoteByPath = remote.Items
+                .ToDictionary(item => item.RelativePath, StringComparer.OrdinalIgnoreCase);
+            Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> remoteById = remote.Items.ToDictionary(item => item.Entry.Id);
+            List<CottonSyncConflictSnapshot> conflicts = [];
+            foreach (CottonDeviceToCloudSyncPlanItem item in plan.Items.Where(item => item.IsBlocked))
+            {
+                if (item.LocalSourceId is null || !localBySource.TryGetValue(item.LocalSourceId, out CottonDeviceToCloudLocalItemSnapshot? file))
                 {
                     continue;
                 }
 
-                conflicts.Add((local, remote));
-            }
-
-            return conflicts;
-        }
-
-        private async Task<CottonFileBrowserEntry> UpdateOrConfirmAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            (CottonDeviceToCloudLocalItemSnapshot Local, CottonDeviceToCloudRemoteItemSnapshot Remote) conflict,
-            CottonFolderHandle parentFolder,
-            CottonFileUploadSource source,
-            IProgress<long> progress,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                return await uploadService.UpdateContentAsync(
-                        instanceUri,
-                        conflict.Remote.Entry.Id,
-                        parentFolder,
-                        conflict.Remote.Entry.ETag!,
-                        source,
-                        progress,
-                        cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            catch (Exception) when (!cancellationToken.IsCancellationRequested)
-            {
-                CottonDeviceToCloudRemoteContentSnapshot refreshed = await remoteContentLoader
-                    .LoadAsync(instanceUri, root, cancellationToken)
-                    .ConfigureAwait(false);
-                CottonFileBrowserEntry? updated = refreshed.Items
-                    .Where(item => item.RelativePath == conflict.Local.RelativePath)
-                    .Select(item => item.Entry)
-                    .SingleOrDefault(entry => entry.Id == conflict.Remote.Entry.Id
-                        && entry.Type == CottonFileBrowserEntryType.File
-                        && entry.Name == conflict.Local.DisplayName
-                        && entry.SizeBytes == conflict.Local.SizeBytes
-                        && entry.ContentHash == conflict.Local.ContentHash
-                        && !string.IsNullOrWhiteSpace(entry.ETag));
-                if (updated is not null)
+                if (!remoteByPath.TryGetValue(file.RelativePath, out CottonDeviceToCloudRemoteItemSnapshot? cloud)
+                    && (!item.CloudItemId.HasValue || !remoteById.TryGetValue(item.CloudItemId.Value, out cloud)))
                 {
-                    CottonSyncDiagnosticLog.ConflictResolutionResponseRecovered(
-                        logger,
-                        root.Id,
-                        updated.Id);
-                    return updated;
+                    continue;
                 }
 
-                throw;
+                if (cloud.Entry.Type == CottonFileBrowserEntryType.File && file.ContentHash == cloud.Entry.ContentHash
+                    && file.SizeBytes == cloud.Entry.SizeBytes)
+                {
+                    continue;
+                }
+
+                conflicts.Add(new CottonSyncConflictSnapshot(file, cloud.Entry.Id, cloud.Entry.Type,
+                    cloud.Entry.SizeBytes, cloud.Entry.ContentHash, cloud.Entry.ETag, cloud.Entry.UpdatedAtUtc, cloud.RelativePath));
             }
+
+            return reviewStore.UpdateAsync(root, state => new CottonSyncReviewState(
+                root.StableKey, null, 0, conflicts, state.Approvals, state.VerifiedFiles), cancellationToken);
         }
 
-        private static void ValidateUpdatedFile(
-            CottonDeviceToCloudLocalItemSnapshot local,
-            Guid expectedFileId,
-            CottonFileBrowserEntry updated)
+        public async Task<int> ApplyAsync(
+            CottonSyncRootSnapshot root,
+            CottonDeviceToCloudLocalContentSnapshot local,
+            CottonDeviceToCloudRemoteContentSnapshot remote,
+            CancellationToken cancellationToken)
         {
-            if (updated.Id != expectedFileId
-                || updated.Type != CottonFileBrowserEntryType.File
-                || updated.Name != local.DisplayName
-                || updated.SizeBytes != local.SizeBytes
-                || updated.ContentHash != local.ContentHash
-                || string.IsNullOrWhiteSpace(updated.ETag))
+            CottonSyncReviewState state = await reviewStore.LoadAsync(root, cancellationToken).ConfigureAwait(false);
+            if (state.Approvals.Count == 0)
             {
-                throw new InvalidDataException("Cloud conflict update returned a different file revision.");
+                return 0;
             }
+
+            IReadOnlyList<CottonUploadReceiptSnapshot> receipts = await uploadReceiptStore
+                .LoadAsync(root.InstanceUri, root, cancellationToken).ConfigureAwait(false);
+            Dictionary<string, CottonUploadReceiptSnapshot> receiptsBySource = receipts
+                .ToDictionary(item => item.LocalSourceId, StringComparer.Ordinal);
+            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> localBySource = local.Items
+                .Where(item => item.ItemType == CottonFileBrowserEntryType.File && item.LocalSourceId is not null)
+                .ToDictionary(item => item.LocalSourceId!, StringComparer.Ordinal);
+            Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> remoteById = remote.Items.ToDictionary(item => item.Entry.Id);
+            CottonDeviceToCloudRemoteFolderIndex folders = new(root, remote);
+            int completed = 0;
+            CottonSyncDiagnosticLog.ConflictResolutionPlanned(logger, root.Id, state.Approvals.Count);
+            foreach (CottonSyncReplacementApproval approval in state.Approvals)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                CottonSyncConflictSnapshot conflict = approval.Conflict;
+                bool applied = false;
+                if (localBySource.TryGetValue(conflict.LocalFile.LocalSourceId!, out CottonDeviceToCloudLocalItemSnapshot? file)
+                    && conflict.MatchesLocal(file)
+                    && remoteById.TryGetValue(conflict.RemoteFileId, out CottonDeviceToCloudRemoteItemSnapshot? cloud)
+                    && cloud.RelativePath == file.RelativePath && cloud.Entry.Type == CottonFileBrowserEntryType.File
+                    && (cloud.Entry.ContentHash == file.ContentHash && cloud.Entry.SizeBytes == file.SizeBytes
+                        || cloud.Entry.ETag == conflict.RemoteETag && cloud.Entry.ContentHash == conflict.RemoteContentHash
+                            && cloud.Entry.SizeBytes == conflict.RemoteSizeBytes))
+                {
+                    bool alreadyConfirmed = receiptsBySource.TryGetValue(file.LocalSourceId!, out CottonUploadReceiptSnapshot? receipt)
+                        && receipt.IsUploaded && receipt.RelativePath == file.RelativePath
+                        && receipt.ContentHash == file.ContentHash && receipt.SizeBytes == file.SizeBytes
+                        && cloud.Entry.ContentHash == file.ContentHash && cloud.Entry.SizeBytes == file.SizeBytes
+                        && receipt.RemoteFileId == cloud.Entry.Id && receipt.RemoteETag == cloud.Entry.ETag;
+                    if (!alreadyConfirmed)
+                    {
+                        CottonSyncUploadProgressReporter progress = new(root.Id, file.DisplayName,
+                            completed + 1, state.Approvals.Count, completed, state.Approvals.Count,
+                            file.SizeBytes, progressHub, timeProvider);
+                        progress.Report(0);
+                        CottonSyncDiagnosticLog.ConflictResolutionFileStarted(logger, root.Id, cloud.Entry.Id, approval.OperationId);
+                        await replacement.ExecuteAsync(root, file, cloud.Entry, folders.ResolveParent(conflict.ToPlanItem()),
+                            conflict.RemoteETag!, approval.OperationId, progress, cancellationToken).ConfigureAwait(false);
+                        completed++;
+                    }
+                    applied = true;
+                    CottonSyncDiagnosticLog.ConflictResolutionFileCompleted(logger, root.Id, cloud.Entry.Id, approval.OperationId);
+                }
+                else
+                {
+                    CottonSyncDiagnosticLog.ReplacementChanged(logger, root.Id);
+                }
+
+                await reviewStore.UpdateAsync(root, current => new CottonSyncReviewState(root.StableKey,
+                    null, 0, applied
+                        ? [.. current.Conflicts.Where(item => item.LocalFile.LocalSourceId != conflict.LocalFile.LocalSourceId)]
+                        : current.Conflicts,
+                    [.. current.Approvals.Where(item => item.OperationId != approval.OperationId)],
+                    current.VerifiedFiles), cancellationToken).ConfigureAwait(false);
+            }
+
+            return completed;
         }
     }
 }

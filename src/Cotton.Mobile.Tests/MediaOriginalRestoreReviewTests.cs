@@ -41,6 +41,7 @@ namespace Cotton.Mobile.Tests
             Assert.Empty(scheduler.Roots);
             Assert.Empty(environment.Transport.PublishedFiles);
             Assert.True(await environment.Service.IsReviewNeededAsync(environment.Root, TestContext.Current.CancellationToken));
+            Assert.Empty(environment.ProgressHub.GetCurrent());
         }
 
         [Fact]

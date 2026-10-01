@@ -34,14 +34,14 @@ namespace Cotton.Mobile.Tests
             Receipts = new FileSystemCottonUploadReceiptStore(paths);
             RestoreStore = new FileSystemCottonMediaOriginalRestoreStore(paths);
             Service = new CottonMediaOriginalRestoreService(
-                this, new CottonRecursiveRemoteContentLoader(this), this, RestoreStore, ExecutionLock,
+                this, new CottonRecursiveRemoteContentLoader(this), this, RestoreStore, ExecutionLock, ProgressHub,
                 NullLogger<CottonMediaOriginalRestoreService>.Instance);
             Replacement = new CottonCloudFileReplacement(
                 new CottonFileUploadService(new UploadTestClientFactory(_httpClient)), this,
                 new CottonSyncFileUploadSourceFactory(this), Receipts, TimeProvider.System,
                 NullLogger<CottonCloudFileReplacement>.Instance);
             Executor = new CottonMediaOriginalRestoreExecutor(RestoreStore, this,
-                Replacement, new CottonSyncProgressHub(), TimeProvider.System,
+                Replacement, ProgressHub, TimeProvider.System,
                 NullLogger<CottonMediaOriginalRestoreExecutor>.Instance);
         }
 
@@ -77,6 +77,10 @@ namespace Cotton.Mobile.Tests
 
         public CottonSyncRootExecutionLock ExecutionLock { get; } = new();
 
+        public CottonSyncProgressHub ProgressHub { get; } = new();
+
+        public IOException? LocalReadFailure { get; set; }
+
         public CottonMediaOriginalRestoreService Service { get; }
 
         public bool IsSupported { get; set; } = true;
@@ -110,6 +114,12 @@ namespace Cotton.Mobile.Tests
             Uri instanceUri, CottonSyncRootSnapshot root, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            ProgressHub.Report(CottonSyncProgressSnapshot.ScanningDevice(root.Id, 1));
+            if (LocalReadFailure is not null)
+            {
+                throw LocalReadFailure;
+            }
+
             return Task.FromResult(LocalContent);
         }
 

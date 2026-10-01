@@ -21,6 +21,55 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(environment.CloudFile.Id, item.RemoteFile.Id);
             Assert.Empty(environment.Transport.PublishedFiles);
             Assert.Empty(await environment.Receipts.LoadAsync(environment.Root.InstanceUri, environment.Root, TestContext.Current.CancellationToken));
+            Assert.Empty(environment.ProgressHub.GetCurrent());
+        }
+
+        [Fact]
+        public async Task FailedReviewClearsProgressAndPreservesOtherRoots()
+        {
+            using MediaOriginalRestoreTestEnvironment environment = new()
+            {
+                LocalReadFailure = new IOException("Media content is unavailable."),
+            };
+            CottonSyncProgressSnapshot other = CottonSyncProgressSnapshot.ScanningDevice(Guid.NewGuid());
+            environment.ProgressHub.Report(other);
+
+            await Assert.ThrowsAsync<IOException>(() => environment.Service.ScanAsync(
+                environment.Root, cancellationToken: TestContext.Current.CancellationToken));
+
+            Assert.Same(other, Assert.Single(environment.ProgressHub.GetCurrent()));
+        }
+
+        [Fact]
+        public async Task CancellingQueuedReviewPreservesRunningSyncProgress()
+        {
+            using MediaOriginalRestoreTestEnvironment environment = new();
+            CottonSyncProgressSnapshot running = CottonSyncProgressSnapshot.ScanningDevice(environment.Root.Id);
+            TaskCompletionSource entered = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource release = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            Task<int> execution = environment.ExecutionLock.ExecuteAsync(environment.Root, async token =>
+            {
+                environment.ProgressHub.Report(running);
+                entered.SetResult();
+                await release.Task.WaitAsync(token);
+                return 0;
+            }, TestContext.Current.CancellationToken);
+            try
+            {
+                await entered.Task.WaitAsync(TestContext.Current.CancellationToken);
+                using CancellationTokenSource cancellation = new();
+                Task<CottonMediaOriginalRestorePreview> review = environment.Service.ScanAsync(
+                    environment.Root, cancellationToken: cancellation.Token);
+                await cancellation.CancelAsync();
+
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => review);
+                Assert.Same(running, Assert.Single(environment.ProgressHub.GetCurrent()));
+            }
+            finally
+            {
+                release.TrySetResult();
+                await execution;
+            }
         }
 
         [Theory]

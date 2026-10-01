@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Services
         ICottonRedactedMediaHashSource redactedHashSource,
         ICottonMediaOriginalRestoreStore restoreStore,
         CottonSyncRootExecutionLock executionLock,
+        CottonSyncProgressHub progressHub,
         ILogger<CottonMediaOriginalRestoreService> logger)
     {
         public bool IsSupported => redactedHashSource.IsSupported;
@@ -61,7 +62,17 @@ namespace Cotton.Mobile.Services
             CancellationToken cancellationToken = default)
         {
             EnsureAvailable(root);
-            return executionLock.ExecuteAsync(root, token => ScanCoreAsync(root, progress, token), cancellationToken);
+            return executionLock.ExecuteAsync(root, async token =>
+            {
+                try
+                {
+                    return await ScanCoreAsync(root, progress, token).ConfigureAwait(false);
+                }
+                finally
+                {
+                    progressHub.Complete(root.Id);
+                }
+            }, cancellationToken);
         }
 
         private async Task<CottonMediaOriginalRestorePreview> ScanCoreAsync(

@@ -22,7 +22,6 @@ namespace Cotton.Mobile.Platforms.Android
             using ComponentName service = new(context, serviceClass);
             using JobInfo.Builder builder = new(AndroidMediaStoreSyncJobConstants.JobId, service);
 
-            _ = builder.SetRequiredNetworkType(NetworkType.Any);
             _ = builder.SetTriggerContentUpdateDelay(
                 AndroidMediaStoreSyncJobConstants.TriggerUpdateDelayMilliseconds);
             _ = builder.SetTriggerContentMaxDelay(

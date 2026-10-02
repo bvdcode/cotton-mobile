@@ -11,6 +11,8 @@ namespace Cotton.Mobile.Tests
 
         public int RescheduleMediaStoreCount { get; private set; }
 
+        public Func<CancellationToken, Task>? MediaStoreSchedule { get; set; }
+
         public int CancelCount { get; private set; }
 
         public List<Guid> RootRetryIds { get; } = [];
@@ -27,6 +29,12 @@ namespace Cotton.Mobile.Tests
             cancellationToken.ThrowIfCancellationRequested();
             RescheduleMediaStoreCount++;
             return Task.CompletedTask;
+        }
+
+        public Task ScheduleMediaStoreSyncAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return MediaStoreSchedule?.Invoke(cancellationToken) ?? Task.CompletedTask;
         }
 
         public Task ScheduleRootRetriesAsync(

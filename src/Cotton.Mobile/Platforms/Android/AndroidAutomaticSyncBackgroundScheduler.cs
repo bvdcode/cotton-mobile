@@ -35,6 +35,26 @@ namespace Cotton.Mobile.Platforms.Android
             AndroidMediaStoreSyncJobScheduler.Schedule();
         }
 
+        public async Task ScheduleMediaStoreSyncAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ExistingWorkPolicy policy = ExistingWorkPolicy.AppendOrReplace
+                ?? throw new InvalidOperationException("Android APPEND_OR_REPLACE policy is unavailable.");
+            Java.Lang.Class workerClass = Java.Lang.Class.FromType(typeof(AndroidMediaStoreSyncWorker))
+                ?? throw new InvalidOperationException("Android MediaStore sync worker type is unavailable.");
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(workerClass)
+                .SetConstraints(CreateNetworkConstraints())
+                .Build()
+                ?? throw new InvalidOperationException("Android MediaStore sync work request is unavailable.");
+            IOperation operation = GetWorkManager().EnqueueUniqueWork(
+                AndroidAutomaticSyncConstants.MediaStoreUploadWorkName,
+                policy,
+                request)
+                ?? throw new InvalidOperationException("Android MediaStore sync operation is unavailable.");
+            await AndroidWorkOperation.WaitAsync(operation, cancellationToken).ConfigureAwait(false);
+        }
+
         public Task RescheduleMediaStoreTriggerAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -89,13 +109,17 @@ namespace Cotton.Mobile.Platforms.Android
                 ?? throw new InvalidOperationException("Legacy Android MediaStore sync cancellation is unavailable.");
             IOperation retryOperation = workManager.CancelAllWorkByTag(AndroidAutomaticSyncConstants.RootRetryTag)
                 ?? throw new InvalidOperationException("Android sync-root retry cancellation is unavailable.");
+            IOperation mediaStoreUploadOperation = workManager.CancelUniqueWork(
+                AndroidAutomaticSyncConstants.MediaStoreUploadWorkName)
+                ?? throw new InvalidOperationException("Android MediaStore upload cancellation is unavailable.");
             Task periodicTask = AndroidWorkOperation.WaitAsync(periodicOperation, cancellationToken);
             Task legacyMediaStoreTask = AndroidWorkOperation.WaitAsync(
                 legacyMediaStoreOperation,
                 cancellationToken);
             Task retryTask = AndroidWorkOperation.WaitAsync(retryOperation, cancellationToken);
+            Task mediaStoreUploadTask = AndroidWorkOperation.WaitAsync(mediaStoreUploadOperation, cancellationToken);
             AndroidMediaStoreSyncJobScheduler.Cancel();
-            await Task.WhenAll(periodicTask, legacyMediaStoreTask, retryTask).ConfigureAwait(false);
+            await Task.WhenAll(periodicTask, legacyMediaStoreTask, retryTask, mediaStoreUploadTask).ConfigureAwait(false);
         }
 
         private static PeriodicWorkRequest CreatePeriodicRequest()

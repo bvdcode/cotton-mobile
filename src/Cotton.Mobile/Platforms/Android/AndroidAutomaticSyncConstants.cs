@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Platforms.Android
     {
         public const string PeriodicWorkName = "cotton.sync.periodic";
         public const string LegacyMediaStoreWorkName = "cotton.sync.media-store";
+        public const string MediaStoreUploadWorkName = "cotton.sync.media-store-upload";
         public const string RootRetryWorkNamePrefix = "cotton.sync.root";
         public const string RootRetryTag = "cotton.sync.root-retry";
         public const string RootIdInputKey = "cotton.sync.root-id";

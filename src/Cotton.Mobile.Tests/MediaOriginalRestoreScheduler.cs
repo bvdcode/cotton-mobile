@@ -18,6 +18,8 @@ namespace Cotton.Mobile.Tests
 
         public Task ScheduleAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
+        public Task ScheduleMediaStoreSyncAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
         public Task RescheduleMediaStoreTriggerAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task CancelAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;

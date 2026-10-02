@@ -108,36 +108,15 @@ namespace Cotton.Mobile.Platforms.Android
             {
                 IServiceProvider services = IPlatformApplication.Current?.Services
                     ?? throw new InvalidOperationException("Android application services are unavailable.");
-                AndroidAutomaticSyncExecutor executor = services
-                    .GetRequiredService<AndroidAutomaticSyncExecutor>();
-                AndroidAutomaticSyncExecutionResult result = await executor
-                    .ExecuteAsync(
-                        CottonAutomaticSyncTrigger.MediaStoreChanged,
-                        retryRootId: null,
-                        cancellation.Token)
+                CottonMediaStoreSyncHandoff handoff = services
+                    .GetRequiredService<CottonMediaStoreSyncHandoff>();
+                await handoff
+                    .QueueAsync(cancellation.Token)
                     .ConfigureAwait(false);
-                switch (result)
-                {
-                    case AndroidAutomaticSyncExecutionResult.Completed:
-                    case AndroidAutomaticSyncExecutionResult.NoSession:
-                        ICottonAutomaticSyncBackgroundScheduler scheduler = services
-                            .GetRequiredService<ICottonAutomaticSyncBackgroundScheduler>();
-                        await scheduler
-                            .RescheduleMediaStoreTriggerAsync(CancellationToken.None)
-                            .ConfigureAwait(false);
 #if DEBUG
-                        _ = Log.Info(LogTag, "rescheduled");
+                _ = Log.Info(LogTag, "upload queued and trigger rescheduled");
 #endif
-                        CompleteIfRunning(parameters, cancellation, wantsReschedule: false);
-                        break;
-
-                    case AndroidAutomaticSyncExecutionResult.RetryRequired:
-                        CompleteIfRunning(parameters, cancellation, wantsReschedule: true);
-                        break;
-
-                    default:
-                        throw new InvalidOperationException("Sync execution result is not supported.");
-                }
+                CompleteIfRunning(parameters, cancellation, wantsReschedule: false);
 #if DEBUG
                 _ = Log.Info(LogTag, "completed");
 #endif

@@ -36,6 +36,7 @@
 		<UseDefaultPublishRuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">false</UseDefaultPublishRuntimeIdentifier>
 		<EmbedAssembliesIntoApk Condition="'$(Configuration)' == 'Debug' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">true</EmbedAssembliesIntoApk>
 		<AndroidStoreUncompressedFileExtensions Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">.so;$(AndroidStoreUncompressedFileExtensions)</AndroidStoreUncompressedFileExtensions>
+		<AndroidHttpClientHandlerType>Cotton.Mobile.Platforms.Android.AndroidNetworkMessageHandler, Cotton.Mobile</AndroidHttpClientHandlerType>
 		<AndroidLintEnabled Condition="'$(Configuration)' == 'Release'">true</AndroidLintEnabled>
 		<AndroidLintDisabledIssues Condition="'$(Configuration)' == 'Release'">MissingClass,BatteryLife,OldTargetApi</AndroidLintDisabledIssues>
 	</PropertyGroup>

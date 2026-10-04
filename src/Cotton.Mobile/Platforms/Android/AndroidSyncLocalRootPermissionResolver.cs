@@ -88,7 +88,8 @@ namespace Cotton.Mobile.Platforms.Android
                     return false;
                 }
 
-                using ICursor? cursor = contentResolver.Query(rootUri, RootProjection, null, null, null);
+                using AndroidCursorScope cursorScope = new(contentResolver.Query(rootUri, RootProjection, null, null, null));
+                ICursor? cursor = cursorScope.Cursor;
                 return cursor is not null
                     && cursor.MoveToFirst()
                     && !cursor.IsNull(0);

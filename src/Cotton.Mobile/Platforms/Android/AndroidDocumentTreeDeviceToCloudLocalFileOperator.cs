@@ -58,7 +58,8 @@ namespace Cotton.Mobile.Platforms.Android
                     ?? throw new InvalidOperationException("Local file deletion requires a document id.");
                 AndroidUri documentUri = DocumentsContract.BuildDocumentUriUsingTree(treeUri, documentId)
                     ?? throw new IOException("Could not build the local document URI.");
-                using ICursor? cursor = resolver.Query(documentUri, DocumentProjection, null, null, null);
+                using AndroidCursorScope cursorScope = new(resolver.Query(documentUri, DocumentProjection, null, null, null));
+                ICursor? cursor = cursorScope.Cursor;
                 if (cursor is null)
                 {
                     return CottonDeviceToCloudLocalFileDeleteStatus.Unsupported;

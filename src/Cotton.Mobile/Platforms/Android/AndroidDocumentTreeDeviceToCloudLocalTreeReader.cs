@@ -135,7 +135,8 @@ namespace Cotton.Mobile.Platforms.Android
                 ?? throw new IOException("Document-tree parent id is unavailable.");
             AndroidUri childrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(treeUri, parentDocumentId)
                 ?? throw new IOException("Could not build document-tree children URI.");
-            using ICursor? cursor = resolver.Query(childrenUri, ChildProjection, null, null, null) ?? throw new IOException("Could not read document-tree children.");
+            using AndroidCursorScope cursorScope = new(resolver.Query(childrenUri, ChildProjection, null, null, null));
+            ICursor cursor = cursorScope.Cursor ?? throw new IOException("Could not read document-tree children.");
             while (cursor.MoveToNext())
             {
                 cancellationToken.ThrowIfCancellationRequested();

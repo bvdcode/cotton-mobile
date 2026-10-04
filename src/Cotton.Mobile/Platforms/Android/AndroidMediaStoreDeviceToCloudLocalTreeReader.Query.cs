@@ -93,12 +93,13 @@ namespace Cotton.Mobile.Platforms.Android
                 : bucketSelection;
             string[] selectionArguments = [.. bucketIds.Select(
                 bucketId => bucketId.ToString(CultureInfo.InvariantCulture))];
-            using ICursor cursor = resolver.Query(
-                    collectionUri,
-                    projection,
-                    selection,
-                    selectionArguments,
-                    null)
+            using AndroidCursorScope cursorScope = new(resolver.Query(
+                collectionUri,
+                projection,
+                selection,
+                selectionArguments,
+                null));
+            ICursor cursor = cursorScope.Cursor
                 ?? throw new IOException("Could not read Android media collection.");
             List<AndroidMediaStoreFileCandidate> candidates = [];
 

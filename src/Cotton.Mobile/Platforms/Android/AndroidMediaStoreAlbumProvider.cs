@@ -77,7 +77,8 @@ namespace Cotton.Mobile.Platforms.Android
             string? selection = OperatingSystem.IsAndroidVersionAtLeast(29)
                 ? $"{MediaStore.IMediaColumns.IsPending} = 0"
                 : null;
-            using ICursor cursor = resolver.Query(uri, projection, selection, null, null)
+            using AndroidCursorScope cursorScope = new(resolver.Query(uri, projection, selection, null, null));
+            ICursor cursor = cursorScope.Cursor
                 ?? throw new IOException("Could not read Android media folders.");
             while (cursor.MoveToNext())
             {

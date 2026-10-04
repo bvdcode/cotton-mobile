@@ -1,5 +1,3 @@
-Closed testing build for Cotton Cloud.
+Improves background photo detection by separating MediaStore events from queued uploads.
 
-Adds a safe action for replacing a conflicting cloud file with the device copy while preserving version history.
-
-Prevents overlapping scans and duplicate manual runs. Uses native source selection and bottom navigation controls. Removes the empty space and redundant message after media access is granted.
+Corrects Android network timeout and cancellation handling. Clears review progress when a scan ends and closes media query cursors after use.

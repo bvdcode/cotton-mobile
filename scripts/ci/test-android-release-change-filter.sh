@@ -104,9 +104,30 @@ policy_head="$(commit_all "release policy")"
 output="$("$detect_script" "$detector_head" "$policy_head")"
 assert_contains "$output" "Android release required: true"
 
+printf '<configuration />\n' > NuGet.Config
+nuget_head="$(commit_all "NuGet configuration")"
+output="$("$detect_script" "$policy_head" "$nuget_head")"
+assert_contains "$output" "Android release required: true"
+
+printf '{"sdk":{"version":"10.0.301"}}\n' > global.json
+sdk_head="$(commit_all "SDK version")"
+output="$("$detect_script" "$nuget_head" "$sdk_head")"
+assert_contains "$output" "Android release required: true"
+
+mkdir -p scripts/mobile/workmanager
+printf '{}\n' > scripts/mobile/workmanager/inputs.json
+binding_inputs_head="$(commit_all "WorkManager inputs")"
+output="$("$detect_script" "$sdk_head" "$binding_inputs_head")"
+assert_contains "$output" "Android release required: true"
+
+printf 'param()\n' > scripts/mobile/build-workmanager-binding.ps1
+binding_script_head="$(commit_all "WorkManager build")"
+output="$("$detect_script" "$binding_inputs_head" "$binding_script_head")"
+assert_contains "$output" "Android release required: true"
+
 printf '<Project><PropertyGroup /></Project>\n' > src/Cotton.Mobile/Cotton.Mobile.csproj
 app_head="$(commit_all "app")"
-output="$("$detect_script" "$policy_head" "$app_head")"
+output="$("$detect_script" "$binding_script_head" "$app_head")"
 assert_contains "$output" "Android release required: true"
 
 mkdir -p src/Cotton.Mobile/ViewModels

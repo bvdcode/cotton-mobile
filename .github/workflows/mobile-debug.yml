@@ -9,7 +9,7 @@ defaults:
 
 env:
   PROJECT_PATH: src/Cotton.Mobile/Cotton.Mobile.csproj
-  DOTNET_VERSION: 10.0.x
+  DOTNET_VERSION: 10.0.301
   JAVA_VERSION: "21"
   ANDROID_PLATFORM: "platforms;android-36"
   ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
@@ -38,11 +38,14 @@ jobs:
       - name: Install Android dependencies
         run: scripts/mobile/install-android-ci-dependencies.sh "$ANDROID_PLATFORM" "$ANDROID_BUILD_TOOLS"
 
+      - name: Build WorkManager binding
+        run: >-
+          pwsh -NoProfile -File scripts/mobile/build-workmanager-binding.ps1
+          -AndroidSdkDirectory "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          -JavaSdkDirectory "$JAVA_HOME"
+
       - name: Restore mobile project
         run: dotnet restore "$PROJECT_PATH"
-
-      - name: Verify mobile formatting
-        run: dotnet format "$PROJECT_PATH" --no-restore --verify-no-changes --severity info
 
       - name: Build debug APK
         run: |
@@ -51,6 +54,12 @@ jobs:
             -c Debug \
             --no-restore \
             -p:EmbedAssembliesIntoApk=true
+
+      - name: Verify mobile formatting
+        env:
+          Configuration: Debug
+          OutDir: ${{ github.workspace }}/src/Cotton.Mobile/bin/Debug/net10.0-android/
+        run: dotnet format "$PROJECT_PATH" --no-restore --verify-no-changes --severity info
 
       - name: Allow Android emulator acceleration
         run: |

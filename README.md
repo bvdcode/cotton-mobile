@@ -33,6 +33,16 @@ The current app provides upload-only backup. It does not automatically replace c
 
 ## Development
 
+Android builds use .NET SDK 10.0.301, Android workload 36.1.2, Android SDK 36 and JDK 21. Install the workload with `dotnet workload install maui-android --skip-manifest-update`.
+
+Build the WorkManager binding before restoring the solution:
+
+```shell
+pwsh -NoProfile -File scripts/mobile/build-workmanager-binding.ps1 -AndroidSdkDirectory <Android SDK> -JavaSdkDirectory <JDK 21>
+```
+
+The script downloads hash-pinned official WorkManager 2.12.0 and binding sources, restores locked dependencies, and packs `2.12.0-cotton.1` into the local `artifacts/workmanager/feed`. Android CI runs the same step. WorkManager 2.12.0 prevents late cancellation from removing a newly scheduled periodic job. Background timing in Optimized still requires device validation.
+
 ```shell
 dotnet restore Cotton.Mobile.slnx
 dotnet test --project src/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj

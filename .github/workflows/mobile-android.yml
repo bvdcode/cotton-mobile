@@ -8,6 +8,7 @@ on:
     paths:
       - "GitVersion.yml"
       - "global.json"
+      - "NuGet.Config"
       - ".editorconfig"
       - ".gitattributes"
       - "Directory.Build.props"
@@ -22,6 +23,7 @@ on:
     paths:
       - "GitVersion.yml"
       - "global.json"
+      - "NuGet.Config"
       - ".editorconfig"
       - ".gitattributes"
       - "Directory.Build.props"

@@ -10,7 +10,7 @@ defaults:
 env:
   TEST_PROJECT_PATH: src/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
   CORE_PROJECT_PATH: src/Cotton.Mobile.Core/Cotton.Mobile.Core.csproj
-  DOTNET_VERSION: 10.0.x
+  DOTNET_VERSION: 10.0.301
 
 jobs:
   tests-and-automation:

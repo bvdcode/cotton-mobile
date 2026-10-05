@@ -18,4 +18,4 @@ yes | "$sdkmanager_bin" --licenses >/dev/null
 set -o pipefail
 "$sdkmanager_bin" --install "$android_platform" "$android_build_tools" platform-tools
 
-dotnet workload install maui-android
+dotnet workload install maui-android --skip-manifest-update

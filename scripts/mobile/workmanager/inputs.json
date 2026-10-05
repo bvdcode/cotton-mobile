@@ -1,0 +1,41 @@
+{
+  "SourceCommit": "06ad7c36ce57951634ded2551e64811f5a7c99b3",
+  "AndroidWorkload": "36.1.2",
+  "Files": [
+    {
+      "Path": "Directory.Build.props",
+      "Uri": "https://raw.githubusercontent.com/dotnet/android-libraries/06ad7c36ce57951634ded2551e64811f5a7c99b3/Directory.Build.props",
+      "SHA256": "60BA3D95B40B6B67EE6A969DCA74E32FAD1CB69BA33AEDD92545904C0A1A483C"
+    },
+    {
+      "Path": "Directory.Build.targets",
+      "Uri": "https://raw.githubusercontent.com/dotnet/android-libraries/06ad7c36ce57951634ded2551e64811f5a7c99b3/Directory.Build.targets",
+      "SHA256": "9DD16D6721F0E58BB32DE8DF9935621F7F34B34CDB3483EB9DF313B5DCB30610"
+    },
+    {
+      "Path": "LICENSE.TXT",
+      "Uri": "https://raw.githubusercontent.com/dotnet/android-libraries/06ad7c36ce57951634ded2551e64811f5a7c99b3/LICENSE.TXT",
+      "SHA256": "CFC21F5E8BD655AE997EEC916138B707B1D290B83272C02A95C9F821B8C87310"
+    },
+    {
+      "Path": "source_Metadata.common.xml",
+      "Uri": "https://raw.githubusercontent.com/dotnet/android-libraries/06ad7c36ce57951634ded2551e64811f5a7c99b3/source/Metadata.common.xml",
+      "SHA256": "5F0335EA7157B96E00445275DAFDCE281DEA8004CE3AA35F20066A225D70D660"
+    },
+    {
+      "Path": "source_androidx.work_work-runtime_Transforms_Metadata.xml",
+      "Uri": "https://raw.githubusercontent.com/dotnet/android-libraries/06ad7c36ce57951634ded2551e64811f5a7c99b3/source/androidx.work/work-runtime/Transforms/Metadata.xml",
+      "SHA256": "BEE81293C84599AE4B96D36CBF5A739BD616DD4AD73DD9623A2E896C002486AD"
+    },
+    {
+      "Path": "source_androidx.work_work-runtime_Additions_WorkAdditions.cs",
+      "Uri": "https://raw.githubusercontent.com/dotnet/android-libraries/06ad7c36ce57951634ded2551e64811f5a7c99b3/source/androidx.work/work-runtime/Additions/WorkAdditions.cs",
+      "SHA256": "420F3ED618E56F75FBADA519F7F91CEA0B7CBB94B786D3E6D388474EAEC3633C"
+    },
+    {
+      "Path": "work-runtime-2.12.0.aar",
+      "Uri": "https://dl.google.com/dl/android/maven2/androidx/work/work-runtime/2.12.0/work-runtime-2.12.0.aar",
+      "SHA256": "A967C776D2C2FF9A7A541679D2FB51CEFDC78D4010FCF68F3FDD4C57C29E89DC"
+    }
+  ]
+}

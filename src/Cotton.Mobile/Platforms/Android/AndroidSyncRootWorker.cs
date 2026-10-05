@@ -22,7 +22,7 @@ namespace Cotton.Mobile.Platforms.Android
         {
             get
             {
-                string? rootId = InputData.GetString(AndroidAutomaticSyncConstants.RootIdInputKey);
+                string? rootId = InputData?.GetString(AndroidAutomaticSyncConstants.RootIdInputKey);
                 if (!Guid.TryParse(rootId, out Guid parsedRootId) || parsedRootId == Guid.Empty)
                 {
                     throw new InvalidDataException("Android sync-root work has an invalid root id.");

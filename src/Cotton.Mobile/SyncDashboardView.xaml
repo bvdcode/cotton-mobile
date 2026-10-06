@@ -26,12 +26,20 @@
                         Padding="0"
                         SemanticProperties.Description="{x:Static localization:AppResources.AddFolderBackupDescription}"
                         StyleClass="TextButton, TouchTarget">
-                    <Button.ImageSource>
-                        <FontImageSource FontFamily="MaterialOutlined"
-                                         Glyph="{x:Static symbols:MaterialOutlined.Add}"
-                                         Size="{StaticResource AppActionIconSize}"
-                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                    </Button.ImageSource>
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button"
+                                     Binding="{Binding IsAddFolderToolbarVisible}"
+                                     Value="True">
+                            <Setter Property="ImageSource">
+                                <Setter.Value>
+                                    <FontImageSource FontFamily="MaterialOutlined"
+                                                     Glyph="{x:Static symbols:MaterialOutlined.Add}"
+                                                     Size="{StaticResource AppActionIconSize}"
+                                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Button.Triggers>
                 </Button>
 
                 <Button Command="{Binding RunAllCommand}"
@@ -40,12 +48,20 @@
                         Padding="0"
                         SemanticProperties.Description="{x:Static localization:AppResources.RunAllSyncFoldersDescription}"
                         StyleClass="TextButton, TouchTarget">
-                    <Button.ImageSource>
-                        <FontImageSource FontFamily="MaterialOutlined"
-                                         Glyph="{x:Static symbols:MaterialOutlined.Play_arrow}"
-                                         Size="{StaticResource AppActionIconSize}"
-                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                    </Button.ImageSource>
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button"
+                                     Binding="{Binding IsRunAllVisible}"
+                                     Value="True">
+                            <Setter Property="ImageSource">
+                                <Setter.Value>
+                                    <FontImageSource FontFamily="MaterialOutlined"
+                                                     Glyph="{x:Static symbols:MaterialOutlined.Play_arrow}"
+                                                     Size="{StaticResource AppActionIconSize}"
+                                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Button.Triggers>
                 </Button>
 
                 <Button Command="{Binding EnterEditModeCommand}"
@@ -54,12 +70,20 @@
                         Padding="0"
                         SemanticProperties.Description="{x:Static localization:AppResources.EnterEditSyncsModeDescription}"
                         StyleClass="TextButton, TouchTarget">
-                    <Button.ImageSource>
-                        <FontImageSource FontFamily="MaterialOutlined"
-                                         Glyph="{x:Static symbols:MaterialOutlined.Edit}"
-                                         Size="{StaticResource AppEditActionIconSize}"
-                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                    </Button.ImageSource>
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button"
+                                     Binding="{Binding IsEditModeAvailable}"
+                                     Value="True">
+                            <Setter Property="ImageSource">
+                                <Setter.Value>
+                                    <FontImageSource FontFamily="MaterialOutlined"
+                                                     Glyph="{x:Static symbols:MaterialOutlined.Edit}"
+                                                     Size="{StaticResource AppEditActionIconSize}"
+                                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Button.Triggers>
                 </Button>
 
                 <Button Command="{Binding ExitEditModeCommand}"
@@ -68,12 +92,20 @@
                         Padding="0"
                         SemanticProperties.Description="{x:Static localization:AppResources.ExitEditSyncsModeDescription}"
                         StyleClass="TextButton, TouchTarget">
-                    <Button.ImageSource>
-                        <FontImageSource FontFamily="MaterialOutlined"
-                                         Glyph="{x:Static symbols:MaterialOutlined.Close}"
-                                         Size="{StaticResource AppActionIconSize}"
-                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                    </Button.ImageSource>
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button"
+                                     Binding="{Binding IsEditMode}"
+                                     Value="True">
+                            <Setter Property="ImageSource">
+                                <Setter.Value>
+                                    <FontImageSource FontFamily="MaterialOutlined"
+                                                     Glyph="{x:Static symbols:MaterialOutlined.Close}"
+                                                     Size="{StaticResource AppActionIconSize}"
+                                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Button.Triggers>
                 </Button>
             </HorizontalStackLayout>
         </Grid>

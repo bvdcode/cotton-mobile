@@ -80,28 +80,39 @@
                     </ContentView.Triggers>
                 </ContentView>
 
-                <Border IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                        Style="{StaticResource AppStatusCard}">
-                    <Grid ColumnDefinitions="Auto,*,Auto"
-                          ColumnSpacing="12">
-                        <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                        <VerticalStackLayout Grid.Column="1"
-                                             Spacing="4"
-                                             VerticalOptions="Center">
-                            <Label Text="{x:Static localization:AppResources.WaitingForBrowserApproval}"
-                                   FontAttributes="Bold" />
-                            <Label Text="{Binding Display.AuthorizationProgressMessage}"
-                                   Style="{StaticResource AppBodyText}" />
-                        </VerticalStackLayout>
-                        <Button Grid.Column="2"
-                                Text="{x:Static localization:AppResources.CancelText}"
-                                Command="{Binding CancelAuthorizationCommand}"
-                                IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
-                                SemanticProperties.Description="{x:Static localization:AppResources.CancelBrowserApprovalDescription}"
-                                StyleClass="TextButton, TouchTarget" />
-                    </Grid>
-                </Border>
+                <ContentView IsVisible="{Binding Display.IsAuthorizationProgressVisible}">
+                    <ContentView.Triggers>
+                        <DataTrigger TargetType="ContentView"
+                                     Binding="{Binding Display.IsAuthorizationProgressVisible}"
+                                     Value="True">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <Border Style="{StaticResource AppStatusCard}">
+                                        <Grid ColumnDefinitions="Auto,*,Auto"
+                                              ColumnSpacing="12">
+                                            <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
+                                                               Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                            <VerticalStackLayout Grid.Column="1"
+                                                                 Spacing="4"
+                                                                 VerticalOptions="Center">
+                                                <Label Text="{x:Static localization:AppResources.WaitingForBrowserApproval}"
+                                                       FontAttributes="Bold" />
+                                                <Label Text="{Binding Display.AuthorizationProgressMessage}"
+                                                       Style="{StaticResource AppBodyText}" />
+                                            </VerticalStackLayout>
+                                            <Button Grid.Column="2"
+                                                    Text="{x:Static localization:AppResources.CancelText}"
+                                                    Command="{Binding CancelAuthorizationCommand}"
+                                                    IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
+                                                    SemanticProperties.Description="{x:Static localization:AppResources.CancelBrowserApprovalDescription}"
+                                                    StyleClass="TextButton, TouchTarget" />
+                                        </Grid>
+                                    </Border>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </ContentView.Triggers>
+                </ContentView>
             </VerticalStackLayout>
         </ScrollView>
 

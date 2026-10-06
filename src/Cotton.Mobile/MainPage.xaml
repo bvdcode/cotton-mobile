@@ -47,27 +47,38 @@
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
 
-                <VerticalStackLayout IsVisible="{Binding Display.IsSignInVisible}"
-                                     Spacing="16">
-                    <material:TextField Title="{Binding Display.InstanceUrlPlaceholder}"
-                                        Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
-                                        Keyboard="Url"
-                                        ReturnType="Go"
-                                        ReturnCommand="{Binding ConnectCommand}"
-                                        AllowClear="True"
-                                        IsEnabled="{Binding Display.IsInputEnabled}"
-                                        SemanticProperties.Hint="{x:Static localization:AppResources.CottonCloudAddressHint}"
-                                        Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Cloud}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
+                <ContentView IsVisible="{Binding Display.IsSignInVisible}">
+                    <ContentView.Triggers>
+                        <DataTrigger TargetType="ContentView"
+                                     Binding="{Binding Display.IsSignInVisible}"
+                                     Value="True">
+                            <Setter Property="Content">
+                                <Setter.Value>
+                                    <VerticalStackLayout Spacing="16">
+                                        <material:TextField Title="{Binding Display.InstanceUrlPlaceholder}"
+                                                            Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
+                                                            Keyboard="Url"
+                                                            ReturnType="Go"
+                                                            ReturnCommand="{Binding ConnectCommand}"
+                                                            AllowClear="True"
+                                                            IsEnabled="{Binding Display.IsInputEnabled}"
+                                                            SemanticProperties.Hint="{x:Static localization:AppResources.CottonCloudAddressHint}"
+                                                            Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Cloud}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
 
-                    <Label Text="{Binding Display.Status}"
-                           IsVisible="{Binding Display.IsStatusVisible}"
-                           Style="{StaticResource AppBodyText}" />
+                                        <Label Text="{Binding Display.Status}"
+                                               IsVisible="{Binding Display.IsStatusVisible}"
+                                               Style="{StaticResource AppBodyText}" />
 
-                    <Button Text="{x:Static localization:AppResources.ConnectText}"
-                            Command="{Binding ConnectCommand}"
-                            IsEnabled="{Binding Display.IsInputEnabled}"
-                            StyleClass="FilledButton, TouchTarget" />
-                </VerticalStackLayout>
+                                        <Button Text="{x:Static localization:AppResources.ConnectText}"
+                                                Command="{Binding ConnectCommand}"
+                                                IsEnabled="{Binding Display.IsInputEnabled}"
+                                                StyleClass="FilledButton, TouchTarget" />
+                                    </VerticalStackLayout>
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </ContentView.Triggers>
+                </ContentView>
 
                 <Border IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
                         Style="{StaticResource AppStatusCard}">

@@ -129,8 +129,21 @@
                 <Grid ColumnDefinitions="Auto,*"
                       ColumnSpacing="12">
                     <Border Style="{StaticResource AppStatusIconFrame}">
-                        <Image Style="{StaticResource AppIcon}"
-                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}}" />
+                        <Image Style="{StaticResource AppIcon}">
+                            <Image.Triggers>
+                                <DataTrigger TargetType="Image"
+                                             Binding="{Binding IsPhotoBackupCalloutVisible}"
+                                             Value="True">
+                                    <Setter Property="Source">
+                                        <Setter.Value>
+                                            <FontImageSource FontFamily="MaterialOutlined"
+                                                             Glyph="{x:Static symbols:MaterialOutlined.Photo_library}"
+                                                             Color="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}}" />
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Image.Triggers>
+                        </Image>
                     </Border>
                     <VerticalStackLayout Grid.Column="1"
                                          Spacing="6">

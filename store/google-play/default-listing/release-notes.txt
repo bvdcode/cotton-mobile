@@ -1,3 +1,3 @@
-Improves background photo detection by separating MediaStore events from queued uploads.
+Updates Android background scheduling to WorkManager 2.12 and validates missing sync-folder input.
 
-Corrects Android network timeout and cancellation handling. Clears review progress when a scan ends and closes media query cursors after use.
+Creates sign-in and browser approval views only when needed. Loads toolbar and photo backup icons only while their controls are visible.

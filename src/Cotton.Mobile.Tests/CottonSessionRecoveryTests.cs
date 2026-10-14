@@ -1,12 +1,61 @@
 using System.Net;
+using System.Net.Http.Json;
+using Cotton.Auth;
 using Cotton.Mobile.Services;
 using Cotton.Sdk;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace Cotton.Mobile.Tests
 {
     public class CottonSessionRecoveryTests
     {
+        [Fact]
+        public async Task CanceledRestoreRetainsReceivedTokensAndNextRestoreAuthenticatesWithoutSignIn()
+        {
+            CancellationToken testCancellation = TestContext.Current.CancellationToken;
+            using SessionRecoveryTestContext context = new();
+            await context.InitializeAsync(testCancellation);
+            using CancellationTokenSource cancellation = CancellationTokenSource.CreateLinkedTokenSource(testCancellation);
+            CancelingSessionTokenStore tokens = new(context.Tokens, cancellation);
+            SessionValidationTestClientFactory clients = new(context.HttpClient, tokens);
+            CottonSessionService service = new(
+                clients, new CottonSessionValidator(clients), context.Instances, tokens,
+                context.Authorization, context.Cursor, context.Authorization,
+                context.Notifications, NullLogger<CottonSessionService>.Instance);
+            context.Handler.RefreshFailure = () =>
+            {
+                if (context.Handler.RefreshCount == 1)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = JsonContent.Create(new TokenPairDto
+                        {
+                            AccessToken = "renewed-access",
+                            RefreshToken = "renewed-refresh",
+                        }),
+                    };
+                }
+
+                return new HttpResponseMessage(HttpStatusCode.NotFound)
+                {
+                    Content = new StringContent(
+                        "{\"status\":404,\"code\":\"not_found\",\"instance\":\"/api/v1/auth/refresh\"}"),
+                };
+            };
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.RestoreAsync(cancellation.Token));
+            CottonSessionResult restored = await service.RestoreAsync(testCancellation);
+
+            Assert.True(restored.IsAuthenticated);
+            Assert.Equal("renewed-refresh", (await tokens.GetAsync(testCancellation))?.RefreshToken);
+            Assert.Equal(SessionRecoveryTestContext.Instance, context.Instances.Instance);
+            Assert.NotNull(context.Cursor.Cursor);
+            Assert.Equal(0, context.Authorization.ClearCount);
+            Assert.Equal(1, context.Notifications.ClearCount);
+            Assert.Equal(1, context.Handler.RefreshCount);
+        }
+
         [Theory]
         [InlineData(HttpStatusCode.NotFound, "404 page not found")]
         [InlineData(HttpStatusCode.ServiceUnavailable, "maintenance")]

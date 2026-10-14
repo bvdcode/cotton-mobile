@@ -1,3 +1,1 @@
-Updates Android background scheduling to WorkManager 2.12 and validates missing sync-folder input.
-
-Creates sign-in and browser approval views only when needed. Loads toolbar and photo backup icons only while their controls are visible.
+Preserves newly received authentication tokens when a background operation is canceled.

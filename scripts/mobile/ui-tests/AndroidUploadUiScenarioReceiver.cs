@@ -238,6 +238,7 @@ namespace Cotton.Mobile.Platforms.Android
                 AndroidCancellationProbeWorker.WorkName, policy, request)
                 ?? throw new InvalidOperationException("Test work scheduling is unavailable.");
             await AndroidWorkOperation.WaitAsync(enqueue, CancellationToken.None);
+            AndroidCancellationProbeJob.RecordScheduled(request);
         }
 
         private static CottonSyncRootSnapshot ShowRoot(

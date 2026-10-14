@@ -618,6 +618,15 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
         if budget:
             scenario = "worker-budget-start"
         emulator.scenario(scenario)
+        probe_output = emulator.text("logcat", "-d", "-s", f"{tag}:I", "*:S")
+        probe_jobs = re.findall(
+            r"job-scheduled:namespace=([^:]*):id=(\d+)", probe_output
+        )
+        if len(probe_jobs) != 1:
+            raise AssertionError(
+                f"Expected one scheduled probe identity: {probe_output}"
+            )
+        probe_namespace, probe_id = probe_jobs[0]
         emulator.run("logcat", "-c")
         jobs = emulator.text("shell", "dumpsys", "jobscheduler")
         pattern = (
@@ -626,9 +635,17 @@ def check_worker_cancellation(emulator: Emulator, budget: bool = False) -> None:
                 PACKAGE + "/androidx.work.impl.background.systemjob.SystemJobService"
             )
         )
-        scheduled = list(re.finditer(pattern, jobs))
+        scheduled = [
+            match
+            for match in re.finditer(pattern, jobs)
+            if (match.group("namespace") or "") == probe_namespace
+            and match.group("id") == probe_id
+        ]
         if len(scheduled) != 1:
-            raise AssertionError("Expected exactly one scheduled cancellation probe.")
+            raise AssertionError(
+                "Expected scheduled cancellation probe "
+                f"{probe_namespace}/{probe_id}: {jobs}"
+            )
         job = scheduled[0]
         namespace = ["-n", job.group("namespace")] if job.group("namespace") else []
         scheduled_start = emulator.text(

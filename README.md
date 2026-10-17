@@ -22,6 +22,17 @@ The current app provides upload-only backup. It does not automatically replace c
 - Package ID: `dev.cottoncloud.app`
 - Target framework: `.NET MAUI / net10.0-android`
 
+### Releases
+
+Each branch release publishes the same version to GitHub Releases and Google Play. Both destinations use the same signed AAB; GitHub also includes the signed APK. GitHub marks each release as Latest.
+
+Release names use `<product name> <version>`, such as `Cotton Mobile 1.0.69`. Git tags use `v<version>`.
+
+| Branch | Google Play track |
+| --- | --- |
+| `develop` | Alpha |
+| `main` | Production |
+
 ## Repository Structure
 
 - `src/Cotton.Mobile` — Android application.

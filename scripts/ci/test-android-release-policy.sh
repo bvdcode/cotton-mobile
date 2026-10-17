@@ -43,8 +43,8 @@ assert_policy() {
   assert_contains "$output" "upload_to_google_play=$expected_upload"
 }
 
-assert_policy develop alpha false true
-assert_policy main production true false
+assert_policy develop alpha true true
+assert_policy main production true true
 
 if "$policy_script" feature/unplanned >"$workspace/unsupported-output" 2>&1; then
   printf 'Unsupported branches must fail release policy resolution.\n' >&2

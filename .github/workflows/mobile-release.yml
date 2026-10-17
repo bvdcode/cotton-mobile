@@ -292,5 +292,4 @@ jobs:
             "$COTTON_GITHUB_RELEASE_DIR" \
             "$APPLICATION_DISPLAY_VERSION" \
             "$GITHUB_REF_NAME" \
-            "$GITHUB_SHA" \
-            "$GITHUB_EVENT_NAME"
+            "$GITHUB_SHA"

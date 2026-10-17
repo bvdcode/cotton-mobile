@@ -12,19 +12,18 @@ branch_name="$1"
 case "$branch_name" in
   develop)
     google_play_track="alpha"
-    publish_github_release="false"
-    upload_to_google_play="true"
     ;;
   main)
     google_play_track="production"
-    publish_github_release="true"
-    upload_to_google_play="false"
     ;;
   *)
     printf 'Unsupported Android release branch: %s\n' "$branch_name" >&2
     exit 1
     ;;
 esac
+
+publish_github_release="true"
+upload_to_google_play="true"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   {

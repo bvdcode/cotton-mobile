@@ -174,17 +174,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [[ "$GITHUB_REF_NAME" == "main" ]]; then
-            published_release_tag="$(
-              gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-                --jq 'map(select(.draft == false and .prerelease == false))[0].tag_name // ""'
-            )"
-          else
-            published_release_tag="$(
-              gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-                --jq 'map(select(.draft == false and .prerelease == true))[0].tag_name // ""'
-            )"
-          fi
+          published_release_tag="$(
+            gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+              --jq "map(select(.draft == false and .target_commitish == \"$GITHUB_REF_NAME\"))[0].tag_name // \"\""
+          )"
 
           scripts/mobile/detect-android-release-changes.sh \
             "${{ github.event.before }}" \

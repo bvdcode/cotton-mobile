@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -ne 6 ]]; then
-  printf 'Usage: %s <tag> <release-dir> <display-version> <ref-name> <sha> <event-name>\n' "$0" >&2
+if [[ $# -ne 5 ]]; then
+  printf 'Usage: %s <tag> <release-dir> <display-version> <ref-name> <sha>\n' "$0" >&2
   exit 2
 fi
 
@@ -11,7 +11,6 @@ release_dir="$2"
 display_version="$3"
 ref_name="$4"
 sha="$5"
-event_name="$6"
 
 if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   printf 'GitHub Release tag must be a SemVer tag such as v1.0.0.\n' >&2
@@ -35,12 +34,10 @@ fi
 release_flags=(
   --title "Cotton Mobile $display_version"
   --notes-file "$release_dir/release-notes.md"
+  --target "$ref_name"
+  --latest
+  --prerelease=false
 )
-if [[ "$event_name" == "push" && "$ref_name" == "develop" ]]; then
-  release_flags+=(--prerelease)
-else
-  release_flags+=(--latest)
-fi
 
 if gh release view "$tag" >/dev/null 2>&1; then
   gh release edit "$tag" "${release_flags[@]}"

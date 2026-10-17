@@ -67,9 +67,14 @@ upload_script_head="$(commit_all "upload script")"
 output="$("$detect_script" "$release_workflow_head" "$upload_script_head")"
 assert_contains "$output" "Android release required: true"
 
+printf '#!/usr/bin/env bash\n' > scripts/mobile/publish-android-github-release.sh
+github_publish_head="$(commit_all "GitHub publication")"
+output="$("$detect_script" "$upload_script_head" "$github_publish_head")"
+assert_contains "$output" "Android release required: true"
+
 printf '#!/usr/bin/env bash\n' > scripts/mobile/test-android-runtime.sh
 runtime_test_head="$(commit_all "runtime test")"
-output="$("$detect_script" "$upload_script_head" "$runtime_test_head")"
+output="$("$detect_script" "$github_publish_head" "$runtime_test_head")"
 assert_contains "$output" "Android release required: true"
 
 printf '#!/usr/bin/env bash\n' > scripts/mobile/test-android-release-runtime.sh

@@ -34,6 +34,9 @@ jobs:
       - name: Test Android release policy
         run: scripts/ci/test-android-release-policy.sh
 
+      - name: Test Android GitHub publication
+        run: scripts/ci/test-android-github-release.sh
+
       - name: Validate Android runtime smoke script
         run: >-
           bash -n

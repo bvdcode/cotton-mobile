@@ -1,1 +1,1 @@
-Preserves newly received authentication tokens when a background operation is canceled.
+Improves session handling when background work is canceled. Coordinates token refresh with sign-in and sign-out to prevent stale token updates.

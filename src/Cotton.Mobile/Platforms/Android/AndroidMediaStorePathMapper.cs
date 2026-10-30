@@ -2,7 +2,6 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 #if ANDROID
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
@@ -47,7 +46,7 @@ namespace Cotton.Mobile.Platforms.Android
         public static bool TryCreateFilePath(
             string parentPath,
             string displayName,
-            [NotNullWhen(true)] out string? relativePath)
+            out string? relativePath)
         {
             try
             {

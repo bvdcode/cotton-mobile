@@ -9,11 +9,6 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(summary);
 
-            if (summary.RootResults is [{ Status: CottonDeviceToCloudSyncRootRunStatus.SkippedPaused } pausedRoot])
-            {
-                return CottonSyncRootManagementText.CreatePausedStatus(pausedRoot.FolderName);
-            }
-
             return CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(summary);
         }
     }

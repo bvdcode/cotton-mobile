@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Globalization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonDeviceToCloudSyncFileOperator(
         ICottonFileUploadService uploadService,
-        CottonSyncFileUploadSourceFactory sourceFactory,
+        ICottonDeviceToCloudLocalFileContentSource localContentSource,
         ICottonFileBrowserService fileBrowserService) :
         ICottonDeviceToCloudSyncFileOperator
     {
+        private const string MetadataSourceValue = "device-to-cloud-sync";
+
         private readonly ICottonFileUploadService _uploadService =
             uploadService ?? throw new ArgumentNullException(nameof(uploadService));
-        private readonly CottonSyncFileUploadSourceFactory _sourceFactory =
-            sourceFactory ?? throw new ArgumentNullException(nameof(sourceFactory));
+        private readonly ICottonDeviceToCloudLocalFileContentSource _localContentSource =
+            localContentSource ?? throw new ArgumentNullException(nameof(localContentSource));
         private readonly ICottonFileBrowserService _fileBrowserService =
             fileBrowserService ?? throw new ArgumentNullException(nameof(fileBrowserService));
 
@@ -21,7 +25,6 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
             CottonFolderHandle parentFolder,
-            IProgress<long>? progress,
             CancellationToken cancellationToken = default)
         {
             EnsureUploadItem(instanceUri, root, item);
@@ -30,8 +33,8 @@ namespace Cotton.Mobile.Services
             return _uploadService.UploadAsync(
                 instanceUri,
                 parentFolder,
-                _sourceFactory.Create(instanceUri, root, item),
-                progress,
+                CreateUploadSource(instanceUri, root, item),
+                progress: null,
                 cancellationToken);
         }
 
@@ -57,25 +60,41 @@ namespace Cotton.Mobile.Services
                 cancellationToken);
         }
 
-        public async Task<bool> MatchesExpectedRemoteFileAsync(
+        private CottonFileUploadSource CreateUploadSource(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item,
-            CottonFolderHandle parentFolder,
-            CancellationToken cancellationToken = default)
+            CottonDeviceToCloudSyncPlanItem item)
         {
-            EnsureDeleteItem(instanceUri, root, item);
-            ArgumentNullException.ThrowIfNull(parentFolder);
+            return new CottonFileUploadSource(
+                new CottonFileUploadSourceSnapshot(
+                    item.DisplayName,
+                    item.ContentType,
+                    item.SizeBytes,
+                    CreateUploadMetadata(item),
+                    item.ContentHash),
+                token => _localContentSource.OpenReadAsync(instanceUri, root, item, token));
+        }
 
-            CottonFolderContent folder = await _fileBrowserService
-                .GetFolderAsync(instanceUri, parentFolder, cancellationToken)
-                .ConfigureAwait(false);
-            CottonFileBrowserEntry? remoteFile = folder.Entries.FirstOrDefault(entry => entry.Id == item.CloudItemId);
-            return remoteFile is not null
-                && remoteFile.Type == CottonFileBrowserEntryType.File
-                && string.Equals(remoteFile.ETag, item.ExpectedRemoteETag, StringComparison.Ordinal)
-                && remoteFile.SizeBytes == item.SizeBytes
-                && string.Equals(remoteFile.ContentHash, item.ContentHash, StringComparison.Ordinal);
+        private static Dictionary<string, string> CreateUploadMetadata(
+            CottonDeviceToCloudSyncPlanItem item)
+        {
+            Dictionary<string, string> metadata = new(StringComparer.Ordinal)
+            {
+                [CottonFileUploadMetadataKeys.Source] = MetadataSourceValue,
+            };
+            if (item.LocalUpdatedAtUtc.HasValue)
+            {
+                metadata[CottonFileUploadMetadataKeys.OriginalLastModifiedUtc] =
+                    item.LocalUpdatedAtUtc.Value.ToString("O", CultureInfo.InvariantCulture);
+            }
+
+            if (item.UploadOperationId.HasValue)
+            {
+                metadata[CottonFileUploadMetadataKeys.UploadOperationId] =
+                    item.UploadOperationId.Value.ToString("N");
+            }
+
+            return metadata;
         }
 
         private static void EnsureUploadItem(
@@ -93,25 +112,6 @@ namespace Cotton.Mobile.Services
             if (string.IsNullOrWhiteSpace(item.LocalSourceId))
             {
                 throw new InvalidOperationException("Device-to-cloud upload item is missing local content.");
-            }
-        }
-
-        private static void EnsureDeleteItem(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item)
-        {
-            EnsureRoot(instanceUri, root);
-            ArgumentNullException.ThrowIfNull(item);
-            if (!item.RequiresLocalDelete
-                || item.TargetType != CottonFileBrowserEntryType.File
-                || !item.CloudItemId.HasValue
-                || string.IsNullOrWhiteSpace(item.ExpectedRemoteETag)
-                || !item.SizeBytes.HasValue
-                || item.ContentHash is null)
-            {
-                throw new InvalidOperationException(
-                    "Local cleanup requires a complete expected remote file revision.");
             }
         }
 

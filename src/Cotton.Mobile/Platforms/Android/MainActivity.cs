@@ -8,12 +8,8 @@ using Android.Content.Res;
 using Android.OS;
 using Android.Views;
 using AndroidX.Core.View;
-using AndroidX.Activity.Result;
-using AndroidX.Activity.Result.Contract;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.ApplicationModel;
-using AndroidIntentFilter = Android.App.IntentFilterAttribute;
 
 namespace Cotton.Mobile.Platforms.Android
 {
@@ -30,37 +26,11 @@ namespace Cotton.Mobile.Platforms.Android
             | ConfigChanges.ScreenLayout
             | ConfigChanges.SmallestScreenSize
             | ConfigChanges.Density)]
-    [AndroidIntentFilter(
-        [Intent.ActionView],
-        Categories = [Intent.CategoryDefault, Intent.CategoryBrowsable],
-        DataScheme = CottonAuthorizationReturn.Scheme,
-        DataHost = CottonAuthorizationReturn.Host)]
     public class MainActivity : MauiAppCompatActivity
     {
-        private const int DocumentTreeBridgeAttemptCount = 20;
-        private const string ActivityResultStateKey = "Cotton.Mobile.ActivityResultState";
-        private static readonly TimeSpan DocumentTreeBridgeAttemptDelay = TimeSpan.FromMilliseconds(100);
-
-        private ActivityResultLauncher? _documentTreeLauncher;
-        private bool _documentTreeBridgeAttachmentScheduled;
-        private ActivityResult? _pendingDocumentTreeResult;
-
         protected override void OnCreate(Bundle? savedInstanceState)
         {
-            _documentTreeLauncher = RegisterForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                new AndroidActivityResultCallback(HandleDocumentTreeResult));
-            Bundle? activityResultState = savedInstanceState?.GetBundle(ActivityResultStateKey);
-            if (activityResultState is not null)
-            {
-                ActivityResultRegistry.OnRestoreInstanceState(activityResultState);
-                IServiceProvider services = IPlatformApplication.Current?.Services
-                    ?? throw new InvalidOperationException("Application services are unavailable during activity restoration.");
-                services.GetRequiredService<AndroidDocumentTreeActivityResultStore>().RestoreActiveRequest();
-            }
-
             base.OnCreate(savedInstanceState);
-            SupportFragmentManager.RegisterFragmentLifecycleCallbacks(new AndroidSystemBarAppearance(), recursive: true);
 
             if (OperatingSystem.IsAndroidVersionAtLeast(31))
             {
@@ -70,33 +40,23 @@ namespace Cotton.Mobile.Platforms.Android
             ApplySystemBars();
         }
 
-        protected override void OnSaveInstanceState(Bundle outState)
-        {
-            base.OnSaveInstanceState(outState);
-            Bundle activityResultState = new();
-            ActivityResultRegistry.OnSaveInstanceState(activityResultState);
-            outState.PutBundle(ActivityResultStateKey, activityResultState);
-        }
-
         protected override void OnResume()
         {
             base.OnResume();
             ApplySystemBars();
-            ScheduleDocumentTreeBridgeAttachment();
             GetForegroundService()?.NotifyResumed();
         }
 
-        private void HandleDocumentTreeResult(ActivityResult result)
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
         {
-            IAndroidDocumentTreeActivityResultBridge? bridge = GetDocumentTreeResultBridge();
-            if (bridge is null)
+            IAndroidDocumentTreeActivityResultBridge? resultBridge = IPlatformApplication.Current?.Services
+                .GetService<IAndroidDocumentTreeActivityResultBridge>();
+            if (resultBridge?.TryHandleActivityResult(requestCode, resultCode, data) == true)
             {
-                _pendingDocumentTreeResult = result;
-                ScheduleDocumentTreeBridgeAttachment();
                 return;
             }
 
-            bridge.HandleActivityResult((Result)result.ResultCode, result.Data);
+            base.OnActivityResult(requestCode, resultCode, data);
         }
 
         protected override void OnStop()
@@ -109,10 +69,6 @@ namespace Cotton.Mobile.Platforms.Android
         {
             base.OnConfigurationChanged(newConfig);
             ApplySystemBars();
-            foreach (AndroidX.Fragment.App.Fragment fragment in SupportFragmentManager.Fragments)
-            {
-                AndroidSystemBarAppearance.RefreshDialog(fragment);
-            }
         }
 
         internal void RefreshSystemBars()
@@ -126,61 +82,6 @@ namespace Cotton.Mobile.Platforms.Android
                 .GetService<IApplicationForegroundService>();
         }
 
-        private static IAndroidDocumentTreeActivityResultBridge? GetDocumentTreeResultBridge()
-        {
-            return IPlatformApplication.Current?.Services
-                .GetService<IAndroidDocumentTreeActivityResultBridge>();
-        }
-
-        internal void LaunchDocumentTree(Intent intent)
-        {
-            ArgumentNullException.ThrowIfNull(intent);
-            ActivityResultLauncher launcher = _documentTreeLauncher
-                ?? throw new InvalidOperationException("Android document-tree launcher is unavailable.");
-            launcher.Launch(intent);
-        }
-
-        private void ScheduleDocumentTreeBridgeAttachment()
-        {
-            if (_documentTreeBridgeAttachmentScheduled)
-            {
-                return;
-            }
-
-            _documentTreeBridgeAttachmentScheduled = true;
-            _ = AttachDocumentTreeBridgeAsync();
-        }
-
-        private async Task AttachDocumentTreeBridgeAsync()
-        {
-            IAndroidDocumentTreeActivityResultBridge? bridge = null;
-            for (int attempt = 0; attempt < DocumentTreeBridgeAttemptCount && bridge is null; attempt++)
-            {
-                await Task.Delay(DocumentTreeBridgeAttemptDelay);
-                bridge = GetDocumentTreeResultBridge();
-            }
-
-            if (bridge is null)
-            {
-                _ = global::Android.Util.Log.Error(
-                    nameof(MainActivity),
-                    "Android document-tree result bridge is unavailable.");
-                _documentTreeBridgeAttachmentScheduled = false;
-                return;
-            }
-
-            await MainThread.InvokeOnMainThreadAsync(() =>
-            {
-                ActivityResult? pendingResult = _pendingDocumentTreeResult;
-                if (pendingResult is not null)
-                {
-                    _pendingDocumentTreeResult = null;
-                    bridge.HandleActivityResult((Result)pendingResult.ResultCode, pendingResult.Data);
-                }
-
-            });
-        }
-
         private void ApplySystemBars()
         {
             if (Window is null || Resources?.Configuration is not Configuration configuration)
@@ -191,6 +92,7 @@ namespace Cotton.Mobile.Platforms.Android
             global::Android.Graphics.Color systemBarColor = Resources.GetColor(
                 Resource.Color.cotton_system_bar_background,
                 Theme);
+            global::Android.Views.View decorView = Window.DecorView;
             WindowCompat.SetDecorFitsSystemWindows(Window, true);
             Window.ClearFlags(WindowManagerFlags.TranslucentStatus | WindowManagerFlags.TranslucentNavigation);
             Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
@@ -205,7 +107,13 @@ namespace Cotton.Mobile.Platforms.Android
                 }
             }
 
-            AndroidSystemBarAppearance.ApplyIconColors(Window, configuration);
+            bool useLightIcons = (configuration.UiMode & UiMode.NightMask) != UiMode.NightYes;
+            WindowInsetsControllerCompat? insetsController = WindowCompat.GetInsetsController(Window, decorView);
+            if (insetsController is not null)
+            {
+                insetsController.AppearanceLightStatusBars = useLightIcons;
+                insetsController.AppearanceLightNavigationBars = useLightIcons;
+            }
         }
     }
 }

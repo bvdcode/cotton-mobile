@@ -12,9 +12,11 @@ namespace Cotton.Mobile.Platforms.Android
     [Register("dev.cottoncloud.mobile.AndroidMediaStoreSyncWorker")]
     public class AndroidMediaStoreSyncWorker(
         Context context,
-        WorkerParameters workerParameters) : AndroidAutomaticSyncWorker(context, workerParameters)
+        WorkerParameters workerParameters) :
+        AndroidAutomaticSyncWorker(context, workerParameters)
     {
-        protected override CottonAutomaticSyncTrigger Trigger => CottonAutomaticSyncTrigger.MediaStoreChanged;
+        protected override CottonAutomaticSyncTrigger Trigger =>
+            CottonAutomaticSyncTrigger.MediaStoreChanged;
 
         protected override Guid? RetryRootId => null;
     }

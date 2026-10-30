@@ -58,44 +58,44 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Choose upload source</value>
+  </data>
+  <data name="AppBarTitle" xml:space="preserve">
+    <value>Upload source</value>
+  </data>
   <data name="ContinueDescription" xml:space="preserve">
     <value>Continue sync setup</value>
   </data>
-  <data name="MediaAlbumPageTitle" xml:space="preserve">
-    <value>Choose media folders</value>
+  <data name="Heading" xml:space="preserve">
+    <value>What should Cotton upload?</value>
   </data>
-  <data name="MediaAlbumAppBarTitle" xml:space="preserve">
-    <value>Media folders</value>
+  <data name="SupportingText" xml:space="preserve">
+    <value>Uploads run automatically when Android allows background work.</value>
   </data>
-  <data name="MediaAlbumHeading" xml:space="preserve">
-    <value>Which media should Cotton upload?</value>
+  <data name="FolderTitle" xml:space="preserve">
+    <value>Selected folder</value>
   </data>
-  <data name="MediaAlbumSupportingText" xml:space="preserve">
-    <value>Select one or more folders. Cotton uploads the media Android allows it to access there.</value>
+  <data name="FolderSupportingText" xml:space="preserve">
+    <value>Scan a folder periodically and upload each file once.</value>
   </data>
-  <data name="MediaAlbumItemCountFormat" xml:space="preserve">
-    <value>{0} items</value>
+  <data name="MediaTitle" xml:space="preserve">
+    <value>Photos and videos</value>
   </data>
-  <data name="MediaAlbumSingleItem" xml:space="preserve">
-    <value>1 item</value>
+  <data name="MediaSupportingText" xml:space="preserve">
+    <value>Upload new media soon after Android adds it to your library.</value>
   </data>
-  <data name="MediaAlbumsDisplayNameFormat" xml:space="preserve">
-    <value>{0} media folders</value>
+  <data name="SelectedSourceDescriptionFormat" xml:space="preserve">
+    <value>{0}, selected.</value>
   </data>
-  <data name="UnnamedMediaAlbum" xml:space="preserve">
-    <value>Unnamed media folder</value>
+  <data name="AvailableSourceDescriptionFormat" xml:space="preserve">
+    <value>{0}, not selected. Double tap to select.</value>
   </data>
-  <data name="NoMediaAlbumsTitle" xml:space="preserve">
-    <value>No media folders available</value>
+  <data name="DeleteOriginalsTitle" xml:space="preserve">
+    <value>Delete originals after upload</value>
   </data>
-  <data name="NoMediaAlbumsSupportingText" xml:space="preserve">
-    <value>Allow access to at least one photo or video, then try again.</value>
-  </data>
-  <data name="MediaAccessRequiredTitle" xml:space="preserve">
-    <value>Allow all media</value>
-  </data>
-  <data name="MediaAccessRequiredMessage" xml:space="preserve">
-    <value>Automatic upload needs access to all photos or videos. Selected-only access cannot see media created later.</value>
+  <data name="DeleteOriginalsSupportingText" xml:space="preserve">
+    <value>Delete the device copy only after Cotton Cloud confirms the upload.</value>
   </data>
   <data name="UnavailableMessage" xml:space="preserve">
     <value>This sync source is not available on this device.</value>

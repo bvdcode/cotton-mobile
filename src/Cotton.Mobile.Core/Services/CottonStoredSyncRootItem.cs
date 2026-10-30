@@ -23,8 +23,6 @@ namespace Cotton.Mobile.Services
 
         public string? LocalRootDisplayName { get; set; }
 
-        public string? LocalScopeKey { get; set; }
-
         public CottonSyncRootPermissionStatus LocalPermissionStatus { get; set; }
 
         public CottonSyncDirection Direction { get; set; }

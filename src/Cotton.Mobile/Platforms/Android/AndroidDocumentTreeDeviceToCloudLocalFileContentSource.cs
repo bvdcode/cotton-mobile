@@ -24,7 +24,8 @@ namespace Cotton.Mobile.Platforms.Android
             ContentResolver resolver = GetContentResolver();
             AndroidUri treeUri = ParseTreeUri(root);
             AndroidUri documentUri = CreateDocumentUri(treeUri, item);
-            Stream stream = AndroidMediaContentAccess.OpenRead(resolver, documentUri);
+            Stream stream = resolver.OpenInputStream(documentUri)
+                ?? throw new IOException("Could not open device-to-cloud local file for reading.");
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(stream);
         }

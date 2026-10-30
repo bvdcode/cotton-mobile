@@ -110,8 +110,7 @@ namespace Cotton.Mobile.Services
                 or CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision
                 or CottonDeviceToCloudSyncActionKind.BlockedLocalItemName
                 or CottonDeviceToCloudSyncActionKind.BlockedLocalSource
-                or CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged
-                or CottonDeviceToCloudSyncActionKind.UploadedLocalVersionChanged;
+                or CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged;
 
         public bool IsLocalProblem => Action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName;
 

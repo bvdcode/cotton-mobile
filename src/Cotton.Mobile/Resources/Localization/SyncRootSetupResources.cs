@@ -10,59 +10,35 @@ namespace Cotton.Mobile.Resources.Localization
     {
         private static readonly ResourceManager ResourceManagerInstance = new(typeof(SyncRootSetupResources));
 
+        public static string PageTitle => GetString(nameof(PageTitle));
+
+        public static string AppBarTitle => GetString(nameof(AppBarTitle));
+
         public static string ContinueDescription => GetString(nameof(ContinueDescription));
 
-        public static string MediaAlbumPageTitle => GetString(nameof(MediaAlbumPageTitle));
+        public static string Heading => GetString(nameof(Heading));
 
-        public static string MediaAlbumAppBarTitle => GetString(nameof(MediaAlbumAppBarTitle));
+        public static string SupportingText => GetString(nameof(SupportingText));
 
-        public static string MediaAlbumHeading => GetString(nameof(MediaAlbumHeading));
+        public static string FolderTitle => GetString(nameof(FolderTitle));
 
-        public static string MediaAlbumSupportingText => GetString(nameof(MediaAlbumSupportingText));
+        public static string FolderSupportingText => GetString(nameof(FolderSupportingText));
 
-        public static string MediaAlbumItemCountFormat => GetString(nameof(MediaAlbumItemCountFormat));
+        public static string MediaTitle => GetString(nameof(MediaTitle));
 
-        public static string MediaAlbumSingleItem => GetString(nameof(MediaAlbumSingleItem));
+        public static string MediaSupportingText => GetString(nameof(MediaSupportingText));
 
-        public static string MediaAlbumsDisplayNameFormat => GetString(nameof(MediaAlbumsDisplayNameFormat));
-
-        public static string UnnamedMediaAlbum => GetString(nameof(UnnamedMediaAlbum));
-
-        public static string NoMediaAlbumsTitle => GetString(nameof(NoMediaAlbumsTitle));
-
-        public static string NoMediaAlbumsSupportingText => GetString(nameof(NoMediaAlbumsSupportingText));
-
-        public static string MediaAccessRequiredTitle => GetString(nameof(MediaAccessRequiredTitle));
-
-        public static string MediaAccessRequiredMessage => GetString(nameof(MediaAccessRequiredMessage));
-
-        public static string CreateMediaAlbumItemCount(int itemCount)
+        public static string CreateSourceDescription(string title, bool isSelected)
         {
-            if (itemCount <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(itemCount), "Media album item count must be positive.");
-            }
-
-            return itemCount == 1
-                ? GetString(nameof(MediaAlbumSingleItem))
-                : string.Format(
-                    CultureInfo.CurrentCulture,
-                    GetString(nameof(MediaAlbumItemCountFormat)),
-                    itemCount);
+            string format = isSelected
+                ? GetString("SelectedSourceDescriptionFormat")
+                : GetString("AvailableSourceDescriptionFormat");
+            return string.Format(CultureInfo.CurrentCulture, format, title.Trim());
         }
 
-        public static string CreateMediaAlbumsDisplayName(int albumCount)
-        {
-            if (albumCount <= 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(albumCount), "Multiple media albums are required.");
-            }
+        public static string DeleteOriginalsTitle => GetString(nameof(DeleteOriginalsTitle));
 
-            return string.Format(
-                CultureInfo.CurrentCulture,
-                GetString(nameof(MediaAlbumsDisplayNameFormat)),
-                albumCount);
-        }
+        public static string DeleteOriginalsSupportingText => GetString(nameof(DeleteOriginalsSupportingText));
 
         public static string UnavailableMessage => GetString(nameof(UnavailableMessage));
 

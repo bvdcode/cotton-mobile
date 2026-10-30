@@ -10,193 +10,61 @@ namespace Cotton.Mobile.Services
     public class CottonSyncRootListItem : ObservableObject
     {
         private readonly string _idleStatusText;
-        private readonly bool _requiresAttention;
-        private readonly string _reconnectActionText;
-        private CottonSyncProgressSnapshot? _progress;
-        private string? _lastSyncStatusText;
-        private string? _failureDetails;
-        private CottonAutomaticSyncFailureKind _failureKind;
+        private readonly string _runningStatusText;
+        private bool _isRunning;
 
-        public CottonSyncRootListItem(
-            CottonSyncRootSnapshot root,
-            bool isPaused = false,
-            CottonAutomaticSyncRootStatusSnapshot? automaticStatus = null,
-            bool isDividerVisible = false)
+        public CottonSyncRootListItem(CottonSyncRootSnapshot root, bool isPaused = false)
         {
             ArgumentNullException.ThrowIfNull(root);
-            if (automaticStatus is not null && automaticStatus.RootId != root.Id)
-            {
-                throw new ArgumentException("Automatic sync status belongs to a different root.", nameof(automaticStatus));
-            }
 
             Id = root.Id;
             Direction = root.Direction;
-            UsesMediaStore = root.LocalRoot.UsesMediaStore;
             Title = root.CloudFolder.FolderName;
-            DisplayPathText = CottonSyncRootPathText.Create(
-                root.CloudFolder.FolderName,
-                root.CloudFolder.Path);
+            PathText = root.CloudFolder.Path;
+            DetailText = $"{CreateDirectionText(root.Direction)} · {root.LocalRoot.DisplayName}";
             IsPaused = isPaused;
             IsUnsupportedLocalRoot = !isPaused && CottonSyncRootRunCapability.HasUnsupportedLocalRoot(root);
             CanRunNow = !isPaused && CottonSyncRootRunCapability.CanRun(root);
             CanReconnect = root.NeedsUserAction;
-            _reconnectActionText = root.LocalRoot.UsesMediaStore
-                ? CoreResources.ReconnectMediaFolders
-                : CoreResources.ReconnectLocalFolder;
             CanUsePrimaryAction = CanReconnect || CanRunNow;
+            PrimaryActionText = CreatePrimaryActionText(root, CanReconnect, CanRunNow);
             _idleStatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot);
+            _runningStatusText = CreateRunningStatusText(root.Direction);
             IsReady = !isPaused && !IsUnsupportedLocalRoot && CanRunNow;
-            _requiresAttention = !isPaused
+            IsAttentionVisible = !isPaused
                 && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync || !CanRunNow);
             CanPauseSync = !isPaused;
             CanResumeSync = isPaused;
-            IsDividerVisible = isDividerVisible;
-            FailureDetailsAction = new CottonSyncRootActionRequest(
-                this,
-                CottonSyncRootAction.ShowFailureDetails);
-            ResolvePendingUploadAction = new CottonSyncRootActionRequest(
-                this,
-                CottonSyncRootAction.ResolvePendingUpload);
-            ReplaceCloudConflictAction = new CottonSyncRootActionRequest(
-                this,
-                CottonSyncRootAction.ReplaceCloudConflict);
-            PrimaryAction = new CottonSyncRootActionRequest(
-                this,
-                CottonSyncRootAction.UsePrimaryAction);
-            PauseAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Pause);
-            ResumeAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Resume);
-            DeleteAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Delete);
-            SetAutomaticStatus(automaticStatus);
+            CanStopSync = true;
         }
 
         public Guid Id { get; }
 
         public CottonSyncDirection Direction { get; }
 
-        public bool UsesMediaStore { get; }
-
         public string Title { get; }
 
-        public string DisplayPathText { get; }
+        public string PathText { get; }
 
-        public string StatusText => _progress is null
-            ? _lastSyncStatusText ?? _idleStatusText
-            : CreateProgressStatusText(_progress);
+        public string DetailText { get; }
 
-        public bool IsRunning => _progress is not null;
+        public string StatusText => IsRunning ? _runningStatusText : _idleStatusText;
 
-        public bool CanShowFailureDetails => !string.IsNullOrWhiteSpace(_failureDetails);
-
-        public string FailureDetails => _failureDetails ?? string.Empty;
-
-        public CottonSyncRootActionRequest FailureDetailsAction { get; }
-
-        public bool CanResolvePendingUpload =>
-            _failureKind == CottonAutomaticSyncFailureKind.PendingUploadChanged && !IsRunning;
-
-        public CottonSyncRootActionRequest ResolvePendingUploadAction { get; }
-
-        private int? _fileDifferenceCount;
-
-        public bool CanReplaceCloudConflict =>
-            (_failureKind is CottonAutomaticSyncFailureKind.RemotePathConflict or CottonAutomaticSyncFailureKind.UploadedFileChanged
-                || _fileDifferenceCount is > 0) && !IsRunning;
-
-        public CottonSyncRootActionRequest ReplaceCloudConflictAction { get; }
-
-        public CottonSyncRootActionRequest? StatusAction
+        public bool IsRunning
         {
-            get
+            get => _isRunning;
+            private set
             {
-                if (IsRunning)
+                if (SetProperty(ref _isRunning, value))
                 {
-                    return null;
+                    OnPropertyChanged(nameof(StatusText));
                 }
-
-                if (CanReplaceCloudConflict)
-                {
-                    return ReplaceCloudConflictAction;
-                }
-
-                if (CanResolvePendingUpload)
-                {
-                    return ResolvePendingUploadAction;
-                }
-
-                if (CanShowFailureDetails)
-                {
-                    return FailureDetailsAction;
-                }
-
-                return CanReconnect ? PrimaryAction : null;
-            }
-        }
-
-        public bool CanUseStatusAction => StatusAction is not null;
-
-        public string StatusActionText
-        {
-            get
-            {
-                if (CanReplaceCloudConflict)
-                {
-                    return CoreResources.ReplaceCloudConflict;
-                }
-
-                if (CanResolvePendingUpload)
-                {
-                    return CoreResources.ResolvePendingUpload;
-                }
-
-                if (CanShowFailureDetails)
-                {
-                    return CoreResources.ShowFailureDetails;
-                }
-
-                return CanReconnect ? _reconnectActionText : string.Empty;
-            }
-        }
-
-        public bool IsProgressDeterminate =>
-            (_progress?.Stage == CottonSyncProgressStage.ApplyingChanges
-                && _progress.TotalItemCount > 0)
-            || (_progress?.Stage == CottonSyncProgressStage.UploadingFile
-                && _progress.Transfer?.TotalBytes.HasValue == true);
-
-        public double ProgressValue
-        {
-            get
-            {
-                CottonSyncProgressSnapshot? progress = _progress;
-                if (progress?.Stage == CottonSyncProgressStage.UploadingFile
-                    && progress.Transfer?.TotalBytes is long totalBytes)
-                {
-                    if (progress.TotalItemCount is not int uploadTotalItemCount
-                        || uploadTotalItemCount <= 0)
-                    {
-                        return 0;
-                    }
-
-                    double fileProgress = totalBytes == 0
-                        ? 1
-                        : Math.Min(1, (double)progress.Transfer.TransferredBytes / totalBytes);
-                    return Math.Min(
-                        1,
-                        (progress.CompletedItemCount + fileProgress) / uploadTotalItemCount);
-                }
-
-                if (progress?.TotalItemCount is not int totalItemCount || totalItemCount <= 0)
-                {
-                    return 0;
-                }
-
-                return (double)progress.CompletedItemCount / totalItemCount;
             }
         }
 
         public bool IsReady { get; }
 
-        public bool IsAttentionVisible => _requiresAttention || (CanShowFailureDetails && !IsRunning);
+        public bool IsAttentionVisible { get; }
 
         public bool CanRunNow { get; }
 
@@ -204,7 +72,7 @@ namespace Cotton.Mobile.Services
 
         public bool CanUsePrimaryAction { get; }
 
-        public CottonSyncRootActionRequest PrimaryAction { get; }
+        public string PrimaryActionText { get; }
 
         public bool IsPaused { get; }
 
@@ -214,104 +82,40 @@ namespace Cotton.Mobile.Services
 
         public string PauseSyncActionText { get; } = CottonSyncRootManagementText.PauseAction;
 
-        public CottonSyncRootActionRequest PauseAction { get; }
-
         public bool CanResumeSync { get; }
 
         public string ResumeSyncActionText { get; } = CottonSyncRootManagementText.ResumeAction;
 
-        public CottonSyncRootActionRequest ResumeAction { get; }
+        public bool CanStopSync { get; }
 
-        public bool CanDeleteSync => !IsRunning;
+        public string StopSyncActionText { get; } = CottonSyncRootManagementText.StopAction;
 
-        public string DeleteSyncActionText { get; } = CottonSyncRootManagementText.DeleteAction;
-
-        public CottonSyncRootActionRequest DeleteAction { get; }
-
-        public CottonSyncRootActionRequest PauseResumeAction => IsPaused
-            ? ResumeAction
-            : PauseAction;
-
-        public string PauseResumeActionText => IsPaused
-            ? ResumeSyncActionText
-            : PauseSyncActionText;
-
-        public bool IsDividerVisible { get; }
-
-        public void ApplyProgress(CottonSyncProgressSnapshot progress)
+        public void SetRunning(bool isRunning)
         {
-            ArgumentNullException.ThrowIfNull(progress);
-            if (progress.RootId != Id)
+            if (isRunning && !CanRunNow)
             {
-                throw new ArgumentException("Sync progress belongs to a different root.", nameof(progress));
+                throw new InvalidOperationException("Only a runnable sync root can enter the running state.");
             }
 
-            if (!CanRunNow)
-            {
-                throw new InvalidOperationException("Only a runnable sync root can report progress.");
-            }
-
-            _progress = progress;
-            NotifyProgressChanged();
+            IsRunning = isRunning;
         }
 
-        public void CompleteProgress()
+        private static string CreatePrimaryActionText(
+            CottonSyncRootSnapshot root,
+            bool canReconnect,
+            bool canRunNow)
         {
-            if (_progress is null)
+            if (canReconnect)
             {
-                return;
+                return root.StatusText;
             }
 
-            _progress = null;
-            NotifyProgressChanged();
-        }
-
-        public void SetAutomaticStatus(CottonAutomaticSyncRootStatusSnapshot? status)
-        {
-            if (status is not null && status.RootId != Id)
+            if (canRunNow)
             {
-                throw new ArgumentException("Automatic sync status belongs to a different root.", nameof(status));
+                return CoreResources.RunNowAction;
             }
 
-            string? statusText = IsReady && status is not null
-                ? CottonAutomaticSyncStatusText.Create(status)
-                : null;
-            string? failureDetails = IsReady
-                && status?.Outcome == CottonAutomaticSyncOutcome.Failed
-                ? CottonAutomaticSyncFailureText.Create(status.FailureKind)
-                : null;
-            CottonAutomaticSyncFailureKind failureKind = IsReady
-                && status?.Outcome == CottonAutomaticSyncOutcome.Failed
-                ? status.FailureKind
-                : CottonAutomaticSyncFailureKind.None;
-            bool statusChanged = !string.Equals(_lastSyncStatusText, statusText, StringComparison.Ordinal);
-            bool failureChanged = !string.Equals(_failureDetails, failureDetails, StringComparison.Ordinal);
-            bool failureKindChanged = _failureKind != failureKind || _fileDifferenceCount != status?.FileDifferenceCount;
-            if (!statusChanged && !failureChanged && !failureKindChanged)
-            {
-                return;
-            }
-
-            _lastSyncStatusText = statusText;
-            _failureDetails = failureDetails;
-            _failureKind = failureKind;
-            _fileDifferenceCount = status?.FileDifferenceCount;
-            if (statusChanged && !IsRunning)
-            {
-                OnPropertyChanged(nameof(StatusText));
-            }
-
-            if (failureChanged || failureKindChanged)
-            {
-                OnPropertyChanged(nameof(CanShowFailureDetails));
-                OnPropertyChanged(nameof(FailureDetails));
-                OnPropertyChanged(nameof(IsAttentionVisible));
-                OnPropertyChanged(nameof(StatusAction));
-                OnPropertyChanged(nameof(CanUseStatusAction));
-                OnPropertyChanged(nameof(StatusActionText));
-                OnPropertyChanged(nameof(CanResolvePendingUpload));
-                OnPropertyChanged(nameof(CanReplaceCloudConflict));
-            }
+            return string.Empty;
         }
 
         private static string CreateStatusText(
@@ -333,11 +137,7 @@ namespace Cotton.Mobile.Services
             return readinessStatus switch
             {
                 CottonSyncRootReadinessStatus.Ready => CoreResources.ReadyStatus,
-                CottonSyncRootReadinessStatus.NeedsUserGrant when root.LocalRoot.UsesMediaStore =>
-                    CoreResources.ChooseMediaStatus,
                 CottonSyncRootReadinessStatus.NeedsUserGrant => CoreResources.ChooseFolderStatus,
-                CottonSyncRootReadinessStatus.GrantRevoked when root.LocalRoot.UsesMediaStore =>
-                    CoreResources.ReconnectMediaStatus,
                 CottonSyncRootReadinessStatus.GrantRevoked => CoreResources.ReconnectStatus,
                 CottonSyncRootReadinessStatus.LocalRootUnavailable => CoreResources.UnavailableStatus,
                 _ => throw new ArgumentOutOfRangeException(
@@ -347,22 +147,24 @@ namespace Cotton.Mobile.Services
             };
         }
 
-        private static string CreateProgressStatusText(CottonSyncProgressSnapshot progress)
+        private static string CreateRunningStatusText(CottonSyncDirection direction)
         {
-            return CottonSyncProgressText.Create(progress);
+            EnsureSupportedDirection(direction);
+            return CoreResources.UploadingStatus;
         }
 
-        private void NotifyProgressChanged()
+        private static string CreateDirectionText(CottonSyncDirection direction)
         {
-            OnPropertyChanged(nameof(StatusText));
-            OnPropertyChanged(nameof(IsRunning));
-            OnPropertyChanged(nameof(IsProgressDeterminate));
-            OnPropertyChanged(nameof(ProgressValue));
-            OnPropertyChanged(nameof(IsAttentionVisible));
-            OnPropertyChanged(nameof(StatusAction));
-            OnPropertyChanged(nameof(CanUseStatusAction));
-            OnPropertyChanged(nameof(StatusActionText));
-            OnPropertyChanged(nameof(CanDeleteSync));
+            EnsureSupportedDirection(direction);
+            return CoreResources.UploadNewFilesAction;
+        }
+
+        private static void EnsureSupportedDirection(CottonSyncDirection direction)
+        {
+            if (direction != CottonSyncDirection.DeviceToCloud)
+            {
+                throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported.");
+            }
         }
     }
 }

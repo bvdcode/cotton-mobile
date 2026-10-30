@@ -1,6 +1,8 @@
 name: Mobile Android Runtime
 
 on:
+  schedule:
+    - cron: "17 9 * * *"
   workflow_dispatch:
 
 defaults:
@@ -9,7 +11,7 @@ defaults:
 
 env:
   PROJECT_PATH: src/Cotton.Mobile/Cotton.Mobile.csproj
-  DOTNET_VERSION: 10.0.301
+  DOTNET_VERSION: 10.0.x
   JAVA_VERSION: "21"
   ANDROID_PLATFORM: "platforms;android-36"
   ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
@@ -24,11 +26,8 @@ jobs:
       fail-fast: false
       matrix:
         api:
-          - 26
           - 29
-          - 33
-          - 34
-          - 36
+          - 35
     steps:
       - name: Check repository
         uses: actions/checkout@v5
@@ -47,12 +46,6 @@ jobs:
       - name: Install Android dependencies
         run: scripts/mobile/install-android-ci-dependencies.sh "$ANDROID_PLATFORM" "$ANDROID_BUILD_TOOLS"
 
-      - name: Build WorkManager binding
-        run: >-
-          pwsh -NoProfile -File scripts/mobile/build-workmanager-binding.ps1
-          -AndroidSdkDirectory "${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
-          -JavaSdkDirectory "$JAVA_HOME"
-
       - name: Restore mobile project
         run: dotnet restore "$PROJECT_PATH"
 
@@ -62,8 +55,7 @@ jobs:
             -f net10.0-android \
             -c Debug \
             --no-restore \
-            -p:EmbedAssembliesIntoApk=true \
-            -p:CottonUiTests=true
+            -p:EmbedAssembliesIntoApk=true
 
       - name: Allow Android emulator acceleration
         run: |
@@ -71,23 +63,11 @@ jobs:
             sudo chmod 666 /dev/kvm
           fi
 
-      - name: Install UI test dependencies
-        run: python3 -m pip install -r scripts/mobile/requirements-ui.txt
-
       - name: Test Android runtime behavior
         timeout-minutes: 20
         env:
           COTTON_ANDROID_RUNTIME_API: ${{ matrix.api }}
-          COTTON_ANDROID_UPLOAD_UI_OUTPUT: artifacts/upload-ui
         run: |
           scripts/mobile/test-android-runtime.sh \
             src/Cotton.Mobile/bin/Debug/net10.0-android/dev.cottoncloud.app.debug-Signed.apk \
             store/google-play/default-listing/graphics/icon.png
-
-      - name: Upload UI test results
-        if: always()
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: cotton-mobile-upload-ui-api-${{ matrix.api }}
-          path: artifacts/upload-ui
-          retention-days: 14

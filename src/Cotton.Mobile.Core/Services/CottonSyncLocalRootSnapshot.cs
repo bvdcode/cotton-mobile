@@ -9,8 +9,7 @@ namespace Cotton.Mobile.Services
             CottonSyncRootStorageKind storageKind,
             string rootKey,
             string displayName,
-            CottonSyncRootPermissionStatus permissionStatus,
-            string? scopeKey = null)
+            CottonSyncRootPermissionStatus permissionStatus)
         {
             if (!Enum.IsDefined(storageKind))
             {
@@ -46,7 +45,6 @@ namespace Cotton.Mobile.Services
             RootKey = rootKey.Trim();
             DisplayName = displayName.Trim();
             PermissionStatus = permissionStatus;
-            ScopeKey = string.IsNullOrWhiteSpace(scopeKey) ? null : scopeKey.Trim();
         }
 
         public CottonSyncRootStorageKind StorageKind { get; }
@@ -56,8 +54,6 @@ namespace Cotton.Mobile.Services
         public string DisplayName { get; }
 
         public CottonSyncRootPermissionStatus PermissionStatus { get; }
-
-        public string? ScopeKey { get; }
 
         public bool UsesAppPrivateStorage => StorageKind == CottonSyncRootStorageKind.AppPrivateDirectory;
 

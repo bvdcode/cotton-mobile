@@ -7,41 +7,39 @@ namespace Cotton.Mobile.Services
 {
     public class CottonAutomaticSyncRunner(
         ICottonSyncRootStore rootStore,
-        SyncExecutionWorkflow workflow,
+        ICottonDeviceToCloudSyncCoordinator coordinator,
         ILogger<CottonAutomaticSyncRunner> logger) : ICottonAutomaticSyncRunner
     {
         private readonly ICottonSyncRootStore _rootStore =
             rootStore ?? throw new ArgumentNullException(nameof(rootStore));
-        private readonly SyncExecutionWorkflow _workflow =
-            workflow ?? throw new ArgumentNullException(nameof(workflow));
+        private readonly ICottonDeviceToCloudSyncCoordinator _coordinator =
+            coordinator ?? throw new ArgumentNullException(nameof(coordinator));
         private readonly ILogger<CottonAutomaticSyncRunner> _logger =
             logger ?? throw new ArgumentNullException(nameof(logger));
 
         public Task<CottonAutomaticSyncRunResult> RunAsync(
-            CottonAuthenticatedSessionScope sessionScope,
+            Uri instanceUri,
             CottonAutomaticSyncTrigger trigger,
             CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(sessionScope);
+            ArgumentNullException.ThrowIfNull(instanceUri);
             if (!Enum.IsDefined(trigger))
             {
                 throw new ArgumentOutOfRangeException(nameof(trigger), "Automatic sync trigger is not supported.");
             }
 
-            CottonSyncDiagnosticLog.AutomaticRequested(_logger, trigger);
-
             return RunSelectedAsync(
-                sessionScope,
-                static _ => true,
+                instanceUri,
+                root => ShouldRun(root, trigger),
                 cancellationToken);
         }
 
         public Task<CottonAutomaticSyncRunResult> RunRootsAsync(
-            CottonAuthenticatedSessionScope sessionScope,
+            Uri instanceUri,
             IReadOnlyCollection<Guid> rootIds,
             CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(sessionScope);
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(rootIds);
             HashSet<Guid> selectedRootIds = [.. rootIds];
             if (selectedRootIds.Contains(Guid.Empty))
@@ -49,68 +47,51 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Automatic sync root ids cannot be empty.", nameof(rootIds));
             }
 
-            CottonSyncDiagnosticLog.AutomaticRootsRequested(_logger, selectedRootIds.Count);
-
             return RunSelectedAsync(
-                sessionScope,
+                instanceUri,
                 root => selectedRootIds.Contains(root.Id),
                 cancellationToken);
         }
 
         private async Task<CottonAutomaticSyncRunResult> RunSelectedAsync(
-            CottonAuthenticatedSessionScope sessionScope,
+            Uri instanceUri,
             Func<CottonSyncRootSnapshot, bool> shouldRun,
             CancellationToken cancellationToken)
         {
             IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore
-                .LoadAsync(sessionScope.InstanceUri, cancellationToken)
+                .LoadAsync(instanceUri, cancellationToken)
                 .ConfigureAwait(false);
-            CottonSyncRootSnapshot[] accountRoots = [.. roots.Where(root => string.Equals(
-                root.AccountScopeKey,
-                sessionScope.AccountScopeKey,
-                StringComparison.Ordinal))];
-            CottonSyncRootSnapshot[] selectedRoots = [.. accountRoots.Where(shouldRun)];
-            CottonSyncDiagnosticLog.AutomaticRootsSelected(_logger, selectedRoots.Length, accountRoots.Length);
             List<Guid> succeededRootIds = [];
-            List<CottonAutomaticSyncFailure> failures = [];
-            foreach (CottonSyncRootSnapshot root in selectedRoots)
+            List<Guid> failedRootIds = [];
+            foreach (CottonSyncRootSnapshot root in roots.Where(shouldRun))
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    CottonDeviceToCloudSyncRunSummary summary = await _workflow
-                        .RunWithStatusAsync(sessionScope.InstanceUri, root, cancellationToken)
-                        .ConfigureAwait(false);
-                    if (summary.HasBlockedItems)
-                    {
-                        CottonAutomaticSyncFailure failure = new(
-                            root.Id,
-                            CottonAutomaticSyncFailureClassifier.ClassifyBlocked(summary));
-                        failures.Add(failure);
-                    }
-                    else if (summary.CompletedRootCount > 0)
-                    {
-                        succeededRootIds.Add(root.Id);
-                    }
+                    await _coordinator.RunRootAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+                    succeededRootIds.Add(root.Id);
                 }
-                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                catch (Exception exception) when (exception is not OperationCanceledException)
                 {
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    CottonAutomaticSyncFailure failure = new(
-                        root.Id,
-                        CottonAutomaticSyncFailureClassifier.Classify(exception));
-                    failures.Add(failure);
+                    CottonAutomaticSyncLog.RootFailed(_logger, root.Id, exception);
+                    failedRootIds.Add(root.Id);
                 }
             }
 
-            CottonSyncDiagnosticLog.AutomaticCompleted(
-                _logger,
-                succeededRootIds.Count,
-                failures.Count);
-            return new CottonAutomaticSyncRunResult(succeededRootIds, failures);
+            return new CottonAutomaticSyncRunResult(succeededRootIds, failedRootIds);
+        }
+
+        private static bool ShouldRun(
+            CottonSyncRootSnapshot root,
+            CottonAutomaticSyncTrigger trigger)
+        {
+            return trigger switch
+            {
+                CottonAutomaticSyncTrigger.ApplicationResumed => true,
+                CottonAutomaticSyncTrigger.PeriodicReconciliation => true,
+                CottonAutomaticSyncTrigger.MediaStoreChanged => root.LocalRoot.UsesMediaStore,
+                _ => throw new ArgumentOutOfRangeException(nameof(trigger), trigger, "Automatic sync trigger is not supported."),
+            };
         }
     }
 }

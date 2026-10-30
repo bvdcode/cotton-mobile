@@ -3,6 +3,7 @@
 
 #if ANDROID
 using Android.Content;
+using Android.Content.PM;
 using Android.Database;
 using Android.Provider;
 using Cotton.Mobile.Services;
@@ -10,7 +11,8 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Platforms.Android
 {
-    public class AndroidSyncLocalRootPermissionResolver : ICottonSyncLocalRootPermissionResolver
+    public class AndroidSyncLocalRootPermissionResolver :
+        ICottonSyncLocalRootPermissionResolver
     {
         private static readonly string[] RootProjection =
         [
@@ -24,7 +26,7 @@ namespace Cotton.Mobile.Platforms.Android
             {
                 CottonSyncRootStorageKind.AppPrivateDirectory => localRoot.PermissionStatus,
                 CottonSyncRootStorageKind.UserSelectedDocumentTree => ResolveDocumentTree(localRoot),
-                CottonSyncRootStorageKind.MediaStore => ResolveMediaStore(localRoot),
+                CottonSyncRootStorageKind.MediaStore => ResolveMediaStore(),
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(localRoot),
                     localRoot.StorageKind,
@@ -53,15 +55,14 @@ namespace Cotton.Mobile.Platforms.Android
                 : CottonSyncRootPermissionStatus.Unavailable;
         }
 
-        private static CottonSyncRootPermissionStatus ResolveMediaStore(CottonSyncLocalRootSnapshot localRoot)
+        private static CottonSyncRootPermissionStatus ResolveMediaStore()
         {
-            if (!string.Equals(localRoot.RootKey, AndroidMediaStoreRootKey.Value, StringComparison.Ordinal)
-                || !AndroidMediaStoreScopeKey.TryParse(localRoot.ScopeKey, out _))
-            {
-                return CottonSyncRootPermissionStatus.NeedsUserGrant;
-            }
-
-            return AndroidMediaReadAccessResolver.Resolve().HasAccess
+            Context context = global::Android.App.Application.Context;
+            bool isGranted = OperatingSystem.IsAndroidVersionAtLeast(33)
+                ? context.CheckSelfPermission(global::Android.Manifest.Permission.ReadMediaImages) == Permission.Granted
+                    && context.CheckSelfPermission(global::Android.Manifest.Permission.ReadMediaVideo) == Permission.Granted
+                : context.CheckSelfPermission(global::Android.Manifest.Permission.ReadExternalStorage) == Permission.Granted;
+            return isGranted
                 ? CottonSyncRootPermissionStatus.Available
                 : CottonSyncRootPermissionStatus.Revoked;
         }
@@ -88,8 +89,7 @@ namespace Cotton.Mobile.Platforms.Android
                     return false;
                 }
 
-                using AndroidCursorScope cursorScope = new(contentResolver.Query(rootUri, RootProjection, null, null, null));
-                ICursor? cursor = cursorScope.Cursor;
+                using ICursor? cursor = contentResolver.Query(rootUri, RootProjection, null, null, null);
                 return cursor is not null
                     && cursor.MoveToFirst()
                     && !cursor.IsNull(0);

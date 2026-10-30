@@ -14,10 +14,6 @@ export LOGNAME="${COTTON_DOTNET_LOGNAME:-${LOGNAME:-$USER}}"
 
 cd "$COTTON_REPO_ROOT"
 
-pwsh -NoProfile -File scripts/mobile/build-workmanager-binding.ps1 \
-  -AndroidSdkDirectory "$ANDROID_HOME" \
-  -JavaSdkDirectory "$JAVA_HOME"
-
 dotnet restore "$COTTON_MOBILE_PROJECT" \
   -p:AndroidSdkDirectory="$ANDROID_HOME" \
   -p:JavaSdkDirectory="$JAVA_HOME"

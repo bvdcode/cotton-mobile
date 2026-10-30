@@ -1,16 +1,8 @@
 cleanup() {
-  local exit_code="$?"
-  if (( exit_code != 0 )); then
-    capture_runtime_failure
-  fi
-
   if [[ -x "$adb_bin" ]]; then
-    local media_uri
-    for media_uri in "$remote_media_uri" "$excluded_media_uri"; do
-      if [[ -n "$media_uri" ]]; then
-        "$adb_bin" shell content delete --uri "$media_uri" >/dev/null 2>&1 || true
-      fi
-    done
+    if [[ -n "$remote_media_uri" ]]; then
+      "$adb_bin" shell content delete --uri "$remote_media_uri" >/dev/null 2>&1 || true
+    fi
 
     "$adb_bin" emu kill >/dev/null 2>&1 || true
   fi
@@ -18,34 +10,13 @@ cleanup() {
   if [[ -n "$emulator_pid" ]]; then
     wait "$emulator_pid" >/dev/null 2>&1 || true
   fi
-
-  return "$exit_code"
-}
-
-capture_runtime_failure() {
-  local output_root="${COTTON_ANDROID_UPLOAD_UI_OUTPUT:-}"
-  if [[ -z "$output_root" ]]; then
-    return
-  fi
-
-  local output_directory="$output_root/runtime-failure"
-  mkdir -p "$output_directory" || return
-  if [[ -f "$emulator_log" ]]; then
-    cp "$emulator_log" "$output_directory/emulator.log" || true
-  fi
-
-  if [[ -x "$adb_bin" ]]; then
-    timeout 15 "$adb_bin" logcat -b all -d >"$output_directory/logcat.txt" 2>&1 || true
-    timeout 15 "$adb_bin" shell dumpsys activity lastanr >"$output_directory/last-anr.txt" 2>&1 || true
-    timeout 15 "$adb_bin" exec-out screencap -p >"$output_directory/screen.png" 2>"$output_directory/screen-error.txt" || true
-  fi
 }
 
 wait_for_boot() {
   local attempt
   for attempt in {1..120}; do
     if [[ "$("$adb_bin" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; then
-      "$adb_bin" shell wm dismiss-keyguard >/dev/null
+      "$adb_bin" shell input keyevent 82 >/dev/null 2>&1 || true
       return
     fi
 
@@ -79,6 +50,14 @@ wait_for_disconnect() {
 
   printf 'Android emulator did not disconnect for reboot.\n' >&2
   exit 1
+}
+
+launch_application() {
+  "$adb_bin" shell monkey \
+    -p "$package_name" \
+    -c android.intent.category.LAUNCHER \
+    1 >/dev/null
+  "$adb_bin" shell input keyevent 3 >/dev/null
 }
 
 wait_for_jobs() {
@@ -131,22 +110,18 @@ wait_for_enabled_component() {
 }
 
 has_scheduled_job() {
-  local jobs
   local line
-  jobs="$("$adb_bin" shell dumpsys jobscheduler | tr -d '\r')"
-
   while IFS= read -r line; do
     if [[ "$line" == *"JOB "* && "$line" == *"$package_name/"* ]]; then
       return 0
     fi
-  done <<<"$jobs"
+  done < <("$adb_bin" shell dumpsys jobscheduler | tr -d '\r')
 
   return 1
 }
 
 find_media_id() {
   local collection_uri="$1"
-  local display_name="$2"
   local attempt
   local media_id
   local query_output
@@ -156,10 +131,8 @@ find_media_id() {
       --uri "$collection_uri" \
       --projection _id:_display_name | tr -d '\r')"
     media_id="$(printf '%s\n' "$query_output" \
-      | grep -F "_display_name=$display_name" \
-      | sed -n 's/.*_id=\([0-9][0-9]*\).*/\1/p' \
-      | head -1 \
-      || true)"
+      | sed -n '/_display_name=cotton-runtime\.png/s/.*_id=\([0-9][0-9]*\).*/\1/p' \
+      | head -1)"
     if [[ -n "$media_id" ]]; then
       printf '%s\n' "$media_id"
       return
@@ -168,70 +141,38 @@ find_media_id() {
     sleep 1
   done
 
-  printf 'Could not locate Android MediaStore fixture %s: %s\n' \
-    "$display_name" \
-    "$query_output" >&2
+  printf 'Could not locate Android MediaStore fixture: %s\n' "$query_output" >&2
   exit 1
 }
 
-create_scoped_media_fixture_entry() {
-  local display_name="$1"
-  local relative_path="$2"
-  local remote_path="$3"
+create_scoped_media_fixture() {
   local media_id
-  local media_uri
 
-  "$adb_bin" push "$media_file" "$remote_path" >/dev/null
+  "$adb_bin" push "$media_file" "$remote_media_path" >/dev/null
   "$adb_bin" shell content insert \
     --uri "$media_collection_uri" \
-    --bind "_display_name:s:$display_name" \
+    --bind _display_name:s:cotton-runtime.png \
     --bind mime_type:s:image/png \
-    --bind "relative_path:s:$relative_path" \
-    --bind is_pending:i:1 >/dev/null
-  media_id="$(find_media_id "$pending_media_collection_uri" "$display_name")"
-  media_uri="$media_collection_uri/$media_id"
-  "$adb_bin" shell "content write --uri '$media_uri' < '$remote_path'"
+    --bind relative_path:s:Pictures/CottonRuntime/ \
+    --bind is_pending:i:1
+  media_id="$(find_media_id "$pending_media_collection_uri")"
+  remote_media_uri="$media_collection_uri/$media_id"
+  "$adb_bin" shell "content write --uri '$remote_media_uri' < '$remote_media_path'"
   "$adb_bin" shell content update \
-    --uri "$media_uri" \
+    --uri "$remote_media_uri" \
     --bind is_pending:i:0 >/dev/null
-  printf '%s\n' "$media_uri"
-}
-
-create_scoped_media_fixture() {
-  remote_media_uri="$(create_scoped_media_fixture_entry \
-    cotton-runtime.png \
-    Pictures/CottonRuntime/ \
-    "$remote_media_path")"
-  excluded_media_uri="$(create_scoped_media_fixture_entry \
-    cotton-excluded.png \
-    Pictures/CottonExcluded/ \
-    "$excluded_remote_media_path")"
-}
-
-create_legacy_media_fixture_entry() {
-  local display_name="$1"
-  local directory="$2"
-  local path="$3"
-  local media_id
-
-  "$adb_bin" shell mkdir -p "$directory"
-  "$adb_bin" push "$media_file" "$path" >/dev/null
-  "$adb_bin" shell am broadcast \
-    -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
-    -d "file://$path" >/dev/null
-  media_id="$(find_media_id "$legacy_media_collection_uri" "$display_name")"
-  printf '%s/%s\n' "$legacy_media_collection_uri" "$media_id"
 }
 
 create_legacy_media_fixture() {
-  remote_media_uri="$(create_legacy_media_fixture_entry \
-    cotton-runtime.png \
-    "$legacy_media_directory" \
-    "$legacy_media_path")"
-  excluded_media_uri="$(create_legacy_media_fixture_entry \
-    cotton-excluded.png \
-    "$excluded_legacy_media_directory" \
-    "$excluded_legacy_media_path")"
+  local media_id
+
+  "$adb_bin" shell mkdir -p "$legacy_media_directory"
+  "$adb_bin" push "$media_file" "$legacy_media_path" >/dev/null
+  "$adb_bin" shell am broadcast \
+    -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
+    -d "file://$legacy_media_path" >/dev/null
+  media_id="$(find_media_id "$legacy_media_collection_uri")"
+  remote_media_uri="$legacy_media_collection_uri/$media_id"
 }
 
 create_media_fixture() {

@@ -7,47 +7,26 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonSyncRootManagementText
     {
-        public static string DeleteAction => CoreResources.DeleteSyncAction;
+        public static string StopAction => CoreResources.StopSyncingAction;
         public static string PauseAction => CoreResources.PauseAction;
         public static string ResumeAction => CoreResources.ResumeAction;
         public static string CancelAction => CoreResources.CancelAction;
-        public static string CloseAction => CoreResources.CloseAction;
-        public static string DeleteMessage => CoreResources.DeleteSyncMessage;
+        public static string StopMessage => CoreResources.StopSyncingMessage;
         public static string PausedStatusText => CoreResources.PausedStatus;
         public static string RootPausedStatus => CoreResources.RootPausedStatus;
         public static string RootMissingStatus => CoreResources.RootMissingStatus;
         public static string PauseFailedStatus => CoreResources.PauseFailedStatus;
         public static string ResumeFailedStatus => CoreResources.ResumeFailedStatus;
-        public static string DeleteFailedStatus => CoreResources.DeleteFailedStatus;
-        public static string ResolvePendingUploadAction => CoreResources.ResolvePendingUpload;
-        public static string ResolvePendingUploadMessage => CoreResources.ResolvePendingUploadMessage;
-        public static string PendingUploadResolvedStatus => CoreResources.PendingUploadResolved;
-        public static string PendingUploadResolveFailedStatus => CoreResources.PendingUploadResolveFailed;
-        public static string ReplaceCloudConflictAction => CoreResources.ReplaceCloudConflict;
-        public static string CloudConflictReplaceFailedStatus => CoreResources.CloudConflictReplaceFailed;
+        public static string StopFailedStatus => CoreResources.StopFailedStatus;
 
-        public static string CreateDeleteTitle(string folderName)
+        public static string CreateStopTitle(string folderName)
         {
-            return CoreResources.Format(CoreResources.DeleteSyncTitleFormat, NormalizeFolderName(folderName));
+            return CoreResources.Format(CoreResources.StopSyncingTitleFormat, NormalizeFolderName(folderName));
         }
 
-        public static string CreateFailureDetailsTitle(string folderName)
+        public static string CreateStoppedStatus(string folderName)
         {
-            return CoreResources.Format(
-                CoreResources.FailureDetailsTitleFormat,
-                NormalizeFolderName(folderName));
-        }
-
-        public static string CreateResolvePendingUploadTitle(string folderName)
-        {
-            return CoreResources.Format(
-                CoreResources.ResolvePendingUploadTitleFormat,
-                NormalizeFolderName(folderName));
-        }
-
-        public static string CreateDeletedStatus(string folderName)
-        {
-            return CoreResources.Format(CoreResources.DeletedSyncFormat, NormalizeFolderName(folderName));
+            return CoreResources.Format(CoreResources.StoppedSyncingFormat, NormalizeFolderName(folderName));
         }
 
         public static string CreatePausedStatus(string folderName)

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileSystemCottonUploadReceiptStore : ICottonUploadReceiptStore, ICottonRestoredUploadReceiptStore, IDisposable
+    public class FileSystemCottonUploadReceiptStore : ICottonUploadReceiptStore, IDisposable
     {
         private const int SchemaVersion = 1;
         private const string ReceiptFileExtension = ".json";
@@ -99,33 +99,6 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        public async Task SaveRestoredAsync(
-            CottonSyncRootSnapshot root,
-            CottonUploadReceiptSnapshot receipt,
-            CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(root);
-            ArgumentNullException.ThrowIfNull(receipt);
-            EnsureSupportedRoot(root.InstanceUri, root);
-            if (!receipt.IsUploaded)
-            {
-                throw new ArgumentException("Restored originals require a confirmed cloud revision.", nameof(receipt));
-            }
-
-            string directory = _pathProvider.CreateUploadReceiptDirectory(root.InstanceUri, root);
-            string path = Path.Combine(directory, CreateReceiptFileName(receipt.LocalSourceId));
-            await _writeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                await CottonAtomicJsonFile.WriteAsync(path, CreateStoredReceipt(root, receipt), cancellationToken)
-                    .ConfigureAwait(false);
-            }
-            finally
-            {
-                _writeLock.Release();
-            }
-        }
-
         public async Task ClearAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
@@ -142,52 +115,6 @@ namespace Cotton.Mobile.Services
                 {
                     Directory.Delete(directory, recursive: true);
                 }
-            }
-            finally
-            {
-                _writeLock.Release();
-            }
-        }
-
-        public async Task<int> ClearPendingAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(root);
-            EnsureSupportedRoot(instanceUri, root);
-            await _writeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                string directory = _pathProvider.CreateUploadReceiptDirectory(instanceUri, root);
-                if (!Directory.Exists(directory))
-                {
-                    return 0;
-                }
-
-                string[] filePaths = Directory.GetFiles(
-                    directory,
-                    $"*{ReceiptFileExtension}",
-                    SearchOption.TopDirectoryOnly);
-                int removedCount = 0;
-                foreach (string filePath in filePaths)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    CottonUploadReceiptSnapshot receipt = await LoadReceiptAsync(
-                        filePath,
-                        root,
-                        cancellationToken).ConfigureAwait(false);
-                    if (!receipt.IsPending)
-                    {
-                        continue;
-                    }
-
-                    File.Delete(filePath);
-                    removedCount++;
-                }
-
-                return removedCount;
             }
             finally
             {

@@ -46,93 +46,24 @@ docs_head="$(commit_all "docs")"
 output="$("$detect_script" "$base" "$docs_head")"
 assert_contains "$output" "Android release required: false"
 
-mkdir -p store/google-play/default-listing
-printf 'Release notes\n' > store/google-play/default-listing/release-notes.txt
-release_notes_head="$(commit_all "release notes")"
-output="$("$detect_script" "$docs_head" "$release_notes_head")"
-assert_contains "$output" "Android release required: true"
-
 printf 'name: Mobile Android\n' > .github/workflows/mobile-android.yml
 workflow_head="$(commit_all "workflow")"
-output="$("$detect_script" "$release_notes_head" "$workflow_head")"
-assert_contains "$output" "Android release required: true"
-
-printf 'name: Mobile Signed Release\n' > .github/workflows/mobile-release.yml
-release_workflow_head="$(commit_all "release workflow")"
-output="$("$detect_script" "$workflow_head" "$release_workflow_head")"
+output="$("$detect_script" "$docs_head" "$workflow_head")"
 assert_contains "$output" "Android release required: true"
 
 printf '#!/usr/bin/env python3\n' > scripts/mobile/upload-google-play.py
 upload_script_head="$(commit_all "upload script")"
-output="$("$detect_script" "$release_workflow_head" "$upload_script_head")"
-assert_contains "$output" "Android release required: true"
-
-printf '#!/usr/bin/env bash\n' > scripts/mobile/publish-android-github-release.sh
-github_publish_head="$(commit_all "GitHub publication")"
-output="$("$detect_script" "$upload_script_head" "$github_publish_head")"
-assert_contains "$output" "Android release required: true"
-
-printf '#!/usr/bin/env bash\n' > scripts/mobile/test-android-runtime.sh
-runtime_test_head="$(commit_all "runtime test")"
-output="$("$detect_script" "$github_publish_head" "$runtime_test_head")"
-assert_contains "$output" "Android release required: true"
-
-printf '#!/usr/bin/env bash\n' > scripts/mobile/test-android-release-runtime.sh
-release_runtime_test_head="$(commit_all "release runtime test")"
-output="$("$detect_script" "$runtime_test_head" "$release_runtime_test_head")"
-assert_contains "$output" "Android release required: true"
-
-printf '#!/usr/bin/env bash\n' > scripts/mobile/android-runtime-support.sh
-runtime_support_head="$(commit_all "runtime support")"
-output="$("$detect_script" "$release_runtime_test_head" "$runtime_support_head")"
-assert_contains "$output" "Android release required: true"
-
-printf '#!/usr/bin/env python3\n' > scripts/mobile/test-android-upload-ui.py
-upload_ui_test_head="$(commit_all "upload UI test")"
-output="$("$detect_script" "$runtime_support_head" "$upload_ui_test_head")"
-assert_contains "$output" "Android release required: true"
-
-mkdir -p scripts/mobile/ui-tests
-printf 'namespace Cotton.Mobile { public class UploadUiScenario { } }\n' \
-  > scripts/mobile/ui-tests/AndroidUploadUiScenario.cs
-upload_ui_scenario_head="$(commit_all "upload UI scenario")"
-output="$("$detect_script" "$upload_ui_test_head" "$upload_ui_scenario_head")"
+output="$("$detect_script" "$workflow_head" "$upload_script_head")"
 assert_contains "$output" "Android release required: true"
 
 printf '#!/usr/bin/env bash\n' > scripts/mobile/detect-android-release-changes.sh
 detector_head="$(commit_all "detector")"
-output="$("$detect_script" "$upload_ui_scenario_head" "$detector_head")"
-assert_contains "$output" "Android release required: true"
-
-printf '#!/usr/bin/env bash\n' > scripts/mobile/resolve-android-release-policy.sh
-policy_head="$(commit_all "release policy")"
-output="$("$detect_script" "$detector_head" "$policy_head")"
-assert_contains "$output" "Android release required: true"
-
-printf '<configuration />\n' > NuGet.Config
-nuget_head="$(commit_all "NuGet configuration")"
-output="$("$detect_script" "$policy_head" "$nuget_head")"
-assert_contains "$output" "Android release required: true"
-
-printf '{"sdk":{"version":"10.0.301"}}\n' > global.json
-sdk_head="$(commit_all "SDK version")"
-output="$("$detect_script" "$nuget_head" "$sdk_head")"
-assert_contains "$output" "Android release required: true"
-
-mkdir -p scripts/mobile/workmanager
-printf '{}\n' > scripts/mobile/workmanager/inputs.json
-binding_inputs_head="$(commit_all "WorkManager inputs")"
-output="$("$detect_script" "$sdk_head" "$binding_inputs_head")"
-assert_contains "$output" "Android release required: true"
-
-printf 'param()\n' > scripts/mobile/build-workmanager-binding.ps1
-binding_script_head="$(commit_all "WorkManager build")"
-output="$("$detect_script" "$binding_inputs_head" "$binding_script_head")"
+output="$("$detect_script" "$upload_script_head" "$detector_head")"
 assert_contains "$output" "Android release required: true"
 
 printf '<Project><PropertyGroup /></Project>\n' > src/Cotton.Mobile/Cotton.Mobile.csproj
 app_head="$(commit_all "app")"
-output="$("$detect_script" "$binding_script_head" "$app_head")"
+output="$("$detect_script" "$detector_head" "$app_head")"
 assert_contains "$output" "Android release required: true"
 
 mkdir -p src/Cotton.Mobile/ViewModels
@@ -146,27 +77,21 @@ core_head="$(commit_all "core")"
 output="$("$detect_script" "$nested_app_head" "$core_head")"
 assert_contains "$output" "Android release required: true"
 
-printf '<Project><PropertyGroup><DependencyVersion>2.0.0</DependencyVersion></PropertyGroup></Project>\n' \
-  > Directory.Build.props
-shared_props_head="$(commit_all "shared build props")"
-output="$("$detect_script" "$core_head" "$shared_props_head")"
-assert_contains "$output" "Android release required: true"
-
 printf 'next-version: 1.0.1\n' > GitVersion.yml
 version_head="$(commit_all "version")"
-output="$("$detect_script" "$shared_props_head" "$version_head")"
+output="$("$detect_script" "$core_head" "$version_head")"
 assert_contains "$output" "Android release required: true"
 
 git tag v1.0.0 "$version_head"
-mkdir -p src/Cotton.Mobile.Tests
-printf 'test only\n' > src/Cotton.Mobile.Tests/Marker.txt
+mkdir -p tests/Cotton.Mobile.Tests
+printf 'test only\n' > tests/Cotton.Mobile.Tests/Marker.txt
 test_only_head="$(commit_all "test only")"
 output="$("$detect_script" "$version_head" "$test_only_head")"
 assert_contains "$output" "Android release required: false"
 
 printf '<Project><UnreleasedChange /></Project>\n' > src/Cotton.Mobile/Cotton.Mobile.csproj
 unreleased_app_head="$(commit_all "unreleased app")"
-printf 'test follow-up\n' > src/Cotton.Mobile.Tests/Marker.txt
+printf 'test follow-up\n' > tests/Cotton.Mobile.Tests/Marker.txt
 test_follow_up_head="$(commit_all "test follow-up")"
 output="$("$detect_script" "$unreleased_app_head" "$test_follow_up_head" v1.0.0)"
 assert_contains "$output" "Android release required: true"

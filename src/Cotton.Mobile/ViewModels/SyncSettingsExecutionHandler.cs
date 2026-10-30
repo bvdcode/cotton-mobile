@@ -3,6 +3,7 @@
 
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
+using EasyExtensions.Mediator;
 using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
@@ -10,23 +11,23 @@ namespace Cotton.Mobile.ViewModels
     public class SyncSettingsExecutionHandler
     {
         private readonly SyncSettingsRootProvider _rootProvider;
-        private readonly SyncExecutionWorkflow _workflow;
+        private readonly IMediator _mediator;
         private readonly INetworkAccessService _networkAccess;
         private readonly ILogger<SyncSettingsExecutionHandler> _logger;
 
         public SyncSettingsExecutionHandler(
             SyncSettingsRootProvider rootProvider,
-            SyncExecutionWorkflow workflow,
+            IMediator mediator,
             INetworkAccessService networkAccess,
             ILogger<SyncSettingsExecutionHandler> logger)
         {
             ArgumentNullException.ThrowIfNull(rootProvider);
-            ArgumentNullException.ThrowIfNull(workflow);
+            ArgumentNullException.ThrowIfNull(mediator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(logger);
 
             _rootProvider = rootProvider;
-            _workflow = workflow;
+            _mediator = mediator;
             _networkAccess = networkAccess;
             _logger = logger;
         }
@@ -65,6 +66,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            IReadOnlyList<CottonSyncRootListItem> runningItems = [];
             state.IsBusy = true;
             try
             {
@@ -73,9 +75,16 @@ namespace Cotton.Mobile.ViewModels
                     CottonSyncRootRunCapability.GetRunnableRoots(
                         collection.Roots,
                         collection.PausedRootIds);
+                HashSet<Guid> runnableRootIds = [.. runnableRoots.Select(root => root.Id)];
+                runningItems = [.. state.Roots.Where(item => runnableRootIds.Contains(item.Id))];
+                SetRunning(runningItems, isRunning: true);
+
                 state.Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
-                state.Status = await _workflow
-                    .RunAllAsync(instanceUri, runnableRoots, cancellationToken);
+                state.Status = await _mediator.Send(
+                    new RunAllSyncRootsRequest(
+                        instanceUri,
+                        runnableRoots),
+                    cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -89,6 +98,7 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
+                SetRunning(runningItems, isRunning: false);
                 state.IsBusy = false;
             }
         }
@@ -140,8 +150,12 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 state.Status = CottonSyncRootRunRouting.CreateStartingStatus(root);
-                state.Status = await _workflow
-                    .RunRootAsync(instanceUri, root, cancellationToken);
+                item.SetRunning(isRunning: true);
+                state.Status = await _mediator.Send(
+                    new RunSyncRootRequest(
+                        instanceUri,
+                        root),
+                    cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -155,7 +169,18 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
+                item.SetRunning(isRunning: false);
                 state.IsBusy = false;
+            }
+        }
+
+        private static void SetRunning(
+            IReadOnlyList<CottonSyncRootListItem> items,
+            bool isRunning)
+        {
+            foreach (CottonSyncRootListItem item in items)
+            {
+                item.SetRunning(isRunning);
             }
         }
     }

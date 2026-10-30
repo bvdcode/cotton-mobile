@@ -169,10 +169,6 @@ namespace Cotton.Mobile.Services
                 && existingRoot.LocalRoot.StorageKind == candidate.LocalRoot.StorageKind
                 && string.Equals(existingRoot.LocalRoot.RootKey, candidate.LocalRoot.RootKey, StringComparison.Ordinal)
                 && string.Equals(
-                    existingRoot.LocalRoot.ScopeKey,
-                    candidate.LocalRoot.ScopeKey,
-                    StringComparison.Ordinal)
-                && string.Equals(
                     existingRoot.LocalRoot.DisplayName,
                     candidate.LocalRoot.DisplayName,
                     StringComparison.Ordinal)
@@ -191,10 +187,6 @@ namespace Cotton.Mobile.Services
                 && string.Equals(
                     existingRoot.LocalRoot.RootKey,
                     candidate.LocalRoot.RootKey,
-                    StringComparison.Ordinal)
-                && string.Equals(
-                    existingRoot.LocalRoot.ScopeKey,
-                    candidate.LocalRoot.ScopeKey,
                     StringComparison.Ordinal);
         }
 

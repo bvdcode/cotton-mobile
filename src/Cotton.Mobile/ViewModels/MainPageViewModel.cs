@@ -68,10 +68,10 @@ namespace Cotton.Mobile.ViewModels
                 () => AsyncCommandExecution.RunAsync(
                     _userInteractionService.OpenPrivacyPolicyAsync,
                     LogUnhandledCommandException));
-            OpenRepositoryCommand = new AsyncRelayCommand(
-                () => AsyncCommandExecution.RunAsync(
-                    _userInteractionService.OpenRepositoryAsync,
-                    LogUnhandledCommandException));
+            ShowSyncCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(ShowSyncAsync, LogUnhandledCommandException));
+            ShowProfileCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(ShowProfileAsync, LogUnhandledCommandException));
         }
 
         public MainPageDisplayState Display { get; }
@@ -90,7 +90,9 @@ namespace Cotton.Mobile.ViewModels
 
         public IAsyncRelayCommand PrivacyPolicyCommand { get; }
 
-        public IAsyncRelayCommand OpenRepositoryCommand { get; }
+        public IAsyncRelayCommand ShowSyncCommand { get; }
+
+        public IAsyncRelayCommand ShowProfileCommand { get; }
 
         public async Task RestoreSessionOnceAsync()
         {
@@ -116,7 +118,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            Display.ShowSignInProgress(AppResources.CheckingServer);
+            Display.ShowLoading(AppResources.CheckingServer);
             RefreshCommands();
             Uri? instanceUri = await _instanceResolver.ResolveAsync(instanceUrlInput);
             if (instanceUri is null)
@@ -158,17 +160,18 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private async Task CancelAuthorizationAsync()
+        private Task CancelAuthorizationAsync()
         {
             CancellationTokenSource? authorizationCancellation = _authorizationCancellation;
             if (authorizationCancellation is null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             Display.ShowAuthorizationCancelling();
             RefreshCommands();
-            await authorizationCancellation.CancelAsync();
+            authorizationCancellation.Cancel();
+            return Task.CompletedTask;
         }
 
         private async Task ConfirmLogoutAsync()
@@ -202,17 +205,28 @@ namespace Cotton.Mobile.ViewModels
                 Display.ShowAuthenticated(profile, state.Status);
                 RefreshCommands();
                 await _notificationSessionService.SetSessionAsync(state.InstanceUriValue);
-                await _automaticSyncSessionService.SetSessionAsync(
-                    new CottonAuthenticatedSessionScope(state.InstanceUriValue, profile.AccountScopeKey));
+                await _automaticSyncSessionService.SetSessionAsync(state.InstanceUriValue);
 
                 return;
             }
 
             await _notificationSessionService.SetSessionAsync(instanceUri: null);
-            await _automaticSyncSessionService.SetSessionAsync(sessionScope: null);
+            await _automaticSyncSessionService.SetSessionAsync(instanceUri: null);
             Sync.Clear();
             Display.ShowSignIn(state.Status);
             RefreshCommands();
+        }
+
+        private Task ShowSyncAsync()
+        {
+            Display.ShowDestination(AppNavigationDestination.Sync);
+            return Task.CompletedTask;
+        }
+
+        private Task ShowProfileAsync()
+        {
+            Display.ShowDestination(AppNavigationDestination.Profile);
+            return Task.CompletedTask;
         }
 
         private void RefreshCommands()

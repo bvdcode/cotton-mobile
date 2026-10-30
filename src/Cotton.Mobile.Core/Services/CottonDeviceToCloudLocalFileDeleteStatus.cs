@@ -8,7 +8,6 @@ namespace Cotton.Mobile.Services
         Deleted,
         AlreadyMissing,
         Changed,
-        RemoteChanged,
         Unsupported,
     }
 }

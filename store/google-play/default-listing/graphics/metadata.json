@@ -10,19 +10,19 @@
   "phoneScreenshots": [
     {
       "path": "phone-screenshots/01-sync-overview.png",
-      "altText": "Cotton Cloud upload folders overview in dark theme with an action to add a folder."
+      "altText": "Cotton Cloud sync overview in dark theme with an action to add a sync folder."
     },
     {
       "path": "phone-screenshots/02-sync-mode.png",
-      "altText": "Cotton Cloud source selection in dark theme with Android folder and media album options."
+      "altText": "Cotton Cloud sync mode selection in dark theme with upload and two-way sync options."
     },
     {
       "path": "phone-screenshots/03-sync-folder-ready.png",
-      "altText": "Cotton Cloud upload dashboard with a configured Android folder ready to back up."
+      "altText": "Cotton Cloud dark sync dashboard with Project Files configured and ready to sync."
     },
     {
       "path": "phone-screenshots/04-sync-folder-active.png",
-      "altText": "Cotton Cloud upload dashboard showing an active Android-to-cloud file upload."
+      "altText": "Cotton Cloud dark sync dashboard actively syncing Project Files from cloud to device."
     }
   ]
 }

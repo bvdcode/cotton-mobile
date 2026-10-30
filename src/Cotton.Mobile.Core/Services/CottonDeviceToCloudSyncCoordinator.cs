@@ -1,14 +1,10 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using Microsoft.Extensions.Logging;
-
 namespace Cotton.Mobile.Services
 {
-    public partial class CottonDeviceToCloudSyncCoordinator : ICottonDeviceToCloudSyncCoordinator
+    public class CottonDeviceToCloudSyncCoordinator : ICottonDeviceToCloudSyncCoordinator
     {
-        private const int MaximumConflictSamples = 3;
-
         private readonly ICottonSyncRootStore _rootStore;
         private readonly ICottonSyncRootPauseStore _pauseStore;
         private readonly ICottonUploadReceiptStore _uploadReceiptStore;
@@ -16,11 +12,6 @@ namespace Cotton.Mobile.Services
         private readonly CottonRecursiveRemoteContentLoader _remoteContentLoader;
         private readonly CottonUploadOnlySyncPlanExecutor _planExecutor;
         private readonly CottonSyncRootExecutionLock _executionLock;
-        private readonly CottonMediaOriginalRestoreExecutor _originalRestore;
-        private readonly CottonRemoteConflictResolutionService _conflicts;
-        private readonly FileSystemCottonSyncReviewStore _reviewStore;
-        private readonly CottonSyncProgressHub _progressHub;
-        private readonly ILogger<CottonDeviceToCloudSyncCoordinator> _logger;
 
         public CottonDeviceToCloudSyncCoordinator(
             ICottonSyncRootStore rootStore,
@@ -29,12 +20,7 @@ namespace Cotton.Mobile.Services
             ICottonDeviceToCloudLocalTreeReader localTreeReader,
             CottonRecursiveRemoteContentLoader remoteContentLoader,
             CottonUploadOnlySyncPlanExecutor planExecutor,
-            CottonSyncRootExecutionLock executionLock,
-            CottonMediaOriginalRestoreExecutor originalRestore,
-            CottonRemoteConflictResolutionService conflicts,
-            FileSystemCottonSyncReviewStore reviewStore,
-            CottonSyncProgressHub progressHub,
-            ILogger<CottonDeviceToCloudSyncCoordinator> logger)
+            CottonSyncRootExecutionLock executionLock)
         {
             ArgumentNullException.ThrowIfNull(rootStore);
             ArgumentNullException.ThrowIfNull(pauseStore);
@@ -43,8 +29,6 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(remoteContentLoader);
             ArgumentNullException.ThrowIfNull(planExecutor);
             ArgumentNullException.ThrowIfNull(executionLock);
-            ArgumentNullException.ThrowIfNull(progressHub);
-            ArgumentNullException.ThrowIfNull(logger);
 
             _rootStore = rootStore;
             _pauseStore = pauseStore;
@@ -53,11 +37,6 @@ namespace Cotton.Mobile.Services
             _remoteContentLoader = remoteContentLoader;
             _planExecutor = planExecutor;
             _executionLock = executionLock;
-            _originalRestore = originalRestore ?? throw new ArgumentNullException(nameof(originalRestore));
-            _conflicts = conflicts ?? throw new ArgumentNullException(nameof(conflicts));
-            _reviewStore = reviewStore ?? throw new ArgumentNullException(nameof(reviewStore));
-            _progressHub = progressHub;
-            _logger = logger;
         }
 
         public async Task<CottonDeviceToCloudSyncRunSummary> RunAsync(
@@ -68,12 +47,14 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonSyncRootSnapshot> roots =
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            IReadOnlySet<Guid> pausedRootIds =
+                await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             List<CottonDeviceToCloudSyncRootRunResult> results = new(roots.Count);
 
             foreach (CottonSyncRootSnapshot root in roots)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                results.Add(await RunRootCoreAsync(instanceUri, root, cancellationToken)
+                results.Add(await RunRootCoreAsync(instanceUri, root, pausedRootIds, cancellationToken)
                     .ConfigureAwait(false));
             }
 
@@ -92,8 +73,10 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Sync root belongs to a different instance.", nameof(root));
             }
 
+            IReadOnlySet<Guid> pausedRootIds =
+                await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             CottonDeviceToCloudSyncRootRunResult result =
-                await RunRootCoreAsync(instanceUri, root, cancellationToken)
+                await RunRootCoreAsync(instanceUri, root, pausedRootIds, cancellationToken)
                     .ConfigureAwait(false);
             return new CottonDeviceToCloudSyncRunSummary([result]);
         }
@@ -101,65 +84,29 @@ namespace Cotton.Mobile.Services
         private async Task<CottonDeviceToCloudSyncRootRunResult> RunRootCoreAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
+            IReadOnlySet<Guid> pausedRootIds,
             CancellationToken cancellationToken)
         {
+            if (pausedRootIds.Contains(root.Id))
+            {
+                return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);
+            }
+
             if (CottonDeviceToCloudSyncRootCapability.HasUnsupportedLocalRoot(root))
             {
-                CottonSyncDiagnosticLog.RootSkipped(
-                    _logger,
-                    root.Id,
-                    CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedLocalRoot);
                 return CottonDeviceToCloudSyncRootRunResult.SkippedUnsupportedLocalRoot(root);
             }
 
             if (!root.CanRunSync)
             {
-                CottonSyncDiagnosticLog.RootSkipped(
-                    _logger,
-                    root.Id,
-                    CottonDeviceToCloudSyncRootRunStatus.SkippedNotReady);
                 return CottonDeviceToCloudSyncRootRunResult.SkippedNotReady(root);
             }
 
-            CottonSyncDiagnosticLog.RootStarted(_logger, root.Id, root.LocalRoot.StorageKind);
-
             return await _executionLock.ExecuteAsync(
                     root,
-                    async token =>
-                    {
-                        try
-                        {
-                            if (await IsPausedAsync(instanceUri, root.Id, token).ConfigureAwait(false))
-                            {
-                                return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);
-                            }
-
-                            return await ExecuteRootAsync(instanceUri, root, token).ConfigureAwait(false);
-                        }
-                        catch (Exception exception) when (token.IsCancellationRequested
-                            && exception is OperationCanceledException or IOException)
-                        {
-                            if (cancellationToken.IsCancellationRequested)
-                            {
-                                CottonSyncDiagnosticLog.RootCancelled(_logger, root.Id, exception);
-                                throw new OperationCanceledException(
-                                    "Sync-root execution was cancelled.", exception, cancellationToken);
-                            }
-
-                            CottonSyncDiagnosticLog.RootSkipped(
-                                _logger, root.Id, CottonDeviceToCloudSyncRootRunStatus.SkippedPaused);
-                            return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);
-                        }
-                    },
+                    token => ExecuteRootAsync(instanceUri, root, token),
                     cancellationToken)
-                    .ConfigureAwait(false);
-        }
-
-        private async Task<bool> IsPausedAsync(Uri instanceUri, Guid rootId, CancellationToken cancellationToken)
-        {
-            IReadOnlySet<Guid> pausedRootIds = await _pauseStore
-                .LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            return pausedRootIds.Contains(rootId);
+                .ConfigureAwait(false);
         }
 
         private async Task<CottonDeviceToCloudSyncRootRunResult> ExecuteRootAsync(
@@ -167,139 +114,20 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                _progressHub.Report(CottonSyncProgressSnapshot.ScanningDevice(root.Id));
-                CottonDeviceToCloudLocalContentSnapshot localContent = await _localTreeReader
-                    .ReadAsync(instanceUri, root, cancellationToken)
-                    .ConfigureAwait(false);
-                CottonSyncDiagnosticLog.LocalScanCompleted(
-                    _logger,
-                    root.Id,
-                    localContent.Items.Count,
-                    localContent.Problems.Count);
-                CottonDeviceToCloudSyncRootRunResult? unchanged = await TryReuseComparisonAsync(
-                    root, localContent, cancellationToken).ConfigureAwait(false);
-                if (unchanged is not null)
-                {
-                    return unchanged;
-                }
+            CottonDeviceToCloudLocalContentSnapshot localContent = await _localTreeReader
+                .ReadAsync(instanceUri, root, cancellationToken)
+                .ConfigureAwait(false);
+            CottonDeviceToCloudRemoteContentSnapshot remoteContent =
+                await _remoteContentLoader.LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+            IReadOnlyList<CottonUploadReceiptSnapshot> uploadReceipts =
+                await _uploadReceiptStore.LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+            CottonDeviceToCloudSyncPlanSnapshot plan =
+                CottonDeviceToCloudSyncPlanner.Create(root, localContent, remoteContent, uploadReceipts);
 
-                await _reviewStore.InvalidateAsync(root, cancellationToken).ConfigureAwait(false);
-                IReadOnlyList<CottonUploadReceiptSnapshot> uploadReceipts = await _uploadReceiptStore
-                    .LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
-                HashSet<string> verifiedSources = await GetVerifiedSourcesAsync(
-                    root, localContent, uploadReceipts, cancellationToken).ConfigureAwait(false);
-                HashSet<string>? selectedPaths = null;
-                if (verifiedSources.Count > 0)
-                {
-                    selectedPaths = localContent.Items
-                        .Where(item => item.ItemType == CottonFileBrowserEntryType.File
-                            && (item.LocalSourceId is null || !verifiedSources.Contains(item.LocalSourceId)))
-                        .Select(item => item.RelativePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
-                }
-                _progressHub.Report(CottonSyncProgressSnapshot.CheckingCloud(root.Id));
-                CottonDeviceToCloudRemoteContentSnapshot remoteContent = await _remoteContentLoader
-                    .LoadAsync(instanceUri, root, cancellationToken, selectedPaths)
-                    .ConfigureAwait(false);
-                CottonSyncDiagnosticLog.CloudScanCompleted(_logger, root.Id, remoteContent.Items.Count);
-                int restored = await _originalRestore.ApplyAsync(root, localContent, remoteContent, cancellationToken)
-                    .ConfigureAwait(false);
-                if (restored > 0)
-                {
-                    remoteContent = await _remoteContentLoader.LoadAsync(instanceUri, root, cancellationToken)
-                        .ConfigureAwait(false);
-                }
+            CottonDeviceToCloudSyncExecutionResult executionResult =
+                await _planExecutor.ExecuteAsync(instanceUri, root, plan, cancellationToken).ConfigureAwait(false);
 
-                int replaced = await _conflicts.ApplyAsync(root, localContent, remoteContent, cancellationToken)
-                    .ConfigureAwait(false);
-                if (replaced > 0)
-                {
-                    remoteContent = await _remoteContentLoader.LoadAsync(instanceUri, root, cancellationToken)
-                        .ConfigureAwait(false);
-                }
-
-                restored += replaced;
-                if (restored > 0)
-                {
-                    uploadReceipts = await _uploadReceiptStore.LoadAsync(instanceUri, root, cancellationToken)
-                        .ConfigureAwait(false);
-                }
-                CottonSyncDiagnosticLog.ReceiptsLoaded(_logger, root.Id, uploadReceipts.Count);
-                CottonDeviceToCloudSyncPlanSnapshot plan =
-                    CottonDeviceToCloudSyncPlanner.Create(root, localContent, remoteContent, uploadReceipts, verifiedSources);
-                await _conflicts.CaptureAsync(root, localContent, remoteContent, plan, cancellationToken)
-                    .ConfigureAwait(false);
-                LogRemotePathConflicts(root.Id, plan, remoteContent);
-                CottonSyncDiagnosticLog.PlanCreated(
-                    _logger,
-                    root.Id,
-                    plan.UploadCount,
-                    plan.RemoteFolderCreateCount,
-                    plan.ConfirmedUploadCount,
-                    plan.LocalDeleteCount,
-                    plan.BlockedCount,
-                    plan.NoOpCount);
-
-                CottonDeviceToCloudSyncExecutionResult executionResult = await _planExecutor
-                    .ExecuteAsync(instanceUri, root, plan, cancellationToken)
-                    .ConfigureAwait(false);
-                if (restored > 0)
-                {
-                    executionResult = new CottonDeviceToCloudSyncExecutionResult(executionResult.UploadedCount,
-                        executionResult.ConfirmedUploadCount + restored, executionResult.CreatedFolderCount,
-                        executionResult.DeletedLocalFileCount, executionResult.SkippedCount, executionResult.BlockedCount);
-                }
-
-                CottonSyncDiagnosticLog.ExecutionCompleted(
-                    _logger,
-                    root.Id,
-                    executionResult.UploadedCount,
-                    executionResult.ConfirmedUploadCount,
-                    executionResult.CreatedFolderCount,
-                    executionResult.DeletedLocalFileCount,
-                    executionResult.SkippedCount,
-                    executionResult.BlockedCount);
-                await SaveComparisonAsync(root, localContent, plan, executionResult, cancellationToken)
-                    .ConfigureAwait(false);
-                return CottonDeviceToCloudSyncRootRunResult.Completed(root, plan, executionResult);
-            }
-            finally
-            {
-                _progressHub.Complete(root.Id);
-            }
-        }
-
-        private void LogRemotePathConflicts(
-            Guid rootId,
-            CottonDeviceToCloudSyncPlanSnapshot plan,
-            CottonDeviceToCloudRemoteContentSnapshot remoteContent)
-        {
-            CottonDeviceToCloudSyncPlanItem[] conflicts = [.. plan.Items.Where(item =>
-                item.Action == CottonDeviceToCloudSyncActionKind.RemotePathConflict)];
-            if (conflicts.Length == 0)
-            {
-                return;
-            }
-
-            CottonSyncDiagnosticLog.RemotePathConflictSummary(
-                _logger, rootId, conflicts.Length, Math.Min(conflicts.Length, MaximumConflictSamples));
-            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> remoteByPath = remoteContent.Items
-                .ToDictionary(item => item.RelativePath, StringComparer.OrdinalIgnoreCase);
-            foreach (CottonDeviceToCloudSyncPlanItem item in conflicts.Take(MaximumConflictSamples))
-            {
-                remoteByPath.TryGetValue(
-                    item.RelativePath,
-                    out CottonDeviceToCloudRemoteItemSnapshot? remoteItem);
-                CottonSyncDiagnosticLog.RemotePathConflict(
-                    _logger,
-                    rootId,
-                    remoteItem?.Entry.Id ?? item.CloudItemId,
-                    remoteItem?.Entry.Type,
-                    item.SizeBytes == remoteItem?.Entry.SizeBytes,
-                    item.ContentHash,
-                    remoteItem?.Entry.ContentHash);
-            }
+            return CottonDeviceToCloudSyncRootRunResult.Completed(root, plan, executionResult);
         }
     }
 }

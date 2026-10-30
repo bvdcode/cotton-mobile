@@ -7,14 +7,12 @@ on:
       - develop
     paths:
       - "GitVersion.yml"
-      - "global.json"
-      - "NuGet.Config"
       - ".editorconfig"
       - ".gitattributes"
       - "Directory.Build.props"
       - "src/Cotton.Mobile.Core/**"
       - "src/Cotton.Mobile/**"
-      - "src/Cotton.Mobile.Tests/**"
+      - "tests/**"
       - "scripts/ci/**"
       - "scripts/mobile/**"
       - "store/google-play/**"
@@ -22,14 +20,12 @@ on:
   pull_request:
     paths:
       - "GitVersion.yml"
-      - "global.json"
-      - "NuGet.Config"
       - ".editorconfig"
       - ".gitattributes"
       - "Directory.Build.props"
       - "src/Cotton.Mobile.Core/**"
       - "src/Cotton.Mobile/**"
-      - "src/Cotton.Mobile.Tests/**"
+      - "tests/**"
       - "scripts/ci/**"
       - "scripts/mobile/**"
       - "store/google-play/**"
@@ -102,22 +98,11 @@ jobs:
           BUILD_SIGNED_RELEASE: ${{ inputs.build_signed_release }}
           GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
           PUBLISH_GITHUB_RELEASE: ${{ inputs.publish_github_release }}
-          UPLOAD_STORE_LISTING: ${{ inputs.upload_store_listing }}
           UPLOAD_TO_GOOGLE_PLAY: ${{ inputs.upload_to_google_play }}
         run: |
-          listing_only_develop_dispatch=false
-          if [[ "$GITHUB_REF" == "refs/heads/develop" \
-            && "$UPLOAD_STORE_LISTING" == "true" \
-            && "$BUILD_SIGNED_RELEASE" != "true" \
-            && "$PUBLISH_GITHUB_RELEASE" != "true" \
-            && "$UPLOAD_TO_GOOGLE_PLAY" != "true" ]]; then
-            listing_only_develop_dispatch=true
-          fi
-
           if [[ "$GITHUB_REF" != "refs/heads/main" ]] \
-            && [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]] \
-            && [[ "$listing_only_develop_dispatch" != "true" ]]; then
-            echo "Manual production operations require main or a SemVer tag; develop permits listing-only publication." >&2
+            && [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Manual production operations require main or a SemVer tag." >&2
             exit 1
           fi
 
@@ -152,17 +137,14 @@ jobs:
     permissions:
       contents: read
 
-  android-release-plan:
-    name: Plan Android Release
+  android-release-changes:
+    name: Detect Android Release Changes
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     permissions:
       contents: read
     outputs:
-      google_play_track: ${{ steps.policy.outputs.google_play_track }}
-      publish_github_release: ${{ steps.policy.outputs.publish_github_release }}
       release_required: ${{ steps.detect.outputs.release_required }}
-      upload_to_google_play: ${{ steps.policy.outputs.upload_to_google_play }}
     steps:
       - name: Check repository
         uses: actions/checkout@v5
@@ -174,24 +156,27 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          published_release_tag="$(
-            gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
-              --jq "map(select(.draft == false and .target_commitish == \"$GITHUB_REF_NAME\"))[0].tag_name // \"\""
-          )"
+          if [[ "$GITHUB_REF_NAME" == "main" ]]; then
+            published_release_tag="$(
+              gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+                --jq 'map(select(.draft == false and .prerelease == false))[0].tag_name // ""'
+            )"
+          else
+            published_release_tag="$(
+              gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+                --jq 'map(select(.draft == false and .prerelease == true))[0].tag_name // ""'
+            )"
+          fi
 
           scripts/mobile/detect-android-release-changes.sh \
             "${{ github.event.before }}" \
             "$GITHUB_SHA" \
             "$published_release_tag"
 
-      - name: Resolve branch distribution
-        id: policy
-        run: scripts/mobile/resolve-android-release-policy.sh "$GITHUB_REF_NAME"
-
   android-debug:
     name: Build Debug APK
     needs:
-      - android-release-plan
+      - android-release-changes
       - quality
     if: >-
       ${{
@@ -200,8 +185,8 @@ jobs:
         (
           github.event_name != 'push' ||
           (
-            needs.android-release-plan.result == 'success' &&
-            needs.android-release-plan.outputs.release_required == 'true'
+            needs.android-release-changes.result == 'success' &&
+            needs.android-release-changes.outputs.release_required == 'true'
           )
         )
       }}
@@ -209,62 +194,43 @@ jobs:
     permissions:
       contents: read
 
-  android-branch-release:
-    name: Distribute Signed Branch Release
-    needs:
-      - android-release-plan
-      - android-debug
-      - quality
-    if: >-
-      ${{
-        always() &&
-        github.event_name == 'push' &&
-        needs.quality.result == 'success' &&
-        needs.android-debug.result == 'success' &&
-        needs.android-release-plan.result == 'success' &&
-        needs.android-release-plan.outputs.release_required == 'true'
-      }}
-    concurrency:
-      group: mobile-android-release
-      cancel-in-progress: false
-    uses: ./.github/workflows/mobile-release.yml
-    with:
-      github_release_tag: ''
-      google_play_changes_not_sent_for_review: false
-      google_play_release_status: completed
-      google_play_track: ${{ needs.android-release-plan.outputs.google_play_track }}
-      publish_github_release: ${{ fromJSON(needs.android-release-plan.outputs.publish_github_release) }}
-      upload_to_google_play: ${{ fromJSON(needs.android-release-plan.outputs.upload_to_google_play) }}
-    secrets: inherit
-    permissions:
-      contents: write
-
-  android-manual-release:
-    name: Build Manually Requested Signed Release
+  android-signed-release:
+    name: Build and Publish Signed Release
     needs:
       - workflow-dispatch-guards
+      - android-release-changes
       - android-debug
       - quality
     if: >-
       ${{
         always() &&
-        github.event_name == 'workflow_dispatch' &&
-        inputs.build_signed_release &&
-        needs.workflow-dispatch-guards.result == 'success' &&
         needs.quality.result == 'success' &&
-        needs.android-debug.result == 'success'
+        needs.android-debug.result == 'success' &&
+        (
+          (
+            github.event_name == 'push' &&
+            github.ref_name == 'main' &&
+            needs.android-release-changes.result == 'success' &&
+            needs.android-release-changes.outputs.release_required == 'true'
+          ) ||
+          (
+            github.event_name == 'workflow_dispatch' &&
+            inputs.build_signed_release &&
+            needs.workflow-dispatch-guards.result == 'success'
+          )
+        )
       }}
     concurrency:
       group: mobile-android-release
       cancel-in-progress: false
     uses: ./.github/workflows/mobile-release.yml
     with:
-      github_release_tag: ${{ inputs.github_release_tag }}
-      google_play_changes_not_sent_for_review: ${{ inputs.google_play_changes_not_sent_for_review }}
-      google_play_release_status: ${{ inputs.google_play_release_status }}
-      google_play_track: ${{ inputs.google_play_track }}
-      publish_github_release: ${{ inputs.publish_github_release }}
-      upload_to_google_play: ${{ inputs.upload_to_google_play }}
+      github_release_tag: ${{ inputs.github_release_tag || '' }}
+      google_play_changes_not_sent_for_review: ${{ inputs.google_play_changes_not_sent_for_review || false }}
+      google_play_release_status: ${{ inputs.google_play_release_status || 'completed' }}
+      google_play_track: ${{ inputs.google_play_track || 'alpha' }}
+      publish_github_release: ${{ github.event_name == 'push' || inputs.publish_github_release }}
+      upload_to_google_play: ${{ (github.event_name == 'push' && github.ref_name == 'main') || inputs.upload_to_google_play }}
     secrets: inherit
     permissions:
       contents: write

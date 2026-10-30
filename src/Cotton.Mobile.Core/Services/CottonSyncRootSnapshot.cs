@@ -69,8 +69,8 @@ namespace Cotton.Mobile.Services
             Direction = direction;
             UploadOriginalRetention = uploadOriginalRetention;
             StableKey = CreateStableKey(InstanceUri, AccountScopeKey, CloudFolder, LocalRoot);
-            ReadinessStatus = ResolveReadinessStatus(LocalRoot);
-            StatusText = CreateStatusText(ReadinessStatus, LocalRoot.UsesMediaStore);
+            ReadinessStatus = ResolveReadinessStatus(LocalRoot.PermissionStatus);
+            StatusText = CreateStatusText(ReadinessStatus);
         }
 
         public Guid Id { get; }
@@ -98,9 +98,7 @@ namespace Cotton.Mobile.Services
         public bool DeletesOriginalsAfterUpload =>
             UploadOriginalRetention == CottonUploadOriginalRetention.DeleteAfterConfirmedUpload;
 
-        public bool NeedsUserAction =>
-            ReadinessStatus is CottonSyncRootReadinessStatus.NeedsUserGrant
-                or CottonSyncRootReadinessStatus.GrantRevoked;
+        public bool NeedsUserAction => LocalRoot.NeedsUserAction;
 
         private static bool IsSupportedInstanceUri(Uri instanceUri)
         {
@@ -147,14 +145,8 @@ namespace Cotton.Mobile.Services
         }
 
         private static CottonSyncRootReadinessStatus ResolveReadinessStatus(
-            CottonSyncLocalRootSnapshot localRoot)
+            CottonSyncRootPermissionStatus permissionStatus)
         {
-            if (localRoot.UsesMediaStore && string.IsNullOrWhiteSpace(localRoot.ScopeKey))
-            {
-                return CottonSyncRootReadinessStatus.NeedsUserGrant;
-            }
-
-            CottonSyncRootPermissionStatus permissionStatus = localRoot.PermissionStatus;
             return permissionStatus switch
             {
                 CottonSyncRootPermissionStatus.Available => CottonSyncRootReadinessStatus.Ready,
@@ -162,27 +154,13 @@ namespace Cotton.Mobile.Services
                 CottonSyncRootPermissionStatus.Revoked => CottonSyncRootReadinessStatus.GrantRevoked,
                 CottonSyncRootPermissionStatus.Unavailable => CottonSyncRootReadinessStatus.LocalRootUnavailable,
                 _ => throw new ArgumentOutOfRangeException(
-                    nameof(localRoot),
+                    nameof(permissionStatus),
                     "Sync root permission status is not supported."),
             };
         }
 
-        private static string CreateStatusText(
-            CottonSyncRootReadinessStatus status,
-            bool usesMediaStore)
+        private static string CreateStatusText(CottonSyncRootReadinessStatus status)
         {
-            if (usesMediaStore)
-            {
-                return status switch
-                {
-                    CottonSyncRootReadinessStatus.Ready => CoreResources.SyncRootReady,
-                    CottonSyncRootReadinessStatus.NeedsUserGrant => CoreResources.ChooseMediaFolders,
-                    CottonSyncRootReadinessStatus.GrantRevoked => CoreResources.ReconnectMediaFolders,
-                    CottonSyncRootReadinessStatus.LocalRootUnavailable => CoreResources.MediaFoldersUnavailable,
-                    _ => throw new ArgumentOutOfRangeException(nameof(status), "Sync root status is not supported."),
-                };
-            }
-
             return status switch
             {
                 CottonSyncRootReadinessStatus.Ready => CoreResources.SyncRootReady,

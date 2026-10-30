@@ -36,9 +36,6 @@
 		<UseDefaultPublishRuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">false</UseDefaultPublishRuntimeIdentifier>
 		<EmbedAssembliesIntoApk Condition="'$(Configuration)' == 'Debug' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">true</EmbedAssembliesIntoApk>
 		<AndroidStoreUncompressedFileExtensions Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">.so;$(AndroidStoreUncompressedFileExtensions)</AndroidStoreUncompressedFileExtensions>
-		<AndroidHttpClientHandlerType>Cotton.Mobile.Platforms.Android.AndroidNetworkMessageHandler, Cotton.Mobile</AndroidHttpClientHandlerType>
-		<AndroidLintEnabled Condition="'$(Configuration)' == 'Release'">true</AndroidLintEnabled>
-		<AndroidLintDisabledIssues Condition="'$(Configuration)' == 'Release'">MissingClass,BatteryLife,OldTargetApi</AndroidLintDisabledIssues>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -54,15 +51,11 @@
 		<ProjectReference Include="..\Cotton.Mobile.Core\Cotton.Mobile.Core.csproj" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="Cotton.Sdk" Version="$(CottonSdkVersion)" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.100" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.11" />
-		<PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.12.0-cotton.1" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.90" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.10.3" />
 		<PackageReference Include="UraniumUI.Icons.MaterialSymbols" Version="3.0.0" />
 		<PackageReference Include="UraniumUI.Material" Version="3.0.0" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(CottonUiTests)' == 'true' and '$(Configuration)' == 'Debug'">
-		<Compile Include="..\..\scripts\mobile\ui-tests\*.cs" />
 	</ItemGroup>
 
 	<Target

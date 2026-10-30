@@ -13,7 +13,6 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public partial class AndroidMediaStoreDeviceToCloudLocalTreeReader
     {
-        private const string LegacyRevisionSourceVersion = "android-media-store-date-modified-v1";
         private const int GenerationModifiedColumnIndex = 6;
 
         private static string[] CreateProjection()
@@ -53,65 +52,38 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static string ResolveContentHash(
             ContentResolver resolver,
-            AndroidMediaContentAccess contentAccess,
+            ICursor cursor,
             AndroidUri contentUri,
             string localSourceId,
-            long? revision,
-            long? sizeBytes,
             CottonContentRevisionIndexSnapshot? previousIndex,
-            List<CottonContentRevisionSnapshot> revisions,
+            List<CottonContentRevisionSnapshot>? revisions,
             AndroidMediaStoreScanStatistics statistics,
             CancellationToken cancellationToken)
         {
-            contentAccess.EnsureUnchanged();
-            if (revision.HasValue
-                && sizeBytes.HasValue
+            if (revisions is null)
+            {
+                statistics.RecordHashedFile();
+                return ComputeContentHash(resolver, contentUri, cancellationToken);
+            }
+
+            long? generation = ReadGeneration(cursor);
+            if (generation.HasValue
                 && previousIndex is not null
-                && previousIndex.TryGetContentHash(
-                    localSourceId,
-                    revision.Value,
-                    sizeBytes.Value,
-                    out string? cachedHash))
+                && previousIndex.TryGetContentHash(localSourceId, generation.Value, out string? cachedHash))
             {
                 statistics.RecordReusedHash();
-                revisions.Add(new CottonContentRevisionSnapshot(
-                    localSourceId,
-                    revision.Value,
-                    cachedHash,
-                    sizeBytes.Value));
-                return cachedHash;
+                revisions.Add(new CottonContentRevisionSnapshot(localSourceId, generation.Value, cachedHash!));
+                return cachedHash!;
             }
 
             statistics.RecordHashedFile();
-            string contentHash = contentAccess.ComputeContentHash(resolver, contentUri, cancellationToken);
-            if (revision.HasValue && sizeBytes.HasValue)
+            string contentHash = ComputeContentHash(resolver, contentUri, cancellationToken);
+            if (generation.HasValue)
             {
-                revisions.Add(new CottonContentRevisionSnapshot(
-                    localSourceId,
-                    revision.Value,
-                    contentHash,
-                    sizeBytes.Value));
+                revisions.Add(new CottonContentRevisionSnapshot(localSourceId, generation.Value, contentHash));
             }
 
             return contentHash;
-        }
-
-        private static long? ReadRevision(ICursor cursor)
-        {
-            return OperatingSystem.IsAndroidVersionAtLeast(30)
-                ? ReadGeneration(cursor)
-                : ReadDateModified(cursor);
-        }
-
-        private static long? ReadDateModified(ICursor cursor)
-        {
-            if (cursor.IsNull(DateModifiedColumnIndex))
-            {
-                return null;
-            }
-
-            long seconds = cursor.GetLong(DateModifiedColumnIndex);
-            return seconds <= 0 ? null : seconds;
         }
 
         private static long? ReadGeneration(ICursor cursor)
@@ -125,13 +97,9 @@ namespace Cotton.Mobile.Platforms.Android
             return generation < 0 ? null : generation;
         }
 
-        private static string CreateSourceVersion()
+        [SupportedOSPlatform("android30.0")]
+        private static string ReadSourceVersion()
         {
-            if (!OperatingSystem.IsAndroidVersionAtLeast(30))
-            {
-                return LegacyRevisionSourceVersion;
-            }
-
             string? sourceVersion = MediaStore.GetVersion(
                 global::Android.App.Application.Context,
                 MediaStore.VolumeExternal);

@@ -107,14 +107,13 @@ namespace Cotton.Mobile.ViewModels
         public AppNavigationDestination SelectedDestination
         {
             get => _selectedDestination;
-            set
+            private set
             {
-                if (!Enum.IsDefined(value))
+                if (SetProperty(ref _selectedDestination, value))
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    OnPropertyChanged(nameof(IsSyncDestinationVisible));
+                    OnPropertyChanged(nameof(IsProfileDestinationVisible));
                 }
-
-                SetProperty(ref _selectedDestination, value);
             }
         }
 
@@ -153,6 +152,12 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsLegalFooterVisible => IsSignInVisible;
 
+        public bool IsSyncDestinationVisible =>
+            IsAuthenticatedVisible && SelectedDestination == AppNavigationDestination.Sync;
+
+        public bool IsProfileDestinationVisible =>
+            IsAuthenticatedVisible && SelectedDestination == AppNavigationDestination.Profile;
+
         public void ShowSessionRestore(string message)
         {
             ShowLoading(message, showIndicator: false);
@@ -170,19 +175,6 @@ namespace Cotton.Mobile.ViewModels
             ProfileStatus = null;
             ProfileAvatarUrl = null;
             IsInputEnabled = true;
-            IsCancelAuthorizationEnabled = false;
-            IsLogoutEnabled = false;
-            SetLoadingIndicatorVisibility(isVisible: false);
-            SetState(MainPageViewState.SignIn);
-        }
-
-        public void ShowSignInProgress(string message)
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(message);
-
-            LoadingMessage = string.Empty;
-            Status = message;
-            IsInputEnabled = false;
             IsCancelAuthorizationEnabled = false;
             IsLogoutEnabled = false;
             SetLoadingIndicatorVisibility(isVisible: false);
@@ -262,6 +254,8 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsAuthenticatedVisible));
             OnPropertyChanged(nameof(IsBrandHeaderVisible));
             OnPropertyChanged(nameof(IsLegalFooterVisible));
+            OnPropertyChanged(nameof(IsSyncDestinationVisible));
+            OnPropertyChanged(nameof(IsProfileDestinationVisible));
         }
 
         private void ShowLoading(string message, bool showIndicator)

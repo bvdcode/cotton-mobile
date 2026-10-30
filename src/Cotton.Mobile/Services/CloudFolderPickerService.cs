@@ -3,6 +3,8 @@
 
 using Cotton.Mobile.ViewModels;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.ApplicationModel;
+
 namespace Cotton.Mobile.Services
 {
     public class CloudFolderPickerService : ICloudFolderPickerService
@@ -36,7 +38,10 @@ namespace Cotton.Mobile.Services
                 destination => completion.TrySetResult(destination),
                 _loggerFactory.CreateLogger<CloudFolderPickerViewModel>());
             CloudFolderPickerPage page = new(viewModel);
-            INavigation navigation = await ModalPageNavigation.ShowAsync(page);
+            INavigation navigation = await MainThread.InvokeOnMainThreadAsync(GetNavigation);
+
+            await MainThread.InvokeOnMainThreadAsync(
+                () => navigation.PushModalAsync(page, animated: false));
             using CancellationTokenRegistration registration = cancellationToken.Register(
                 () => completion.TrySetCanceled(cancellationToken));
             try
@@ -45,8 +50,26 @@ namespace Cotton.Mobile.Services
             }
             finally
             {
-                await ModalPageNavigation.DismissAsync(navigation, page);
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    if (navigation.ModalStack.Contains(page))
+                    {
+                        await navigation.PopModalAsync(animated: false);
+                    }
+                });
             }
+        }
+
+        private static INavigation GetNavigation()
+        {
+            Application? application = Application.Current;
+            if (application is null || application.Windows.Count == 0)
+            {
+                throw new InvalidOperationException("Cloud folder picker needs an active page.");
+            }
+
+            return application.Windows[0].Page?.Navigation
+                ?? throw new InvalidOperationException("Cloud folder picker needs an active page.");
         }
     }
 }

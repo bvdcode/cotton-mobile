@@ -56,9 +56,7 @@ namespace Cotton.Mobile.Services
             try
             {
                 browserOpened = await MainThread.InvokeOnMainThreadAsync(
-                    () => _browser.OpenAsync(
-                        CottonAuthorizationReturn.CreateApprovalUri(session.ApprovalUri),
-                        CottonBrowserLaunchOptions.SystemPreferred()))
+                    () => _browser.OpenAsync(session.ApprovalUri, CottonBrowserLaunchOptions.SystemPreferred()))
                     .ConfigureAwait(false);
             }
             catch (Exception exception)

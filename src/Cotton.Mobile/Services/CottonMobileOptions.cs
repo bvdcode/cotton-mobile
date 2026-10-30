@@ -7,7 +7,6 @@ namespace Cotton.Mobile.Services
     {
         public CottonMobileOptions(
             string applicationName,
-            Uri repositoryUri,
             Uri privacyPolicyUri,
             string supportEmail)
         {
@@ -21,20 +20,15 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Support email is required.", nameof(supportEmail));
             }
 
-            ArgumentNullException.ThrowIfNull(repositoryUri);
             ArgumentNullException.ThrowIfNull(privacyPolicyUri);
-            EnsureHttpsUri(repositoryUri, nameof(repositoryUri));
             EnsureHttpsUri(privacyPolicyUri, nameof(privacyPolicyUri));
 
             ApplicationName = applicationName.Trim();
-            RepositoryUri = repositoryUri;
             PrivacyPolicyUri = privacyPolicyUri;
             SupportEmail = supportEmail.Trim();
         }
 
         public string ApplicationName { get; }
-
-        public Uri RepositoryUri { get; }
 
         public Uri PrivacyPolicyUri { get; }
 

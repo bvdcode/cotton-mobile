@@ -9,8 +9,7 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudLocalContentSnapshot localContent,
             CottonDeviceToCloudRemoteContentSnapshot remoteContent,
-            IEnumerable<CottonUploadReceiptSnapshot> uploadReceipts,
-            IReadOnlySet<string>? verifiedSources = null)
+            IEnumerable<CottonUploadReceiptSnapshot> uploadReceipts)
         {
             ValidateInput(root, localContent, remoteContent, uploadReceipts);
 
@@ -22,17 +21,7 @@ namespace Cotton.Mobile.Services
                 .Where(item => item.ItemType == CottonFileBrowserEntryType.File)
                 .OrderBy(item => item.RelativePath, StringComparer.OrdinalIgnoreCase))
             {
-                CottonDeviceToCloudSyncPlanItem fileItem;
-                if (!root.DeletesOriginalsAfterUpload && localFile.LocalSourceId is not null
-                    && verifiedSources?.Contains(localFile.LocalSourceId) == true)
-                {
-                    fileItem = CottonDeviceToCloudSyncPlanItemFactory.CreateLocal(
-                        CottonDeviceToCloudSyncActionKind.KeepExistingFile, localFile);
-                }
-                else
-                {
-                    fileItem = itemPlanner.CreateLocalFileItem(localFile);
-                }
+                CottonDeviceToCloudSyncPlanItem fileItem = itemPlanner.CreateLocalFileItem(localFile);
                 if (fileItem.RequiresUpload
                     && !index.TryCollectRequiredFolders(
                         fileItem,

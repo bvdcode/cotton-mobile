@@ -16,6 +16,5 @@ namespace Cotton.Mobile.Services
         BlockedLocalItemName,
         BlockedLocalSource,
         PendingLocalVersionChanged,
-        UploadedLocalVersionChanged,
     }
 }

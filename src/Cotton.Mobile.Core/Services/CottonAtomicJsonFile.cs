@@ -67,6 +67,7 @@ namespace Cotton.Mobile.Services
                         .SerializeAsync(stream, value, SerializerOptions, cancellationToken)
                         .ConfigureAwait(false);
                     await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                    stream.Flush(flushToDisk: true);
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();

@@ -1,1 +1,5 @@
-Improves session handling when background work is canceled. Coordinates token refresh with sign-in and sign-out to prevent stale token updates.
+Closed testing build for Cotton Cloud.
+
+Adds account and security notifications without a third-party push provider. New notifications arrive immediately through the active Cotton connection while the app is open and are checked periodically by Android in the background.
+
+Large notification backlogs are summarized into one useful alert instead of flooding the notification tray.

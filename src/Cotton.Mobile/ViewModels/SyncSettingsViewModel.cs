@@ -10,81 +10,145 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public partial class SyncSettingsViewModel : ObservableObject, ISyncSettingsViewState
+    public class SyncSettingsViewModel : ObservableObject, ISyncSettingsViewState
     {
         private readonly SyncSettingsLoadingHandler _loadingHandler;
         private readonly SyncSettingsExecutionHandler _executionHandler;
         private readonly SyncSettingsSetupHandler _setupHandler;
         private readonly SyncSettingsManagementHandler _managementHandler;
-        private readonly SyncSettingsStatusObserver _statusObserver;
-        private readonly MediaOriginalRestoreReviewHandler _originalRestore;
         private readonly ILogger<SyncSettingsViewModel> _logger;
         private Uri? _instanceUri;
         private string? _accountScopeKey;
         private bool _isBusy;
         private bool _canRunAll;
+        private string _summaryText = AppResources.NoFoldersSyncing;
         private string? _status;
-        private long _statusRevision;
         private bool _isEmptyVisible = true;
-        private bool _isEditMode;
 
         public SyncSettingsViewModel(
             SyncSettingsLoadingHandler loadingHandler,
             SyncSettingsExecutionHandler executionHandler,
             SyncSettingsSetupHandler setupHandler,
             SyncSettingsManagementHandler managementHandler,
-            SyncSettingsStatusObserver statusObserver,
-            BackgroundSyncRestrictionViewModel backgroundRestriction,
-            MediaLocationAccessViewModel mediaLocationAccess,
-            MediaOriginalRestoreReviewHandler originalRestore,
             ILogger<SyncSettingsViewModel> logger)
         {
-            ArgumentNullException.ThrowIfNull(statusObserver);
+            ArgumentNullException.ThrowIfNull(loadingHandler);
+            ArgumentNullException.ThrowIfNull(executionHandler);
+            ArgumentNullException.ThrowIfNull(setupHandler);
+            ArgumentNullException.ThrowIfNull(managementHandler);
+            ArgumentNullException.ThrowIfNull(logger);
 
-            _loadingHandler = loadingHandler ?? throw new ArgumentNullException(nameof(loadingHandler));
-            _executionHandler = executionHandler ?? throw new ArgumentNullException(nameof(executionHandler));
-            _setupHandler = setupHandler ?? throw new ArgumentNullException(nameof(setupHandler));
-            _managementHandler = managementHandler ?? throw new ArgumentNullException(nameof(managementHandler));
-            _statusObserver = statusObserver;
-            _originalRestore = originalRestore;
-            BackgroundRestriction = backgroundRestriction
-                ?? throw new ArgumentNullException(nameof(backgroundRestriction));
-            MediaLocationAccess = mediaLocationAccess
-                ?? throw new ArgumentNullException(nameof(mediaLocationAccess));
-            MediaLocationAccess.PropertyChanged += OnDashboardNoticeChanged;
-            BackgroundRestriction.PropertyChanged += OnDashboardNoticeChanged;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _statusObserver.Attach(this);
-            EnablePhotoBackupCommand = CreateEnablePhotoBackupCommand();
-            AddFolderCommand = CreateAddFolderCommand();
+            _loadingHandler = loadingHandler;
+            _executionHandler = executionHandler;
+            _setupHandler = setupHandler;
+            _managementHandler = managementHandler;
+            _logger = logger;
+            LoadCommand = CreateLoadCommand();
+            AddRootCommand = CreateAddRootCommand();
             RunAllCommand = CreateRunAllCommand();
-            RootActionCommand = CreateRootActionCommand();
+            RootPrimaryActionCommand = CreateRootPrimaryActionCommand();
+            StopRootCommand = CreateStopRootCommand();
             PauseRootCommand = CreatePauseRootCommand();
-            EnterEditModeCommand = new RelayCommand(EnterEditMode, CanEnterEditMode);
-            ExitEditModeCommand = new RelayCommand(ExitEditMode, CanExitEditMode);
+            ResumeRootCommand = CreateResumeRootCommand();
         }
 
-        public IAsyncRelayCommand EnablePhotoBackupCommand { get; }
+        private AsyncRelayCommand CreateLoadCommand()
+        {
+            return new AsyncRelayCommand(
+                cancellationToken => AsyncCommandExecution.RunAsync(
+                    token => _loadingHandler.LoadAsync(this, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
+                () => !IsBusy);
+        }
 
-        public IAsyncRelayCommand AddFolderCommand { get; }
+        private AsyncRelayCommand CreateAddRootCommand()
+        {
+            return new AsyncRelayCommand(
+                cancellationToken => AsyncCommandExecution.RunAsync(
+                    token => _setupHandler.AddRootAsync(this, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
+                CanAddRoot);
+        }
+
+        private AsyncRelayCommand CreateRunAllCommand()
+        {
+            return new AsyncRelayCommand(
+                cancellationToken => AsyncCommandExecution.RunAsync(
+                    token => _executionHandler.RunAllAsync(this, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
+                CanRunAll);
+        }
+
+        private AsyncRelayCommand<CottonSyncRootListItem> CreateRootPrimaryActionCommand()
+        {
+            return new AsyncRelayCommand<CottonSyncRootListItem>(
+                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
+                    item,
+                    ExecuteRootPrimaryActionAsync,
+                    LogUnhandledCommandException,
+                    cancellationToken),
+                item => !IsBusy && item is not null && item.CanUsePrimaryAction);
+        }
+
+        private AsyncRelayCommand<CottonSyncRootListItem> CreateStopRootCommand()
+        {
+            return new AsyncRelayCommand<CottonSyncRootListItem>(
+                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
+                    item,
+                    (root, token) => _managementHandler.StopRootAsync(this, root, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
+                item => !IsBusy && item is not null && item.CanStopSync);
+        }
+
+        private AsyncRelayCommand<CottonSyncRootListItem> CreatePauseRootCommand()
+        {
+            return new AsyncRelayCommand<CottonSyncRootListItem>(
+                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
+                    item,
+                    (root, token) => _managementHandler.SetRootPausedAsync(
+                        this,
+                        root,
+                        isPaused: true,
+                        token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
+                item => !IsBusy && item is not null && item.CanPauseSync);
+        }
+
+        private AsyncRelayCommand<CottonSyncRootListItem> CreateResumeRootCommand()
+        {
+            return new AsyncRelayCommand<CottonSyncRootListItem>(
+                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
+                    item,
+                    (root, token) => _managementHandler.SetRootPausedAsync(
+                        this,
+                        root,
+                        isPaused: false,
+                        token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
+                item => !IsBusy && item is not null && item.CanResumeSync);
+        }
+
+        public IAsyncRelayCommand LoadCommand { get; }
+
+        public IAsyncRelayCommand AddRootCommand { get; }
 
         public IAsyncRelayCommand RunAllCommand { get; }
 
-        public IAsyncRelayCommand<CottonSyncRootActionRequest> RootActionCommand { get; }
+        public IAsyncRelayCommand<CottonSyncRootListItem> RootPrimaryActionCommand { get; }
 
-        public IAsyncRelayCommand<CottonSyncRootActionRequest> PauseRootCommand { get; }
+        public IAsyncRelayCommand<CottonSyncRootListItem> StopRootCommand { get; }
 
-        public IRelayCommand EnterEditModeCommand { get; }
+        public IAsyncRelayCommand<CottonSyncRootListItem> PauseRootCommand { get; }
 
-        public IRelayCommand ExitEditModeCommand { get; }
-
-        public BackgroundSyncRestrictionViewModel BackgroundRestriction { get; }
-
-        public MediaLocationAccessViewModel MediaLocationAccess { get; }
+        public IAsyncRelayCommand<CottonSyncRootListItem> ResumeRootCommand { get; }
 
         public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = [];
-
-        public RangeObservableCollection<object> DashboardItems { get; } = [];
 
         public bool IsBusy
         {
@@ -93,13 +157,25 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isBusy, value))
                 {
-                    EnablePhotoBackupCommand.NotifyCanExecuteChanged();
-                    AddFolderCommand.NotifyCanExecuteChanged();
+                    LoadCommand.NotifyCanExecuteChanged();
+                    AddRootCommand.NotifyCanExecuteChanged();
                     RunAllCommand.NotifyCanExecuteChanged();
-                    RootActionCommand.NotifyCanExecuteChanged();
+                    RootPrimaryActionCommand.NotifyCanExecuteChanged();
+                    StopRootCommand.NotifyCanExecuteChanged();
                     PauseRootCommand.NotifyCanExecuteChanged();
-                    EnterEditModeCommand.NotifyCanExecuteChanged();
-                    ExitEditModeCommand.NotifyCanExecuteChanged();
+                    ResumeRootCommand.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        public string SummaryText
+        {
+            get => _summaryText;
+            private set
+            {
+                if (SetProperty(ref _summaryText, value))
+                {
+                    OnPropertyChanged(nameof(HeaderSupportingText));
                 }
             }
         }
@@ -109,15 +185,27 @@ namespace Cotton.Mobile.ViewModels
             get => _status;
             private set
             {
-                _ = Interlocked.Increment(ref _statusRevision);
                 if (SetProperty(ref _status, value))
                 {
                     OnPropertyChanged(nameof(IsStatusVisible));
+                    OnPropertyChanged(nameof(HeaderSupportingText));
+                    OnPropertyChanged(nameof(IsHeaderSupportingTextVisible));
                 }
             }
         }
 
         public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        public string HeaderSupportingText
+        {
+            get
+            {
+                string? status = Status;
+                return string.IsNullOrWhiteSpace(status) ? SummaryText : status;
+            }
+        }
+
+        public bool IsHeaderSupportingTextVisible => IsStatusVisible || IsSummaryVisible;
 
         public bool IsEmptyVisible
         {
@@ -126,54 +214,18 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isEmptyVisible, value))
                 {
+                    OnPropertyChanged(nameof(IsSummaryVisible));
                     OnPropertyChanged(nameof(IsListVisible));
-                    OnPropertyChanged(nameof(IsPhotoBackupCalloutVisible));
-                    OnPropertyChanged(nameof(IsAddFolderToolbarVisible));
-                    OnPropertyChanged(nameof(IsEditModeAvailable));
-                    EnterEditModeCommand.NotifyCanExecuteChanged();
+                    OnPropertyChanged(nameof(IsHeaderSupportingTextVisible));
                 }
             }
         }
+
+        public bool IsSummaryVisible => !IsEmptyVisible;
 
         public bool IsListVisible => !IsEmptyVisible;
 
-        public bool IsPhotoBackupConfigured => Roots.Any(root => root.UsesMediaStore);
-
-        public bool IsPhotoBackupCalloutVisible =>
-            IsListVisible && !IsPhotoBackupConfigured && !IsEditMode;
-
-        public bool IsAddFolderToolbarVisible => IsListVisible && !IsEditMode;
-
-        public bool IsRunAllVisible => _canRunAll && !IsEditMode;
-
-        public bool ArePrimaryActionsVisible => !IsEditMode;
-
-        public bool IsEditModeAvailable => IsListVisible && !IsEditMode;
-
-        public bool IsEditMode
-        {
-            get => _isEditMode;
-            private set
-            {
-                if (!SetProperty(ref _isEditMode, value))
-                {
-                    return;
-                }
-
-                OnPropertyChanged(nameof(TopBarTitle));
-                OnPropertyChanged(nameof(ArePrimaryActionsVisible));
-                OnPropertyChanged(nameof(IsEditModeAvailable));
-                OnPropertyChanged(nameof(IsRunAllVisible));
-                OnPropertyChanged(nameof(IsPhotoBackupCalloutVisible));
-                OnPropertyChanged(nameof(IsAddFolderToolbarVisible));
-                EnterEditModeCommand.NotifyCanExecuteChanged();
-                ExitEditModeCommand.NotifyCanExecuteChanged();
-            }
-        }
-
-        public string TopBarTitle => IsEditMode
-            ? AppResources.EditSyncsModeTitle
-            : AppResources.SyncTitle;
+        public bool IsRunAllVisible => _canRunAll;
 
         public void Configure(Uri instanceUri, string accountScopeKey)
         {
@@ -182,8 +234,7 @@ namespace Cotton.Mobile.ViewModels
 
             _instanceUri = instanceUri;
             _accountScopeKey = accountScopeKey.Trim();
-            EnablePhotoBackupCommand.NotifyCanExecuteChanged();
-            AddFolderCommand.NotifyCanExecuteChanged();
+            AddRootCommand.NotifyCanExecuteChanged();
         }
 
         public async Task LoadForInstanceAsync(
@@ -193,41 +244,30 @@ namespace Cotton.Mobile.ViewModels
         {
             Configure(instanceUri, accountScopeKey);
             await _loadingHandler.LoadAsync(this, cancellationToken);
-            await _setupHandler.ResumePendingSetupAsync(this, cancellationToken);
-            _originalRestore.Configure(instanceUri, accountScopeKey);
         }
 
         public void Clear()
         {
-            _originalRestore.Clear();
             _instanceUri = null;
             _accountScopeKey = null;
-            ReplaceRoots([]);
+            Roots.ReplaceWith([]);
+            SummaryText = AppResources.NoFoldersSyncing;
             Status = null;
             IsEmptyVisible = true;
-            IsEditMode = false;
             _canRunAll = false;
-            BackgroundRestriction.SetAutomaticSyncEnabled(isEnabled: false);
             OnPropertyChanged(nameof(IsRunAllVisible));
             RunAllCommand.NotifyCanExecuteChanged();
-            EnablePhotoBackupCommand.NotifyCanExecuteChanged();
-            AddFolderCommand.NotifyCanExecuteChanged();
+            AddRootCommand.NotifyCanExecuteChanged();
         }
 
         private void ShowRoots(SyncRootCollectionSnapshot collection)
         {
             CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create(
                 collection.Roots,
-                collection.PausedRootIds,
-                collection.AutomaticSyncStatuses);
-            ReplaceRoots(state.Items);
-            _statusObserver.RefreshProgress();
-            BackgroundRestriction.SetAutomaticSyncEnabled(state.CanRunAny);
-            if (!state.HasItems)
-            {
-                IsEditMode = false;
-            }
+                collection.PausedRootIds);
+            Roots.ReplaceWith(state.Items);
 
+            SummaryText = state.SummaryText;
             IsEmptyVisible = state.IsEmptyVisible;
             bool canRunAllChanged = _canRunAll != state.CanRunAny;
             _canRunAll = state.CanRunAny;
@@ -239,53 +279,33 @@ namespace Cotton.Mobile.ViewModels
             RunAllCommand.NotifyCanExecuteChanged();
         }
 
-        private void ReplaceRoots(IEnumerable<CottonSyncRootListItem> items)
+        private bool CanRunAll()
         {
-            foreach (CottonSyncRootListItem item in Roots)
-            {
-                item.PropertyChanged -= OnRootPropertyChanged;
-            }
-
-            Roots.ReplaceWith(items);
-            OnPropertyChanged(nameof(IsPhotoBackupConfigured));
-            OnPropertyChanged(nameof(IsPhotoBackupCalloutVisible));
-            EnablePhotoBackupCommand.NotifyCanExecuteChanged();
-            RefreshDashboardItems();
-            foreach (CottonSyncRootListItem item in Roots)
-            {
-                item.PropertyChanged += OnRootPropertyChanged;
-            }
+            return !IsBusy && _canRunAll;
         }
 
-        private void OnDashboardNoticeChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs eventArgs)
+        private bool CanAddRoot()
         {
-            if (eventArgs.PropertyName == nameof(MediaLocationAccessViewModel.IsGranted) && MediaLocationAccess.IsGranted)
-            {
-                _originalRestore.PermissionGranted();
-            }
-
-            if (eventArgs.PropertyName is nameof(MediaLocationAccessViewModel.IsPermissionNeeded)
-                or nameof(BackgroundSyncRestrictionViewModel.IsVisible))
-            {
-                RefreshDashboardItems();
-            }
+            return !IsBusy && _instanceUri is not null && !string.IsNullOrWhiteSpace(_accountScopeKey);
         }
 
-        private void RefreshDashboardItems()
+        private Task ExecuteRootPrimaryActionAsync(
+            CottonSyncRootListItem item,
+            CancellationToken cancellationToken)
         {
-            List<object> items = [];
-            if (BackgroundRestriction.IsVisible)
+            ArgumentNullException.ThrowIfNull(item);
+            if (item.CanReconnect)
             {
-                items.Add(BackgroundRestriction);
+                return _setupHandler.ReconnectRootAsync(this, item, cancellationToken);
             }
 
-            if (MediaLocationAccess.IsPermissionNeeded)
-            {
-                items.Add(MediaLocationAccess);
-            }
+            return _executionHandler.ExecutePrimaryActionAsync(this, item, cancellationToken);
+        }
 
-            items.AddRange(Roots);
-            DashboardItems.ReplaceWith(items);
+        private void LogUnhandledCommandException(Exception exception)
+        {
+            CottonLog.Error(_logger, "Unhandled Cotton mobile sync settings command failure.", exception);
+            Status = AppResources.SyncSettingsUpdateFailed;
         }
 
         Uri? ISyncSettingsViewState.InstanceUri => _instanceUri;
@@ -303,8 +323,6 @@ namespace Cotton.Mobile.ViewModels
             get => Status;
             set => Status = value;
         }
-
-        long ISyncSettingsViewState.StatusRevision => Interlocked.Read(ref _statusRevision);
 
         IReadOnlyList<CottonSyncRootListItem> ISyncSettingsViewState.Roots => Roots;
 

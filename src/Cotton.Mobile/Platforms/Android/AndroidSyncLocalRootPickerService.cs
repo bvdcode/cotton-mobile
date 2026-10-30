@@ -14,6 +14,8 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidSyncLocalRootPickerService : ICottonSyncLocalRootPickerService
     {
+        private const string ExternalMediaStoreVolume = "external";
+
         private static readonly ActivityFlags PersistableGrantFlags =
             ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission;
 
@@ -23,39 +25,24 @@ namespace Cotton.Mobile.Platforms.Android
             | ActivityFlags.GrantPrefixUriPermission;
 
         private readonly IAndroidDocumentTreeActivityResultBridge _activityResultBridge;
-        private readonly ICottonMediaAlbumPickerService _mediaAlbumPicker;
-        private readonly IUserDialogService _dialogService;
 
         public AndroidSyncLocalRootPickerService(
-            IAndroidDocumentTreeActivityResultBridge activityResultBridge,
-            ICottonMediaAlbumPickerService mediaAlbumPicker,
-            IUserDialogService dialogService)
+            IAndroidDocumentTreeActivityResultBridge activityResultBridge)
         {
             ArgumentNullException.ThrowIfNull(activityResultBridge);
-            ArgumentNullException.ThrowIfNull(mediaAlbumPicker);
-            ArgumentNullException.ThrowIfNull(dialogService);
 
             _activityResultBridge = activityResultBridge;
-            _mediaAlbumPicker = mediaAlbumPicker;
-            _dialogService = dialogService;
         }
 
         public bool IsAvailable => true;
 
         public Task<CottonSyncLocalRootSnapshot?> PickAsync(
             CottonSyncRootStorageKind storageKind,
-            Guid requestId,
             CancellationToken cancellationToken = default)
         {
-            if (requestId == Guid.Empty)
-            {
-                throw new ArgumentException("Local-root picker request id is required.", nameof(requestId));
-            }
-
             return storageKind switch
             {
-                CottonSyncRootStorageKind.UserSelectedDocumentTree =>
-                    PickDocumentTreeAsync(requestId, cancellationToken),
+                CottonSyncRootStorageKind.UserSelectedDocumentTree => PickDocumentTreeAsync(cancellationToken),
                 CottonSyncRootStorageKind.MediaStore => PickMediaStoreAsync(cancellationToken),
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(storageKind),
@@ -64,13 +51,7 @@ namespace Cotton.Mobile.Platforms.Android
             };
         }
 
-        public void CompletePick(Guid requestId)
-        {
-            _activityResultBridge.CompleteRequest(requestId);
-        }
-
         private async Task<CottonSyncLocalRootSnapshot?> PickDocumentTreeAsync(
-            Guid requestId,
             CancellationToken cancellationToken)
         {
             Activity activity = Platform.CurrentActivity
@@ -82,11 +63,7 @@ namespace Cotton.Mobile.Platforms.Android
             intent.AddFlags(PickerIntentFlags);
 
             Intent? resultIntent = await MainThread.InvokeOnMainThreadAsync(() =>
-                    _activityResultBridge.StartOpenDocumentTreeAsync(
-                        activity,
-                        intent,
-                        requestId,
-                        cancellationToken))
+                    _activityResultBridge.StartOpenDocumentTreeAsync(activity, intent, cancellationToken))
                 .ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             if (resultIntent is null || resultIntent.Data is not AndroidUri uri)
@@ -108,51 +85,26 @@ namespace Cotton.Mobile.Platforms.Android
                 CottonSyncRootPermissionStatus.Available);
         }
 
-        private async Task<CottonSyncLocalRootSnapshot?> PickMediaStoreAsync(
+        private static async Task<CottonSyncLocalRootSnapshot?> PickMediaStoreAsync(
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            _ = await MainThread
-                .InvokeOnMainThreadAsync(
-                    () => Permissions.RequestAsync<CottonMediaReadPermissionRequest>())
+            PermissionStatus status = await Permissions
+                .RequestAsync<CottonMediaReadPermissionRequest>()
                 .ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            AndroidMediaReadAccessSnapshot access = AndroidMediaReadAccessResolver.Resolve();
-            if (!access.HasAccess)
-            {
-                await _dialogService
-                    .ShowAlertAsync(
-                        SyncRootSetupResources.MediaAccessRequiredTitle,
-                        SyncRootSetupResources.MediaAccessRequiredMessage,
-                        AppResources.OkText)
-                    .ConfigureAwait(false);
-                return null;
-            }
-
-            IReadOnlyList<CottonMediaAlbumSnapshot> albums = await AndroidMediaStoreAlbumProvider
-                .LoadAsync(access, cancellationToken)
-                .ConfigureAwait(false);
-            IReadOnlyList<CottonMediaAlbumSnapshot>? selectedAlbums = await _mediaAlbumPicker
-                .PickAsync(albums, cancellationToken)
-                .ConfigureAwait(false);
-            if (selectedAlbums is null || selectedAlbums.Count == 0)
+            if (status != PermissionStatus.Granted)
             {
                 return null;
             }
 
+            AndroidUri contentUri = MediaStore.Files.GetContentUri(ExternalMediaStoreVolume)
+                ?? throw new InvalidOperationException("Android external MediaStore URI is unavailable.");
             return new CottonSyncLocalRootSnapshot(
                 CottonSyncRootStorageKind.MediaStore,
-                AndroidMediaStoreRootKey.Value,
-                CreateMediaDisplayName(selectedAlbums),
-                CottonSyncRootPermissionStatus.Available,
-                AndroidMediaStoreScopeKey.Create(selectedAlbums.Select(album => album.Id)));
-        }
-
-        private static string CreateMediaDisplayName(IReadOnlyList<CottonMediaAlbumSnapshot> albums)
-        {
-            return albums.Count == 1
-                ? albums[0].DisplayName
-                : SyncRootSetupResources.CreateMediaAlbumsDisplayName(albums.Count);
+                contentUri.ToString() ?? throw new InvalidOperationException("Android MediaStore URI is empty."),
+                SyncRootSetupResources.MediaTitle,
+                CottonSyncRootPermissionStatus.Available);
         }
 
         private static void PersistGrant(ContentResolver contentResolver, Intent resultIntent, AndroidUri uri)

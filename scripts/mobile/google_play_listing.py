@@ -55,8 +55,6 @@ class StoreListing:
     icon_path: Path
     feature_graphic_path: Path
     phone_screenshot_paths: tuple[Path, ...]
-    capabilities_path: Path
-    metadata_path: Path
 
 
 class GooglePlayListingClient(AndroidPublisherClient):

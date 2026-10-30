@@ -12,64 +12,30 @@ namespace Cotton.Mobile.ViewModels
         private readonly SyncSettingsRootProvider _rootProvider;
         private readonly SyncRootSetupCoordinator _rootSetupCoordinator;
         private readonly INetworkAccessService _networkAccess;
-        private readonly CottonAutomaticSyncDispatcher _automaticSyncDispatcher;
-        private readonly ICottonAutomaticSyncBackgroundScheduler _backgroundScheduler;
         private readonly ILogger<SyncSettingsSetupHandler> _logger;
 
         public SyncSettingsSetupHandler(
             SyncSettingsRootProvider rootProvider,
             SyncRootSetupCoordinator rootSetupCoordinator,
             INetworkAccessService networkAccess,
-            CottonAutomaticSyncDispatcher automaticSyncDispatcher,
-            ICottonAutomaticSyncBackgroundScheduler backgroundScheduler,
             ILogger<SyncSettingsSetupHandler> logger)
         {
             ArgumentNullException.ThrowIfNull(rootProvider);
             ArgumentNullException.ThrowIfNull(rootSetupCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
-            ArgumentNullException.ThrowIfNull(automaticSyncDispatcher);
-            ArgumentNullException.ThrowIfNull(backgroundScheduler);
             ArgumentNullException.ThrowIfNull(logger);
 
             _rootProvider = rootProvider;
             _rootSetupCoordinator = rootSetupCoordinator;
             _networkAccess = networkAccess;
-            _automaticSyncDispatcher = automaticSyncDispatcher;
-            _backgroundScheduler = backgroundScheduler;
             _logger = logger;
         }
 
-        public Task AddPhotoBackupAsync(
+        public async Task AddRootAsync(
             ISyncSettingsViewState state,
             CancellationToken cancellationToken = default)
-        {
-            return AddRootAsync(
-                state,
-                new SyncRootSetupOptions(
-                    CottonSyncRootStorageKind.MediaStore,
-                    CottonUploadOriginalRetention.KeepOriginals),
-                cancellationToken);
-        }
-
-        public Task AddFolderBackupAsync(
-            ISyncSettingsViewState state,
-            CancellationToken cancellationToken = default)
-        {
-            return AddRootAsync(
-                state,
-                new SyncRootSetupOptions(
-                    CottonSyncRootStorageKind.UserSelectedDocumentTree,
-                    CottonUploadOriginalRetention.KeepOriginals),
-                cancellationToken);
-        }
-
-        private async Task AddRootAsync(
-            ISyncSettingsViewState state,
-            SyncRootSetupOptions options,
-            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(state);
-            ArgumentNullException.ThrowIfNull(options);
             Uri? instanceUri = state.InstanceUri;
             string? accountScopeKey = state.AccountScopeKey;
             if (instanceUri is null || string.IsNullOrWhiteSpace(accountScopeKey))
@@ -90,7 +56,6 @@ namespace Cotton.Mobile.ViewModels
                 SyncRootSetupResult result = await _rootSetupCoordinator.AddRootAsync(
                     instanceUri,
                     accountScopeKey,
-                    options,
                     cancellationToken);
                 if (result.Status == SyncRootSetupStatus.Cancelled)
                 {
@@ -100,7 +65,6 @@ namespace Cotton.Mobile.ViewModels
 
                 state.ShowRoots(await _rootProvider.LoadAsync(instanceUri, accountScopeKey, cancellationToken));
                 state.Status = result.Message;
-                QueueChangedRoot(state, instanceUri, accountScopeKey, result, state.StatusRevision);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -115,42 +79,6 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 state.IsBusy = false;
-            }
-        }
-
-        public async Task ResumePendingSetupAsync(
-            ISyncSettingsViewState state,
-            CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(state);
-            Uri? instanceUri = state.InstanceUri;
-            string? accountScopeKey = state.AccountScopeKey;
-            if (instanceUri is null || string.IsNullOrWhiteSpace(accountScopeKey))
-            {
-                return;
-            }
-
-            try
-            {
-                SyncRootSetupResult? result = await _rootSetupCoordinator
-                    .ResumePendingAsync(instanceUri, accountScopeKey, cancellationToken);
-                if (result is null || result.Status == SyncRootSetupStatus.Cancelled)
-                {
-                    return;
-                }
-
-                state.ShowRoots(await _rootProvider.LoadAsync(instanceUri, accountScopeKey, cancellationToken));
-                state.Status = result.Message;
-                QueueChangedRoot(state, instanceUri, accountScopeKey, result, state.StatusRevision);
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (Exception exception)
-            {
-                CottonLog.Warning(_logger, "Failed to resume Cotton mobile sync-root setup.", exception);
-                state.Status = AppResources.SyncFolderAddFailed;
             }
         }
 
@@ -201,7 +129,6 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 state.Status = result.Message;
-                QueueChangedRoot(state, instanceUri, root.AccountScopeKey, result, state.StatusRevision);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -217,82 +144,6 @@ namespace Cotton.Mobile.ViewModels
             {
                 state.IsBusy = false;
             }
-        }
-
-        private void QueueChangedRoot(
-            ISyncSettingsViewState state,
-            Uri instanceUri,
-            string accountScopeKey,
-            SyncRootSetupResult setupResult,
-            long statusRevision)
-        {
-            if (!setupResult.DidChangeRoots)
-            {
-                return;
-            }
-
-            CottonSyncRootSnapshot root = setupResult.Root
-                ?? throw new InvalidOperationException("Changed sync setup did not return its root.");
-            _ = RunChangedRootAsync(state, instanceUri, accountScopeKey, root.Id, statusRevision);
-        }
-
-        private async Task RunChangedRootAsync(
-            ISyncSettingsViewState state,
-            Uri instanceUri,
-            string accountScopeKey,
-            Guid rootId,
-            long statusRevision)
-        {
-            try
-            {
-                CottonAutomaticSyncRunResult result = await _automaticSyncDispatcher
-                    .RunRootsAsync(
-                        new CottonAuthenticatedSessionScope(instanceUri, accountScopeKey),
-                        [rootId],
-                        CancellationToken.None);
-                if (result.RetryableRootIds.Count > 0)
-                {
-                    await _backgroundScheduler.ScheduleRootRetriesAsync(
-                        result.RetryableRootIds,
-                        CancellationToken.None);
-                }
-
-                if (HasExpectedStatus(state, instanceUri, accountScopeKey, statusRevision))
-                {
-                    state.Status = null;
-                }
-            }
-            catch (OperationCanceledException exception)
-            {
-                CottonLog.Debug(_logger, "Automatic sync for a changed root was canceled.", exception);
-            }
-            catch (Exception exception) when (exception is not OperationCanceledException)
-            {
-                CottonLog.Warning(_logger, "Failed to start automatic sync for a changed root.", exception);
-                if (HasExpectedStatus(state, instanceUri, accountScopeKey, statusRevision))
-                {
-                    state.Status = AppResources.SyncInitialRunFailed;
-                }
-            }
-        }
-
-        private static bool IsCurrentAccount(
-            ISyncSettingsViewState state,
-            Uri instanceUri,
-            string accountScopeKey)
-        {
-            return Uri.Equals(state.InstanceUri, instanceUri)
-                && string.Equals(state.AccountScopeKey, accountScopeKey, StringComparison.Ordinal);
-        }
-
-        private static bool HasExpectedStatus(
-            ISyncSettingsViewState state,
-            Uri instanceUri,
-            string accountScopeKey,
-            long statusRevision)
-        {
-            return IsCurrentAccount(state, instanceUri, accountScopeKey)
-                && state.StatusRevision == statusRevision;
         }
     }
 }

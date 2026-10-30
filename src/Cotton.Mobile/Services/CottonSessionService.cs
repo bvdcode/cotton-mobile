@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Net;
 using Cotton.Auth;
 using Cotton.Sdk;
 using Cotton.Sdk.Auth;
@@ -11,44 +12,36 @@ namespace Cotton.Mobile.Services
     public class CottonSessionService : ICottonSessionService
     {
         private readonly ICottonClientFactory _clientFactory;
-        private readonly ICottonSessionValidator _sessionValidator;
         private readonly ICottonInstanceStore _instanceStore;
         private readonly ICottonTokenStore _tokenStore;
         private readonly ICottonPendingAppCodeSessionStore _pendingSessionStore;
         private readonly ICottonNotificationCursorStore _notificationCursorStore;
         private readonly ICottonAppCodeAuthorizationService _appCodeAuthorization;
-        private readonly ICottonSessionNotificationService _sessionNotifications;
         private readonly ILogger<CottonSessionService> _logger;
 
         public CottonSessionService(
             ICottonClientFactory clientFactory,
-            ICottonSessionValidator sessionValidator,
             ICottonInstanceStore instanceStore,
             ICottonTokenStore tokenStore,
             ICottonPendingAppCodeSessionStore pendingSessionStore,
             ICottonNotificationCursorStore notificationCursorStore,
             ICottonAppCodeAuthorizationService appCodeAuthorization,
-            ICottonSessionNotificationService sessionNotifications,
             ILogger<CottonSessionService> logger)
         {
             ArgumentNullException.ThrowIfNull(clientFactory);
-            ArgumentNullException.ThrowIfNull(sessionValidator);
             ArgumentNullException.ThrowIfNull(instanceStore);
             ArgumentNullException.ThrowIfNull(tokenStore);
             ArgumentNullException.ThrowIfNull(pendingSessionStore);
             ArgumentNullException.ThrowIfNull(notificationCursorStore);
             ArgumentNullException.ThrowIfNull(appCodeAuthorization);
-            ArgumentNullException.ThrowIfNull(sessionNotifications);
             ArgumentNullException.ThrowIfNull(logger);
 
             _clientFactory = clientFactory;
-            _sessionValidator = sessionValidator;
             _instanceStore = instanceStore;
             _tokenStore = tokenStore;
             _pendingSessionStore = pendingSessionStore;
             _notificationCursorStore = notificationCursorStore;
             _appCodeAuthorization = appCodeAuthorization;
-            _sessionNotifications = sessionNotifications;
             _logger = logger;
         }
 
@@ -67,11 +60,9 @@ namespace Cotton.Mobile.Services
 
         public async Task<CottonSessionResult> RestoreAsync(CancellationToken cancellationToken = default)
         {
-            CottonSessionDiagnosticLog.RestoreStarted(_logger);
             Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
             if (instanceUri is null)
             {
-                CottonSessionDiagnosticLog.SavedInstanceMissing(_logger);
                 await ClearLocalSessionAsync(cancellationToken).ConfigureAwait(false);
                 return CottonSessionResult.Unauthenticated();
             }
@@ -79,28 +70,26 @@ namespace Cotton.Mobile.Services
             TokenPairDto? tokens = await _tokenStore.GetAsync(cancellationToken).ConfigureAwait(false);
             if (tokens is null)
             {
-                CottonSessionDiagnosticLog.TokenPairMissing(_logger);
                 return await _appCodeAuthorization
                     .RestorePendingAsync(instanceUri, cancellationToken)
                     .ConfigureAwait(false);
             }
 
+            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
             try
             {
-                UserDto user = await _sessionValidator
-                    .ValidateAsync(instanceUri, cancellationToken)
+                TokenPairDto refreshedTokens = await client.Auth
+                    .RefreshAsync(tokens.RefreshToken, cancellationToken)
                     .ConfigureAwait(false);
-                CottonSessionDiagnosticLog.ProfileValidated(_logger);
-                _sessionNotifications.ClearSignInRequired();
+                await _tokenStore.SaveAsync(refreshedTokens, cancellationToken).ConfigureAwait(false);
+                UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
                 await _appCodeAuthorization
                     .ClearPendingBestEffortAsync("session restore")
                     .ConfigureAwait(false);
                 return CottonSessionResult.Authenticated(instanceUri, user);
             }
-            catch (CottonTokenRefreshException exception) when (CottonRefreshTokenRejection.IsConfirmed(exception, _logger))
+            catch (CottonApiException exception) when (IsAuthorizationFailure(exception))
             {
-                CottonSessionDiagnosticLog.RestoreRejected(_logger, (int)exception.StatusCode.GetValueOrDefault());
-                await ClearRejectedAuthenticationBestEffortAsync(cancellationToken).ConfigureAwait(false);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.SessionExpired, instanceUri);
             }
         }
@@ -134,7 +123,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonSessionDiagnosticLog.RemoteLogoutFailed(_logger, exception);
+                CottonLog.Warning(_logger, "Cotton mobile remote logout failed; clearing local session.", exception);
             }
             finally
             {
@@ -144,7 +133,6 @@ namespace Cotton.Mobile.Services
 
         public async Task ClearLocalSessionAsync(CancellationToken cancellationToken = default)
         {
-            _sessionNotifications.ClearSignInRequired();
             List<Exception> failures = [];
             await TryClearLocalSessionAreaAsync(
                 _tokenStore.ClearAsync,
@@ -178,27 +166,6 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private async Task ClearRejectedAuthenticationBestEffortAsync(
-            CancellationToken cancellationToken)
-        {
-            List<Exception> failures = [];
-            await TryClearLocalSessionAreaAsync(
-                _tokenStore.ClearAsync,
-                "rejected tokens",
-                failures,
-                cancellationToken).ConfigureAwait(false);
-            await TryClearLocalSessionAreaAsync(
-                _pendingSessionStore.ClearAsync,
-                "rejected pending authorization",
-                failures,
-                cancellationToken).ConfigureAwait(false);
-            await TryClearLocalSessionAreaAsync(
-                _notificationCursorStore.ClearAsync,
-                "rejected notification cursor",
-                failures,
-                cancellationToken).ConfigureAwait(false);
-        }
-
         private async Task TryClearLocalSessionAreaAsync(
             Func<CancellationToken, Task> clearAsync,
             string sessionAreaName,
@@ -211,9 +178,18 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonSessionDiagnosticLog.SessionAreaClearFailed(_logger, sessionAreaName, exception);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to clear a Cotton mobile session area.",
+                    sessionAreaName,
+                    exception);
                 failures.Add(exception);
             }
+        }
+
+        private static bool IsAuthorizationFailure(CottonApiException exception)
+        {
+            return exception.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden;
         }
     }
 }

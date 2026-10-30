@@ -58,8 +58,7 @@ namespace Cotton.Mobile.Platforms.Android
                     ?? throw new InvalidOperationException("Local file deletion requires a document id.");
                 AndroidUri documentUri = DocumentsContract.BuildDocumentUriUsingTree(treeUri, documentId)
                     ?? throw new IOException("Could not build the local document URI.");
-                using AndroidCursorScope cursorScope = new(resolver.Query(documentUri, DocumentProjection, null, null, null));
-                ICursor? cursor = cursorScope.Cursor;
+                using ICursor? cursor = resolver.Query(documentUri, DocumentProjection, null, null, null);
                 if (cursor is null)
                 {
                     return CottonDeviceToCloudLocalFileDeleteStatus.Unsupported;
@@ -109,12 +108,6 @@ namespace Cotton.Mobile.Platforms.Android
             string? documentId = cursor.GetString(DocumentIdColumnIndex);
             string? displayName = cursor.GetString(DisplayNameColumnIndex);
             string? mimeType = cursor.GetString(MimeTypeColumnIndex);
-            if (AndroidMediaContentAccess.IsMedia(mimeType)
-                && !AndroidMediaContentAccess.HasLocationPermission)
-            {
-                return CottonDeviceToCloudLocalFileDeleteStatus.Unsupported;
-            }
-
             if (!string.Equals(documentId, item.LocalSourceId, StringComparison.Ordinal)
                 || !string.Equals(displayName, item.DisplayName, StringComparison.Ordinal)
                 || string.Equals(mimeType, DocumentsContract.Document.MimeTypeDir, StringComparison.Ordinal))
@@ -153,7 +146,8 @@ namespace Cotton.Mobile.Platforms.Android
                 return CottonDeviceToCloudLocalFileDeleteStatus.Unsupported;
             }
 
-            using Stream content = AndroidMediaContentAccess.OpenRead(resolver, documentUri);
+            using Stream content = resolver.OpenInputStream(documentUri)
+                ?? throw new IOException("Could not open local document content before deletion.");
             string contentHash = CottonContentHash.ComputeSha256(content, cancellationToken);
             if (!string.Equals(contentHash, item.ContentHash, StringComparison.Ordinal))
             {

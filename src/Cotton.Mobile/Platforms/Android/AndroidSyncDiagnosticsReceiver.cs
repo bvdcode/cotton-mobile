@@ -23,7 +23,6 @@ namespace Cotton.Mobile.Platforms.Android
 
         private const string DiagnosticInstanceUri = "https://app.cottoncloud.dev";
         private const string DiagnosticAccountScope = "android-runtime-diagnostics";
-        private const string DiagnosticAlbumName = "CottonRuntime";
         private const string DiagnosticRootName = "Android media";
         private static readonly Guid DiagnosticRootId =
             Guid.Parse("ad000001-0000-0000-0000-000000000001");
@@ -68,37 +67,15 @@ namespace Cotton.Mobile.Platforms.Android
 
         private static async Task<string> ScanMediaAsync(IServiceProvider services)
         {
-            AndroidMediaReadAccessSnapshot access = AndroidMediaReadAccessResolver.Resolve();
-            string accessMetrics =
-                $"access={Convert.ToInt32(access.HasAccess)},limited={Convert.ToInt32(access.HasLimitedAccess)}";
-            if (!access.HasAccess)
-            {
-                return $"{accessMetrics},files=0,hashed=0,reused=0";
-            }
-
-            IReadOnlyList<CottonMediaAlbumSnapshot> albums = await AndroidMediaStoreAlbumProvider
-                .LoadAsync(access)
-                .ConfigureAwait(false);
-            CottonMediaAlbumSnapshot[] selectedAlbums = [.. albums.Where(album => string.Equals(
-                album.DisplayName,
-                DiagnosticAlbumName,
-                StringComparison.Ordinal))];
-            if (selectedAlbums.Length != 1)
-            {
-                throw new InvalidDataException("Android diagnostics media folder is unavailable or ambiguous.");
-            }
-
             AndroidMediaStoreDeviceToCloudLocalTreeReader reader = services
                 .GetRequiredService<AndroidMediaStoreDeviceToCloudLocalTreeReader>();
             Uri instanceUri = new(DiagnosticInstanceUri);
-            CottonSyncRootSnapshot root = CreateMediaRoot(
-                instanceUri,
-                selectedAlbums.Select(album => album.Id));
+            CottonSyncRootSnapshot root = CreateMediaRoot(instanceUri);
             AndroidMediaStoreScanResult scan = await reader
                 .ReadWithDiagnosticsAsync(instanceUri, root)
                 .ConfigureAwait(false);
             int fileCount = scan.Content.Items.Count(item => item.ItemType == CottonFileBrowserEntryType.File);
-            return $"{accessMetrics},files={fileCount},hashed={scan.Statistics.HashedFileCount},reused={scan.Statistics.ReusedHashCount}";
+            return $"files={fileCount},hashed={scan.Statistics.HashedFileCount},reused={scan.Statistics.ReusedHashCount}";
         }
 
         private static async Task<string> ScheduleWorkAsync(IServiceProvider services)
@@ -109,16 +86,13 @@ namespace Cotton.Mobile.Platforms.Android
             return "scheduled=true";
         }
 
-        private static CottonSyncRootSnapshot CreateMediaRoot(
-            Uri instanceUri,
-            IEnumerable<long> bucketIds)
+        private static CottonSyncRootSnapshot CreateMediaRoot(Uri instanceUri)
         {
             CottonSyncLocalRootSnapshot localRoot = new(
                 CottonSyncRootStorageKind.MediaStore,
-                AndroidMediaStoreRootKey.Value,
+                "content://media/external/file",
                 DiagnosticRootName,
-                CottonSyncRootPermissionStatus.Available,
-                AndroidMediaStoreScopeKey.Create(bucketIds));
+                CottonSyncRootPermissionStatus.Available);
             CottonUploadDestinationSnapshot destination = new(
                 DiagnosticFolderId,
                 DiagnosticRootName,

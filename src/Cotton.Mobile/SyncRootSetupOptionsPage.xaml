@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.SyncRootSetupOptionsPage"
+             x:DataType="viewModels:SyncRootSetupOptionsViewModel"
+             Shell.NavBarIsVisible="False"
+             Title="{x:Static localization:SyncRootSetupResources.PageTitle}">
+
+    <Grid RowDefinitions="Auto,*"
+          Style="{StaticResource AppScreen}"
+          InputTransparent="{Binding IsInteractionLocked}">
+        <Grid ColumnDefinitions="Auto,*,Auto"
+              Style="{StaticResource AppTopBar}">
+            <Button Command="{Binding CancelCommand}"
+                    SemanticProperties.Description="{x:Static localization:AppResources.BackDescription}"
+                    StyleClass="TextButton, TouchTarget">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Arrow_back}"
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                </Button.ImageSource>
+            </Button>
+            <Label Grid.Column="1"
+                   Text="{x:Static localization:SyncRootSetupResources.AppBarTitle}"
+                   Style="{StaticResource AppTopBarTitle}" />
+            <Button Grid.Column="2"
+                    Command="{Binding ContinueCommand}"
+                    SemanticProperties.Description="{x:Static localization:SyncRootSetupResources.ContinueDescription}"
+                    StyleClass="TextButton, TouchTarget">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Check}"
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                </Button.ImageSource>
+            </Button>
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Style="{StaticResource AppScrollableContent}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{x:Static localization:SyncRootSetupResources.Heading}"
+                           Style="{StaticResource AppScreenTitle}" />
+                    <Label Text="{x:Static localization:SyncRootSetupResources.SupportingText}"
+                           Style="{StaticResource AppBodyText}" />
+                </VerticalStackLayout>
+
+                <material:ButtonView TappedCommand="{Binding SelectFolderCommand}"
+                                     SemanticProperties.Description="{Binding FolderDescription}"
+                                     Padding="16"
+                                     Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
+                                     StrokeThickness="1"
+                                     BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                     StrokeShape="RoundRectangle 20">
+                    <material:ButtonView.Triggers>
+                        <DataTrigger TargetType="material:ButtonView"
+                                     Binding="{Binding IsFolderSelected}"
+                                     Value="True">
+                            <Setter Property="Stroke"
+                                    Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                            <Setter Property="BackgroundColor"
+                                    Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" />
+                        </DataTrigger>
+                    </material:ButtonView.Triggers>
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          ColumnSpacing="12">
+                        <Border Style="{StaticResource AppIconFrame}">
+                            <Image Style="{StaticResource AppIcon}"
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Folder}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="3"
+                                             VerticalOptions="Center">
+                            <Label Text="{x:Static localization:SyncRootSetupResources.FolderTitle}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{x:Static localization:SyncRootSetupResources.FolderSupportingText}"
+                                   Style="{StaticResource AppBodyText}" />
+                        </VerticalStackLayout>
+                        <Image Grid.Column="2"
+                               Style="{StaticResource AppIcon}"
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Check}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}"
+                               IsVisible="{Binding IsFolderSelected}" />
+                    </Grid>
+                </material:ButtonView>
+
+                <material:ButtonView TappedCommand="{Binding SelectMediaCommand}"
+                                     SemanticProperties.Description="{Binding MediaDescription}"
+                                     Padding="16"
+                                     Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
+                                     StrokeThickness="1"
+                                     BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                     StrokeShape="RoundRectangle 20">
+                    <material:ButtonView.Triggers>
+                        <DataTrigger TargetType="material:ButtonView"
+                                     Binding="{Binding IsMediaSelected}"
+                                     Value="True">
+                            <Setter Property="Stroke"
+                                    Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                            <Setter Property="BackgroundColor"
+                                    Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" />
+                        </DataTrigger>
+                    </material:ButtonView.Triggers>
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          ColumnSpacing="12">
+                        <Border Style="{StaticResource AppIconFrame}">
+                            <Image Style="{StaticResource AppIcon}"
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="3"
+                                             VerticalOptions="Center">
+                            <Label Text="{x:Static localization:SyncRootSetupResources.MediaTitle}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{x:Static localization:SyncRootSetupResources.MediaSupportingText}"
+                                   Style="{StaticResource AppBodyText}" />
+                        </VerticalStackLayout>
+                        <Image Grid.Column="2"
+                               Style="{StaticResource AppIcon}"
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Check}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}"
+                               IsVisible="{Binding IsMediaSelected}" />
+                    </Grid>
+                </material:ButtonView>
+
+                <Border IsVisible="{Binding IsDeleteOptionVisible}"
+                        Style="{StaticResource AppCard}">
+                    <Grid ColumnDefinitions="*,Auto"
+                          ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="3"
+                                             VerticalOptions="Center">
+                            <Label Text="{x:Static localization:SyncRootSetupResources.DeleteOriginalsTitle}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{x:Static localization:SyncRootSetupResources.DeleteOriginalsSupportingText}"
+                                   Style="{StaticResource AppBodyText}" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                IsToggled="{Binding DeleteOriginalsAfterUpload}"
+                                SemanticProperties.Description="{x:Static localization:SyncRootSetupResources.DeleteOriginalsTitle}"
+                                VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

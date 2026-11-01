@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Text.Json;
 using Cotton.Auth;
 using Cotton.Sdk.Auth;
 using Microsoft.Extensions.Logging;
@@ -8,11 +9,13 @@ using Microsoft.Maui.Storage;
 
 namespace Cotton.Mobile.Services
 {
-    public class SecureStorageCottonTokenStore : ICottonTokenStore
+    public class SecureStorageCottonTokenStore : ICottonTokenStore, IDisposable
     {
-        private const string AccessTokenKey = "Cotton.Mobile.Auth.AccessToken";
-        private const string RefreshTokenKey = "Cotton.Mobile.Auth.RefreshToken";
+        private const string TokenPairKey = "Cotton.Mobile.Auth.TokenPair";
+        private const string LegacyAccessTokenKey = "Cotton.Mobile.Auth.AccessToken";
+        private const string LegacyRefreshTokenKey = "Cotton.Mobile.Auth.RefreshToken";
 
+        private readonly SemaphoreSlim _gate = new(1, 1);
         private readonly ISecureStorage _secureStorage;
         private readonly ILogger<SecureStorageCottonTokenStore> _logger;
 
@@ -29,43 +32,25 @@ namespace Cotton.Mobile.Services
 
         public async Task<TokenPairDto?> GetAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            string? accessToken;
-            string? refreshToken;
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                accessToken = await _secureStorage.GetAsync(AccessTokenKey).ConfigureAwait(false);
-                refreshToken = await _secureStorage.GetAsync(RefreshTokenKey).ConfigureAwait(false);
+                string? value = await ReadValueAsync(TokenPairKey).ConfigureAwait(false);
+                TokenPairDto? tokens = value is null
+                    ? await ReadAndMigrateLegacyPairAsync(cancellationToken).ConfigureAwait(false)
+                    : DeserializePair(value);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (tokens is not null)
+                {
+                    CottonSessionDiagnosticLog.TokenStoreLoaded(_logger);
+                }
+
+                return tokens;
             }
-            catch (Exception exception) when (exception is not OperationCanceledException)
+            finally
             {
-                CottonSessionDiagnosticLog.TokenStoreReadFailed(_logger, exception);
-                throw;
+                _gate.Release();
             }
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (string.IsNullOrWhiteSpace(accessToken) && string.IsNullOrWhiteSpace(refreshToken))
-            {
-                CottonSessionDiagnosticLog.TokenStoreEmpty(_logger);
-                return null;
-            }
-
-            if (string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(refreshToken))
-            {
-                ClearBestEffort("partial token pair");
-                CottonSessionDiagnosticLog.TokenStoreIncomplete(_logger);
-                return null;
-            }
-
-            CottonSessionDiagnosticLog.TokenStoreLoaded(_logger);
-
-            return new TokenPairDto
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-            };
         }
 
         public async Task SaveAsync(TokenPairDto tokens, CancellationToken cancellationToken = default)
@@ -82,68 +67,137 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Refresh token is required.", nameof(tokens));
             }
 
+            string value = JsonSerializer.Serialize(tokens, CottonTokenPairJsonContext.Default.TokenPairDto);
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                await _secureStorage.SetAsync(AccessTokenKey, tokens.AccessToken).ConfigureAwait(false);
-                await _secureStorage.SetAsync(RefreshTokenKey, tokens.RefreshToken).ConfigureAwait(false);
+                await WriteValueAsync(value).ConfigureAwait(false);
                 CottonSessionDiagnosticLog.TokenStoreSaved(_logger);
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+
+        public async Task ClearAsync(CancellationToken cancellationToken = default)
+        {
+            await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                RemoveKeys(LegacyAccessTokenKey, LegacyRefreshTokenKey);
+                RemoveKeys(TokenPairKey);
+                CottonSessionDiagnosticLog.TokenStoreCleared(_logger);
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+
+        public void Dispose()
+        {
+            _gate.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        private async Task<TokenPairDto?> ReadAndMigrateLegacyPairAsync(CancellationToken cancellationToken)
+        {
+            string? accessToken = await ReadValueAsync(LegacyAccessTokenKey).ConfigureAwait(false);
+            string? refreshToken = await ReadValueAsync(LegacyRefreshTokenKey).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (string.IsNullOrWhiteSpace(accessToken) && string.IsNullOrWhiteSpace(refreshToken))
+            {
+                CottonSessionDiagnosticLog.TokenStoreEmpty(_logger);
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(refreshToken))
+            {
+                RemoveKeys(LegacyAccessTokenKey, LegacyRefreshTokenKey);
+                CottonSessionDiagnosticLog.TokenStoreIncomplete(_logger);
+                return null;
+            }
+
+            TokenPairDto tokens = new() { AccessToken = accessToken, RefreshToken = refreshToken };
+            string value = JsonSerializer.Serialize(tokens, CottonTokenPairJsonContext.Default.TokenPairDto);
+            await WriteValueAsync(value).ConfigureAwait(false);
+            RemoveKeys(LegacyAccessTokenKey, LegacyRefreshTokenKey);
+            CottonSessionDiagnosticLog.TokenStoreMigrated(_logger);
+            return tokens;
+        }
+
+        private async Task<string?> ReadValueAsync(string key)
+        {
+            try
+            {
+                return await _secureStorage.GetAsync(key).ConfigureAwait(false);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Failed to save Cotton mobile tokens; clearing local token store.", exception);
-                ClearBestEffort("token save failure");
+                CottonSessionDiagnosticLog.TokenStoreReadFailed(_logger, exception);
                 throw;
             }
-
-            cancellationToken.ThrowIfCancellationRequested();
         }
 
-        public Task ClearAsync(CancellationToken cancellationToken = default)
+        private TokenPairDto DeserializePair(string value)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                TokenPairDto? tokens = JsonSerializer.Deserialize(value, CottonTokenPairJsonContext.Default.TokenPairDto);
+                if (tokens is null || string.IsNullOrWhiteSpace(tokens.AccessToken)
+                    || string.IsNullOrWhiteSpace(tokens.RefreshToken))
+                {
+                    throw new InvalidDataException("Stored token pair is incomplete.");
+                }
 
+                return tokens;
+            }
+            catch (Exception exception) when (exception is JsonException or InvalidDataException)
+            {
+                CottonSessionDiagnosticLog.TokenStoreReadFailed(_logger, exception);
+                throw;
+            }
+        }
+
+        private async Task WriteValueAsync(string value)
+        {
+            try
+            {
+                await _secureStorage.SetAsync(TokenPairKey, value).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                CottonLog.Warning(_logger, "Failed to save Cotton mobile token pair.", exception);
+                throw;
+            }
+        }
+
+        private void RemoveKeys(params string[] keys)
+        {
             List<Exception> failures = [];
-            RemoveTokenKey(AccessTokenKey, failures);
-            RemoveTokenKey(RefreshTokenKey, failures);
+            foreach (string key in keys)
+            {
+                try
+                {
+                    _secureStorage.Remove(key);
+                }
+                catch (Exception exception)
+                {
+                    CottonLog.WarningWithContext(_logger, "Failed to clear Cotton mobile token value.", key, exception);
+                    failures.Add(exception);
+                }
+            }
+
             if (failures.Count == 1)
             {
-                throw new InvalidOperationException("Failed to clear one Cotton mobile token.", failures[0]);
+                throw new InvalidOperationException("Failed to clear a Cotton mobile token value.", failures[0]);
             }
 
             if (failures.Count > 1)
             {
-                throw new AggregateException("Failed to clear Cotton mobile tokens.", failures);
-            }
-
-            CottonSessionDiagnosticLog.TokenStoreCleared(_logger);
-
-            return Task.CompletedTask;
-        }
-
-        private void ClearBestEffort(string reason)
-        {
-            List<Exception> failures = [];
-            RemoveTokenKey(AccessTokenKey, failures);
-            RemoveTokenKey(RefreshTokenKey, failures);
-            foreach (Exception exception in failures)
-            {
-                CottonLog.WarningWithContext(
-                    _logger,
-                    "Failed to clear Cotton mobile tokens.",
-                    reason,
-                    exception);
-            }
-        }
-
-        private void RemoveTokenKey(string key, List<Exception> failures)
-        {
-            try
-            {
-                _secureStorage.Remove(key);
-            }
-            catch (Exception exception)
-            {
-                failures.Add(exception);
+                throw new AggregateException("Failed to clear Cotton mobile token values.", failures);
             }
         }
     }

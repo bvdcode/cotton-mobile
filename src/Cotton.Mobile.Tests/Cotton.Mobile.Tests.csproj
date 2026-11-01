@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Cotton.Sdk" Version="$(CottonSdkVersion)" />
+		<PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.100" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
 		<PackageReference Include="xunit.v3" Version="4.0.0" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
@@ -28,6 +29,9 @@
 		<Compile Include="..\Cotton.Mobile\Services\CottonSessionResult.cs" Link="Services\CottonSessionResult.cs" />
 		<Compile Include="..\Cotton.Mobile\Services\CottonSessionResultStatus.cs" Link="Services\CottonSessionResultStatus.cs" />
 		<Compile Include="..\Cotton.Mobile\Services\CottonSessionDiagnosticLog.cs" Link="Services\CottonSessionDiagnosticLog.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\SecureStorageCottonTokenStore.cs" Link="Services\SecureStorageCottonTokenStore.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\CottonTokenPairJsonContext.cs" Link="Services\CottonTokenPairJsonContext.cs" />
+		<Compile Include="..\Cotton.Mobile\Services\CottonLog.cs" Link="Services\CottonLog.cs" />
 		<Compile Include="..\Cotton.Mobile\Services\ICottonInstanceStore.cs" Link="Services\ICottonInstanceStore.cs" />
 		<Compile Include="..\Cotton.Mobile\Services\ICottonPendingAppCodeSessionStore.cs" Link="Services\ICottonPendingAppCodeSessionStore.cs" />
 		<Compile Include="..\Cotton.Mobile\Services\CottonPendingAppCodeSession.cs" Link="Services\CottonPendingAppCodeSession.cs" />

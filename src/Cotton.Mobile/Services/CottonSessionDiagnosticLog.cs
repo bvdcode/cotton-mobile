@@ -45,5 +45,8 @@ namespace Cotton.Mobile.Services
 
         [LoggerMessage(EventId = 2015, Level = LogLevel.Warning, Message = "Failed to clear session area {Area}.")]
         public static partial void SessionAreaClearFailed(ILogger logger, string area, Exception exception);
+
+        [LoggerMessage(EventId = 2016, Level = LogLevel.Information, Message = "Token store migrated its existing pair to one record.")]
+        public static partial void TokenStoreMigrated(ILogger logger);
     }
 }

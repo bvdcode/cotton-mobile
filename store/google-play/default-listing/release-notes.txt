@@ -1,1 +1,1 @@
-Improves session handling when background work is canceled. Coordinates token refresh with sign-in and sign-out to prevent stale token updates.
+Stores access and refresh tokens together to prevent mixed token pairs after interrupted saves. Existing saved sessions are migrated automatically.

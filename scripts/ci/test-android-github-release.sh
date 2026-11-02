@@ -40,6 +40,14 @@ printf 'Release notes\n' > "$workspace/assets/release-notes.md"
 cat > "$workspace/bin/gh" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
+for argument in "$@"; do
+  case "$argument" in
+    --target|--target=*)
+      printf 'Release publication must use the verified existing tag.\n' >&2
+      exit 1
+      ;;
+  esac
+done
 printf '%s\n' "$*" >> "$RELEASE_COMMANDS"
 if [[ "$1 $2" == "release view" ]]; then
   exit "$RELEASE_VIEW_EXIT_CODE"
@@ -50,9 +58,9 @@ export PATH="$workspace/bin:$PATH"
 export RELEASE_COMMANDS="$workspace/commands"
 export RELEASE_VIEW_EXIT_CODE=1
 
-"$publish_script" v1.2.3 "$workspace/assets" 1.2.3 develop "$sha"
+"$publish_script" v1.2.3 "$workspace/assets" 1.2.3 "$sha"
 output="$(<"$RELEASE_COMMANDS")"
-assert_contains "$output" "release create v1.2.3 --title Cotton Mobile 1.2.3 --notes-file $workspace/assets/release-notes.md --target develop --latest --prerelease=false --verify-tag"
+assert_contains "$output" "release create v1.2.3 --title Cotton Mobile 1.2.3 --notes-file $workspace/assets/release-notes.md --latest --prerelease=false --verify-tag"
 assert_contains "$output" "release upload v1.2.3 $workspace/assets/CottonCloud-Android.apk $workspace/assets/CottonCloud-Android.aab --clobber"
 remote_sha="$(git ls-remote origin refs/tags/v1.2.3 | cut -f1)"
 if [[ "$remote_sha" != "$sha" ]]; then
@@ -62,9 +70,9 @@ fi
 
 export RELEASE_VIEW_EXIT_CODE=0
 : > "$RELEASE_COMMANDS"
-"$publish_script" v1.2.3 "$workspace/assets" 1.2.3 develop "$sha"
+"$publish_script" v1.2.3 "$workspace/assets" 1.2.3 "$sha"
 output="$(<"$RELEASE_COMMANDS")"
-assert_contains "$output" "release edit v1.2.3 --title Cotton Mobile 1.2.3 --notes-file $workspace/assets/release-notes.md --target develop --latest --prerelease=false"
+assert_contains "$output" "release edit v1.2.3 --title Cotton Mobile 1.2.3 --notes-file $workspace/assets/release-notes.md --latest --prerelease=false"
 assert_contains "$output" "release upload v1.2.3 $workspace/assets/CottonCloud-Android.apk $workspace/assets/CottonCloud-Android.aab --clobber"
 
 printf 'next\n' >> fixture.txt
@@ -72,7 +80,7 @@ git add fixture.txt
 git commit -q -m "next release"
 next_sha="$(git rev-parse HEAD)"
 : > "$RELEASE_COMMANDS"
-if "$publish_script" v1.2.3 "$workspace/assets" 1.2.3 main "$next_sha" > "$workspace/conflict" 2>&1; then
+if "$publish_script" v1.2.3 "$workspace/assets" 1.2.3 "$next_sha" > "$workspace/conflict" 2>&1; then
   printf 'An existing release tag must not move to another commit.\n' >&2
   exit 1
 fi
@@ -84,8 +92,8 @@ fi
 
 export RELEASE_VIEW_EXIT_CODE=1
 : > "$RELEASE_COMMANDS"
-"$publish_script" v1.2.4 "$workspace/assets" 1.2.4 main "$next_sha"
+"$publish_script" v1.2.4 "$workspace/assets" 1.2.4 "$next_sha"
 output="$(<"$RELEASE_COMMANDS")"
-assert_contains "$output" "release create v1.2.4 --title Cotton Mobile 1.2.4 --notes-file $workspace/assets/release-notes.md --target main --latest --prerelease=false --verify-tag"
+assert_contains "$output" "release create v1.2.4 --title Cotton Mobile 1.2.4 --notes-file $workspace/assets/release-notes.md --latest --prerelease=false --verify-tag"
 
 printf 'Android GitHub release publication checks passed.\n'

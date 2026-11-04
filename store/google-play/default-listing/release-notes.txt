@@ -1,1 +1,1 @@
-Stores access and refresh tokens together to prevent mixed token pairs after interrupted saves. Existing saved sessions are migrated automatically.
+Restores session recovery and background synchronization fixes. Stores access and refresh tokens together to prevent mixed pairs after interrupted saves. Updates Cotton SDK to 0.5.22.
